@@ -52,8 +52,24 @@ npm run db:migrate
 
 ### 5. Seed Database (Optional)
 
+Seed the database with sample books (60+ books across various genres):
+
 ```bash
 npm run db:seed
+```
+
+This will populate the database with:
+- 60+ sample books across 10+ genres
+- Diverse publication years (1813-2019)
+- Realistic ISBNs, publishers, and titles
+- Mix of Fiction, Science Fiction, Mystery, Fantasy, Biography, History, Science, Self-Help, Philosophy, Horror, and Poetry
+
+The seeder is idempotent - it's safe to run multiple times without creating duplicates.
+
+**Undo seeding:**
+
+```bash
+npm run db:seed:undo
 ```
 
 ## Database Management

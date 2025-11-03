@@ -16,14 +16,15 @@ const db = {
   Sequelize,
 };
 
-// Models will be imported and added here
-// Example:
-// db.User = require('./User')(sequelize);
-// db.Book = require('./Book')(sequelize);
+// Import models
+db.Book = require('./Book')(sequelize);
+db.Author = require('./Author')(sequelize);
 
-// Associations will be defined here
-// Example:
-// db.User.hasMany(db.Book);
-// db.Book.belongsTo(db.User);
+// Define associations
+Object.keys(db).forEach((modelName) => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
 
 module.exports = db;
