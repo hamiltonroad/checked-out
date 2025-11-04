@@ -38,6 +38,9 @@ describe('BookService', () => {
       expect(result).toEqual(mockBooks);
       expect(Book.findAll).toHaveBeenCalledTimes(1);
       expect(Book.findAll).toHaveBeenCalledWith({
+        where: {},
+        limit: 100,
+        offset: 0,
         include: [
           {
             model: Author,

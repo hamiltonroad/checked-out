@@ -14,8 +14,13 @@ class BookController {
   // eslint-disable-next-line class-methods-use-this
   async getAllBooks(req, res, next) {
     try {
-      const result = await bookService.getAllBooks();
-      res.json(ApiResponse.success(result));
+      const filters = {
+        genre: req.query.genre,
+        limit: req.query.limit,
+        offset: req.query.offset,
+      };
+      const result = await bookService.getAllBooks(filters);
+      res.json(ApiResponse.success(result, 'Books retrieved successfully'));
     } catch (error) {
       next(error);
     }

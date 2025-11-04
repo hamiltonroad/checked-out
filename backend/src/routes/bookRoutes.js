@@ -1,5 +1,7 @@
 const express = require('express');
 const bookController = require('../controllers/bookController');
+const bookValidator = require('../validators/bookValidator');
+const validateRequest = require('../middlewares/validateRequest');
 
 const router = express.Router();
 
@@ -9,6 +11,6 @@ const router = express.Router();
  */
 
 // GET /api/v1/books - Get all books with authors
-router.get('/', bookController.getAllBooks);
+router.get('/', validateRequest(bookValidator.getAll), bookController.getAllBooks);
 
 module.exports = router;

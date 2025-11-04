@@ -65,6 +65,7 @@ function BooksPage() {
                 <TableRow key={book.id}>
                   <TableCell>{book.title}</TableCell>
                   <TableCell>{authors}</TableCell>
+                  {/* TODO: Replace with actual book.status when checkout feature is implemented */}
                   <TableCell>Available</TableCell>
                 </TableRow>
               );
@@ -75,7 +76,5 @@ function BooksPage() {
     </Container>
   );
 }
-
-BooksPage.propTypes = {};
 
 export default BooksPage;

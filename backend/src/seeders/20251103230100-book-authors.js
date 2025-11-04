@@ -18,9 +18,14 @@ module.exports = {
     );
 
     // Create helper function to find IDs
-    const findBookId = (title) => books.find((b) => b.title === title)?.id;
-    const findAuthorId = (lastName) =>
-      authors.find((a) => a.last_name === lastName)?.id;
+    const findBookId = (title) => {
+      const book = books.find((b) => b.title === title);
+      return book ? book.id : null;
+    };
+    const findAuthorId = (lastName) => {
+      const author = authors.find((a) => a.last_name === lastName);
+      return author ? author.id : null;
+    };
 
     const now = new Date();
     const bookAuthors = [

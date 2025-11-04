@@ -58,7 +58,11 @@ describe('BookController', () => {
       await bookController.getAllBooks(mockReq, mockRes, mockNext);
 
       expect(bookService.getAllBooks).toHaveBeenCalledTimes(1);
-      expect(bookService.getAllBooks).toHaveBeenCalledWith();
+      expect(bookService.getAllBooks).toHaveBeenCalledWith({
+        genre: undefined,
+        limit: undefined,
+        offset: undefined,
+      });
     });
 
     it('should return ApiResponse.success format', async () => {
@@ -67,7 +71,7 @@ describe('BookController', () => {
 
       await bookController.getAllBooks(mockReq, mockRes, mockNext);
 
-      const expectedResponse = ApiResponse.success(mockBooks);
+      const expectedResponse = ApiResponse.success(mockBooks, 'Books retrieved successfully');
       expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
       expect(mockRes.json.mock.calls[0][0]).toHaveProperty('success', true);
       expect(mockRes.json.mock.calls[0][0]).toHaveProperty('data', mockBooks);
