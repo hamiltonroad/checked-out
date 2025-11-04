@@ -1,4 +1,5 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
   Container,
   Typography,
@@ -19,6 +20,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useBooks } from '../hooks/useBooks';
+import { useBookSearch } from '../hooks/useBookSearch';
 import BookDetailModal from '../components/BookDetailModal';
 
 /**
@@ -41,48 +43,18 @@ function BooksPage() {
     setSelectedBookId(null);
   };
 
-  // Create debounced update function
-  const updateDebouncedSearch = useCallback((value) => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(value);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Update debounced term when searchTerm changes
+  // Debounce search term with 300ms delay
   useEffect(() => {
-    const cleanup = updateDebouncedSearch(searchTerm);
-    return cleanup;
-  }, [searchTerm, updateDebouncedSearch]);
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
 
-  // Filter books with useMemo
-  const filteredBooks = useMemo(() => {
-    const books = data?.data || [];
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
-    if (!debouncedSearchTerm) {
-      return books;
-    }
-
-    const searchLower = debouncedSearchTerm.toLowerCase();
-
-    return books.filter((book) => {
-      // Search in title
-      if (book.title.toLowerCase().includes(searchLower)) {
-        return true;
-      }
-
-      // Search in authors
-      if (book.authors && book.authors.length > 0) {
-        return book.authors.some((author) => {
-          const firstNameMatch = author.first_name?.toLowerCase().includes(searchLower);
-          const lastNameMatch = author.last_name?.toLowerCase().includes(searchLower);
-          return firstNameMatch || lastNameMatch;
-        });
-      }
-
-      return false;
-    });
-  }, [data, debouncedSearchTerm]);
+  // Get books and filter by search term
+  const books = data?.data || [];
+  const filteredBooks = useBookSearch(books, debouncedSearchTerm);
 
   if (isLoading) {
     return (
@@ -111,6 +83,7 @@ function BooksPage() {
       <Box sx={{ mb: 2 }}>
         <TextField
           fullWidth
+          label="Search Books"
           placeholder="Search by title or author..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -122,7 +95,7 @@ function BooksPage() {
             ),
             endAdornment: searchTerm && (
               <InputAdornment position="end">
-                <IconButton onClick={() => setSearchTerm('')}>
+                <IconButton onClick={() => setSearchTerm('')} aria-label="Clear search">
                   <ClearIcon />
                 </IconButton>
               </InputAdornment>
@@ -134,6 +107,13 @@ function BooksPage() {
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography variant="h6" color="text.secondary">
             No books found matching &quot;{debouncedSearchTerm}&quot;
+          </Typography>
+        </Box>
+      )}
+      {filteredBooks.length === 0 && !debouncedSearchTerm && (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <Typography variant="h6" color="text.secondary">
+            No books in the library yet
           </Typography>
         </Box>
       )}
@@ -174,5 +154,7 @@ function BooksPage() {
     </Container>
   );
 }
+
+BooksPage.propTypes = {};
 
 export default BooksPage;
