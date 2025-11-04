@@ -23,10 +23,14 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+import SearchOffIcon from '@mui/icons-material/SearchOff';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 import { useBooks } from '../hooks/useBooks';
 import { useBookSearch } from '../hooks/useBookSearch';
 import BookDetailModal from '../components/BookDetailModal';
 import StatusChip from '../components/StatusChip';
+import EmptyState from '../components/EmptyState';
 
 // Availability filter constants
 const AVAILABILITY_FILTERS = {
@@ -150,17 +154,35 @@ function BooksPage() {
           </Select>
         </FormControl>
       </Box>
-      {filteredBooks.length === 0 && (
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <Typography variant="h6" color="text.secondary">
-            {debouncedSearchTerm
-              ? `No ${availabilityFilter !== AVAILABILITY_FILTERS.ALL ? AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase() : ''} books found matching "${debouncedSearchTerm}"`
-              : availabilityFilter !== AVAILABILITY_FILTERS.ALL
-                ? `No ${AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase()} books`
-                : 'No books in the library yet'}
-          </Typography>
-        </Box>
-      )}
+      {filteredBooks.length === 0 &&
+        (() => {
+          // Determine which icon and message to show based on current state
+          let icon, title, message;
+
+          if (debouncedSearchTerm && availabilityFilter !== AVAILABILITY_FILTERS.ALL) {
+            // Search + Filter active
+            icon = <SearchOffIcon sx={{ fontSize: 'inherit' }} />;
+            title = 'No matching books found';
+            message = `No ${AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase()} books found matching "${debouncedSearchTerm}"`;
+          } else if (debouncedSearchTerm) {
+            // Search only
+            icon = <SearchOffIcon sx={{ fontSize: 'inherit' }} />;
+            title = 'No matching books found';
+            message = `No books found matching "${debouncedSearchTerm}"`;
+          } else if (availabilityFilter !== AVAILABILITY_FILTERS.ALL) {
+            // Filter only
+            icon = <FilterListOffIcon sx={{ fontSize: 'inherit' }} />;
+            title = 'No books available';
+            message = `No ${AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase()} books`;
+          } else {
+            // Empty library
+            icon = <MenuBookIcon sx={{ fontSize: 'inherit' }} />;
+            title = 'No books in the library yet';
+            message = 'The library is empty. Books will appear here once they are added.';
+          }
+
+          return <EmptyState icon={icon} title={title} message={message} />;
+        })()}
       {filteredBooks.length > 0 && (
         <TableContainer component={Paper}>
           <Table>
