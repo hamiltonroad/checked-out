@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   Container,
@@ -22,6 +22,7 @@ import {
   Skeleton,
   Chip,
   Button,
+  Fade,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -57,6 +58,7 @@ function BooksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [availabilityFilter, setAvailabilityFilter] = useState(AVAILABILITY_FILTERS.ALL);
+  const searchInputRef = useRef(null);
 
   const handleRowClick = (bookId) => {
     setSelectedBookId(bookId);
@@ -76,6 +78,27 @@ function BooksPage() {
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Cmd+K (Mac) or Ctrl+K (Windows/Linux) to focus search
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+      }
+
+      // Escape to clear search and reset filter
+      if (event.key === 'Escape') {
+        setSearchTerm('');
+        setDebouncedSearchTerm('');
+        setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Get books and filter by search term
   const books = data?.data || [];
@@ -155,117 +178,122 @@ function BooksPage() {
 
   return (
     <Container>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ color: 'primary.main', fontWeight: 600 }}>
-          Books
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Browse and search our library collection
-        </Typography>
-      </Box>
-      <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            gap: 2,
-            alignItems: 'flex-start',
-            mb: 1.5,
-          }}
-        >
-          <TextField
-            fullWidth
-            label="Search Books"
-            placeholder="Search by title or author..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-              endAdornment: searchTerm && (
-                <InputAdornment position="end">
-                  <IconButton onClick={() => setSearchTerm('')} aria-label="Clear search">
-                    <ClearIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
-            <InputLabel id="availability-filter-label">Availability</InputLabel>
-            <Select
-              labelId="availability-filter-label"
-              id="availability-filter"
-              value={availabilityFilter}
-              label="Availability"
-              onChange={(e) => setAvailabilityFilter(e.target.value)}
-            >
-              <MenuItem value={AVAILABILITY_FILTERS.ALL}>
-                {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.ALL]}
-              </MenuItem>
-              <MenuItem value={AVAILABILITY_FILTERS.AVAILABLE}>
-                {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE]}
-              </MenuItem>
-              <MenuItem value={AVAILABILITY_FILTERS.CHECKED_OUT}>
-                {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT]}
-              </MenuItem>
-            </Select>
-          </FormControl>
+      <Fade in={!isLoading} timeout={300}>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h4" component="h1" sx={{ color: 'primary.main', fontWeight: 600 }}>
+            Books
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Browse and search our library collection
+          </Typography>
         </Box>
-        <Typography variant="body2" color="text.secondary">
-          Showing {filteredBooks.length} of {books.length} books
-        </Typography>
-        {(debouncedSearchTerm || availabilityFilter !== AVAILABILITY_FILTERS.ALL) && (
+      </Fade>
+      <Fade in={!isLoading} timeout={400}>
+        <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
           <Box
             sx={{
               display: 'flex',
-              flexWrap: 'wrap',
-              gap: 1,
-              mt: 2,
-              alignItems: 'center',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: 2,
+              alignItems: 'flex-start',
+              mb: 1.5,
             }}
           >
-            {debouncedSearchTerm && (
-              <Chip
-                label={`Search: "${debouncedSearchTerm}"`}
-                onDelete={() => {
-                  setSearchTerm('');
-                  setDebouncedSearchTerm('');
-                }}
-                size="small"
-                variant="outlined"
-                aria-label={`Remove search filter: ${debouncedSearchTerm}`}
-              />
-            )}
-            {availabilityFilter !== AVAILABILITY_FILTERS.ALL && (
-              <Chip
-                label={`Availability: ${AVAILABILITY_FILTER_LABELS[availabilityFilter]}`}
-                onDelete={() => setAvailabilityFilter(AVAILABILITY_FILTERS.ALL)}
-                size="small"
-                variant="outlined"
-                aria-label={`Remove availability filter: ${AVAILABILITY_FILTER_LABELS[availabilityFilter]}`}
-              />
-            )}
-            {debouncedSearchTerm && availabilityFilter !== AVAILABILITY_FILTERS.ALL && (
-              <Button
-                size="small"
-                onClick={() => {
-                  setSearchTerm('');
-                  setDebouncedSearchTerm('');
-                  setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
-                }}
-                sx={{ ml: 0.5 }}
-                aria-label="Clear all filters"
+            <TextField
+              fullWidth
+              label="Search Books"
+              placeholder="Search by title or author... (⌘K or Ctrl+K)"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              inputRef={searchInputRef}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+                endAdornment: searchTerm && (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setSearchTerm('')} aria-label="Clear search">
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
+              <InputLabel id="availability-filter-label">Availability</InputLabel>
+              <Select
+                labelId="availability-filter-label"
+                id="availability-filter"
+                value={availabilityFilter}
+                label="Availability"
+                onChange={(e) => setAvailabilityFilter(e.target.value)}
               >
-                Clear all filters
-              </Button>
-            )}
+                <MenuItem value={AVAILABILITY_FILTERS.ALL}>
+                  {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.ALL]}
+                </MenuItem>
+                <MenuItem value={AVAILABILITY_FILTERS.AVAILABLE}>
+                  {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE]}
+                </MenuItem>
+                <MenuItem value={AVAILABILITY_FILTERS.CHECKED_OUT}>
+                  {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT]}
+                </MenuItem>
+              </Select>
+            </FormControl>
           </Box>
-        )}
-      </Paper>
+          <Typography variant="body2" color="text.secondary">
+            Showing {filteredBooks.length} of {books.length} books
+          </Typography>
+          {(debouncedSearchTerm || availabilityFilter !== AVAILABILITY_FILTERS.ALL) && (
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 1,
+                mt: 2,
+                alignItems: 'center',
+              }}
+            >
+              {debouncedSearchTerm && (
+                <Chip
+                  label={`Search: "${debouncedSearchTerm}"`}
+                  onDelete={() => {
+                    setSearchTerm('');
+                    setDebouncedSearchTerm('');
+                  }}
+                  size="small"
+                  variant="outlined"
+                  aria-label={`Remove search filter: ${debouncedSearchTerm}`}
+                />
+              )}
+              {availabilityFilter !== AVAILABILITY_FILTERS.ALL && (
+                <Chip
+                  label={`Availability: ${AVAILABILITY_FILTER_LABELS[availabilityFilter]}`}
+                  onDelete={() => setAvailabilityFilter(AVAILABILITY_FILTERS.ALL)}
+                  size="small"
+                  variant="outlined"
+                  aria-label={`Remove availability filter: ${AVAILABILITY_FILTER_LABELS[availabilityFilter]}`}
+                />
+              )}
+              {debouncedSearchTerm && availabilityFilter !== AVAILABILITY_FILTERS.ALL && (
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setDebouncedSearchTerm('');
+                    setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
+                  }}
+                  sx={{ ml: 0.5 }}
+                  aria-label="Clear all filters"
+                >
+                  Clear all filters
+                </Button>
+              )}
+            </Box>
+          )}
+        </Paper>
+      </Fade>
       {filteredBooks.length === 0 &&
         (() => {
           // Determine which icon and message to show based on current state
@@ -293,56 +321,64 @@ function BooksPage() {
             message = 'The library is empty. Books will appear here once they are added.';
           }
 
-          return <EmptyState icon={icon} title={title} message={message} />;
+          return (
+            <Fade in={!isLoading} timeout={500}>
+              <div>
+                <EmptyState icon={icon} title={title} message={message} />
+              </div>
+            </Fade>
+          );
         })()}
       {filteredBooks.length > 0 && (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'action.hover' }}>
-                <TableCell sx={{ fontWeight: 600 }}>Title</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Author(s)</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Availability</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredBooks.map((book, index) => {
-                const authors = book.authors
-                  .map((author) => `${author.first_name} ${author.last_name}`)
-                  .join(', ');
-                const isLastRow = index === filteredBooks.length - 1;
-                const tableCellSx = {
-                  borderBottom: isLastRow ? 'none' : '1px solid',
-                  borderColor: 'divider',
-                };
+        <Fade in={!isLoading} timeout={500}>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ bgcolor: 'action.hover' }}>
+                  <TableCell sx={{ fontWeight: 600 }}>Title</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Author(s)</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Availability</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredBooks.map((book, index) => {
+                  const authors = book.authors
+                    .map((author) => `${author.first_name} ${author.last_name}`)
+                    .join(', ');
+                  const isLastRow = index === filteredBooks.length - 1;
+                  const tableCellSx = {
+                    borderBottom: isLastRow ? 'none' : '1px solid',
+                    borderColor: 'divider',
+                  };
 
-                return (
-                  <TableRow
-                    key={book.id}
-                    onClick={() => handleRowClick(book.id)}
-                    sx={{
-                      cursor: 'pointer',
-                      transition: (theme) =>
-                        theme.transitions.create(['background-color'], {
-                          duration: theme.transitions.duration.short,
-                        }),
-                      '@media (prefers-reduced-motion: reduce)': {
-                        transition: 'none',
-                      },
-                      '&:hover': { bgcolor: 'action.hover' },
-                    }}
-                  >
-                    <TableCell sx={tableCellSx}>{book.title}</TableCell>
-                    <TableCell sx={tableCellSx}>{authors}</TableCell>
-                    <TableCell sx={tableCellSx}>
-                      <StatusChip status={book.status} />
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                  return (
+                    <TableRow
+                      key={book.id}
+                      onClick={() => handleRowClick(book.id)}
+                      sx={{
+                        cursor: 'pointer',
+                        transition: (theme) =>
+                          theme.transitions.create(['background-color'], {
+                            duration: theme.transitions.duration.short,
+                          }),
+                        '@media (prefers-reduced-motion: reduce)': {
+                          transition: 'none',
+                        },
+                        '&:hover': { bgcolor: 'action.hover' },
+                      }}
+                    >
+                      <TableCell sx={tableCellSx}>{book.title}</TableCell>
+                      <TableCell sx={tableCellSx}>{authors}</TableCell>
+                      <TableCell sx={tableCellSx}>
+                        <StatusChip status={book.status} />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Fade>
       )}
       <BookDetailModal open={modalOpen} onClose={handleModalClose} bookId={selectedBookId} />
     </Container>
