@@ -1,14 +1,8 @@
 import { createTheme } from '@mui/material/styles';
+import lightPalette from './palette.js';
 
 const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
+  palette: lightPalette,
   spacing: 8,
 });
 
