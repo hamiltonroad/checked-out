@@ -26,6 +26,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import { useBooks } from '../hooks/useBooks';
 import { useBookSearch } from '../hooks/useBookSearch';
 import BookDetailModal from '../components/BookDetailModal';
+import StatusChip from '../components/StatusChip';
 
 // Availability filter constants
 const AVAILABILITY_FILTERS = {
@@ -185,9 +186,7 @@ function BooksPage() {
                     <TableCell>{book.title}</TableCell>
                     <TableCell>{authors}</TableCell>
                     <TableCell>
-                      {book.status === AVAILABILITY_FILTERS.AVAILABLE
-                        ? AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE]
-                        : AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT]}
+                      <StatusChip status={book.status} />
                     </TableCell>
                   </TableRow>
                 );

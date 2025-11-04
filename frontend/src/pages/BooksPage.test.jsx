@@ -107,7 +107,7 @@ describe('BooksPage', () => {
     expect(screen.getByText('Terry Pratchett, Neil Gaiman')).toBeInTheDocument();
   });
 
-  it('should show availability status from API data', () => {
+  it('should show availability status from API data using StatusChip', () => {
     const mockData = {
       status: 'success',
       data: [
@@ -132,10 +132,15 @@ describe('BooksPage', () => {
       error: null,
     });
 
-    render(<BooksPage />);
+    const { container } = render(<BooksPage />);
 
+    // Check for StatusChip labels
     expect(screen.getByText('Available')).toBeInTheDocument();
     expect(screen.getByText('Checked Out')).toBeInTheDocument();
+
+    // Verify Chip components are rendered
+    const chips = container.querySelectorAll('.MuiChip-root');
+    expect(chips.length).toBeGreaterThanOrEqual(2);
   });
 
   describe('Search Functionality', () => {

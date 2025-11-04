@@ -80,6 +80,15 @@ if [ ! -f "$FRONTEND_DIR/.env" ]; then
   fi
 fi
 
+# Clear Vite cache to prevent stale module resolution issues
+echo "Clearing Vite cache..."
+if [ -d "$FRONTEND_DIR/node_modules/.vite" ]; then
+  rm -rf "$FRONTEND_DIR/node_modules/.vite"
+  echo -e "${GREEN}✓${NC} Vite cache cleared"
+else
+  echo "No Vite cache to clear"
+fi
+
 # Start frontend in background
 echo "Starting frontend server..."
 cd "$FRONTEND_DIR" || exit 1

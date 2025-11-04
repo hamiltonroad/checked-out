@@ -13,6 +13,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { useBook } from '../hooks/useBook';
+import StatusChip from './StatusChip';
 
 /**
  * BookDetailModal displays detailed information about a book in a modal dialog
@@ -97,7 +98,9 @@ function BookDetailModal({ open, onClose, bookId }) {
               <Typography variant="subtitle2" color="text.secondary">
                 Status
               </Typography>
-              <Typography variant="body1">{book.status || 'Available'}</Typography>
+              <Box sx={{ mt: 0.5 }}>
+                <StatusChip status={book.status || 'available'} size="medium" />
+              </Box>
             </Box>
           </Box>
         )}

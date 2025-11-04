@@ -57,7 +57,7 @@ describe('BookDetailModal', () => {
         publisher: 'Test Publisher',
         publication_year: 2023,
         genre: 'Fiction',
-        status: 'Available',
+        status: 'available',
         authors: [
           { first_name: 'John', last_name: 'Doe' },
           { first_name: 'Jane', last_name: 'Smith' },
@@ -74,6 +74,7 @@ describe('BookDetailModal', () => {
     expect(screen.getByText('Test Publisher')).toBeInTheDocument();
     expect(screen.getByText('2023')).toBeInTheDocument();
     expect(screen.getByText('Fiction')).toBeInTheDocument();
+    // StatusChip renders the text "Available"
     expect(screen.getByText('Available')).toBeInTheDocument();
   });
 
