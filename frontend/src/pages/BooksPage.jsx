@@ -20,6 +20,8 @@ import {
   FormControl,
   InputLabel,
   Skeleton,
+  Chip,
+  Button,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -216,6 +218,53 @@ function BooksPage() {
         <Typography variant="body2" color="text.secondary">
           Showing {filteredBooks.length} of {books.length} books
         </Typography>
+        {(debouncedSearchTerm || availabilityFilter !== AVAILABILITY_FILTERS.ALL) && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 1,
+              mt: 2,
+              alignItems: 'center',
+            }}
+          >
+            {debouncedSearchTerm && (
+              <Chip
+                label={`Search: "${debouncedSearchTerm}"`}
+                onDelete={() => {
+                  setSearchTerm('');
+                  setDebouncedSearchTerm('');
+                }}
+                size="small"
+                variant="outlined"
+                aria-label={`Remove search filter: ${debouncedSearchTerm}`}
+              />
+            )}
+            {availabilityFilter !== AVAILABILITY_FILTERS.ALL && (
+              <Chip
+                label={`Availability: ${AVAILABILITY_FILTER_LABELS[availabilityFilter]}`}
+                onDelete={() => setAvailabilityFilter(AVAILABILITY_FILTERS.ALL)}
+                size="small"
+                variant="outlined"
+                aria-label={`Remove availability filter: ${AVAILABILITY_FILTER_LABELS[availabilityFilter]}`}
+              />
+            )}
+            {debouncedSearchTerm && availabilityFilter !== AVAILABILITY_FILTERS.ALL && (
+              <Button
+                size="small"
+                onClick={() => {
+                  setSearchTerm('');
+                  setDebouncedSearchTerm('');
+                  setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
+                }}
+                sx={{ ml: 0.5 }}
+                aria-label="Clear all filters"
+              >
+                Clear all filters
+              </Button>
+            )}
+          </Box>
+        )}
       </Paper>
       {filteredBooks.length === 0 &&
         (() => {

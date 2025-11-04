@@ -526,4 +526,192 @@ describe('BooksPage', () => {
       });
     });
   });
+
+  describe('Filter Chips', () => {
+    const mockBooksData = {
+      status: 'success',
+      data: [
+        {
+          id: 1,
+          title: 'Available Book 1',
+          authors: [{ first_name: 'Author', last_name: 'One' }],
+          status: 'available',
+        },
+        {
+          id: 2,
+          title: 'Checked Out Book',
+          authors: [{ first_name: 'Author', last_name: 'Two' }],
+          status: 'checked_out',
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      useBooks.mockReturnValue({
+        data: mockBooksData,
+        isLoading: false,
+        error: null,
+      });
+    });
+
+    it('should not show chips when no filters are active', () => {
+      render(<BooksPage />);
+
+      expect(screen.queryByText(/Search:/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Availability:/)).not.toBeInTheDocument();
+    });
+
+    it('should show search chip when search term is active', async () => {
+      const user = userEvent.setup();
+      render(<BooksPage />);
+
+      const searchInput = screen.getByLabelText('Search Books');
+      await user.type(searchInput, 'test');
+
+      await waitFor(
+        () => {
+          expect(screen.getByText('Search: "test"')).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+    });
+
+    it('should show availability chip when availability filter is not "All"', async () => {
+      const user = userEvent.setup();
+      render(<BooksPage />);
+
+      const filterSelect = screen.getByLabelText('Availability');
+      await user.click(filterSelect);
+      const availableOption = screen.getByRole('option', { name: 'Available' });
+      await user.click(availableOption);
+
+      await waitFor(() => {
+        expect(screen.getByText('Availability: Available')).toBeInTheDocument();
+      });
+    });
+
+    it('should show both chips and "Clear all filters" button when both filters are active', async () => {
+      const user = userEvent.setup();
+      render(<BooksPage />);
+
+      // Apply search filter
+      const searchInput = screen.getByLabelText('Search Books');
+      await user.type(searchInput, 'test');
+
+      // Apply availability filter
+      const filterSelect = screen.getByLabelText('Availability');
+      await user.click(filterSelect);
+      const availableOption = screen.getByRole('option', { name: 'Available' });
+      await user.click(availableOption);
+
+      await waitFor(
+        () => {
+          expect(screen.getByText('Search: "test"')).toBeInTheDocument();
+          expect(screen.getByText('Availability: Available')).toBeInTheDocument();
+          expect(screen.getByRole('button', { name: 'Clear all filters' })).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+    });
+
+    it('should clear search when search chip delete is clicked', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<BooksPage />);
+
+      const searchInput = screen.getByLabelText('Search Books');
+      await user.type(searchInput, 'test');
+
+      await waitFor(
+        () => {
+          expect(screen.getByText('Search: "test"')).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+
+      // Find the chip with the search text and click its delete icon
+      const chipDeleteButton = container.querySelector(
+        '[aria-label="Remove search filter: test"] .MuiChip-deleteIcon'
+      );
+      await user.click(chipDeleteButton);
+
+      await waitFor(() => {
+        expect(searchInput).toHaveValue('');
+        expect(screen.queryByText('Search: "test"')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should reset availability filter when availability chip delete is clicked', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<BooksPage />);
+
+      const filterSelect = screen.getByLabelText('Availability');
+      await user.click(filterSelect);
+      const availableOption = screen.getByRole('option', { name: 'Available' });
+      await user.click(availableOption);
+
+      await waitFor(() => {
+        expect(screen.getByText('Availability: Available')).toBeInTheDocument();
+      });
+
+      // Find the chip with the availability filter text and click its delete icon
+      const chipDeleteButton = container.querySelector(
+        '[aria-label="Remove availability filter: Available"] .MuiChip-deleteIcon'
+      );
+      await user.click(chipDeleteButton);
+
+      await waitFor(() => {
+        expect(screen.queryByText('Availability: Available')).not.toBeInTheDocument();
+        // All books should be visible again
+        expect(screen.getByText('Available Book 1')).toBeInTheDocument();
+        expect(screen.getByText('Checked Out Book')).toBeInTheDocument();
+      });
+    });
+
+    it('should clear both filters when "Clear all filters" button is clicked', async () => {
+      const user = userEvent.setup();
+      render(<BooksPage />);
+
+      // Apply both filters
+      const searchInput = screen.getByLabelText('Search Books');
+      await user.type(searchInput, 'test');
+
+      const filterSelect = screen.getByLabelText('Availability');
+      await user.click(filterSelect);
+      const availableOption = screen.getByRole('option', { name: 'Available' });
+      await user.click(availableOption);
+
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: 'Clear all filters' })).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+
+      const clearAllButton = screen.getByRole('button', { name: 'Clear all filters' });
+      await user.click(clearAllButton);
+
+      await waitFor(() => {
+        expect(searchInput).toHaveValue('');
+        expect(screen.queryByText('Search: "test"')).not.toBeInTheDocument();
+        expect(screen.queryByText('Availability: Available')).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Clear all filters' })).not.toBeInTheDocument();
+      });
+    });
+
+    it('should have proper accessibility attributes on chips', async () => {
+      const user = userEvent.setup();
+      const { container } = render(<BooksPage />);
+
+      const searchInput = screen.getByLabelText('Search Books');
+      await user.type(searchInput, 'test');
+
+      await waitFor(
+        () => {
+          const chip = container.querySelector('[aria-label="Remove search filter: test"]');
+          expect(chip).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+    });
+  });
 });
