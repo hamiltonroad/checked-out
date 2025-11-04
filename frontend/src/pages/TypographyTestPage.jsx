@@ -1,9 +1,15 @@
 import { Box, Container, Typography, Paper } from '@mui/material';
+import PropTypes from 'prop-types';
 
 /**
- * TypographyTestPage - Test page to display all MD3 typography variants
- * This page is temporary and used for verifying typography implementation
- * Remove after typography verification is complete
+ * TypographyTestPage - Test page displaying all Material Design 3 typography variants
+ *
+ * Displays all 15 MD3 type roles and MUI standard variants for visual verification.
+ * This is a temporary component used during development and should be removed after
+ * typography system verification is complete.
+ *
+ * @component
+ * @returns {JSX.Element} Typography test page with all variants
  */
 function TypographyTestPage() {
   return (
@@ -248,5 +254,7 @@ function TypographyTestPage() {
     </Container>
   );
 }
+
+TypographyTestPage.propTypes = {};
 
 export default TypographyTestPage;

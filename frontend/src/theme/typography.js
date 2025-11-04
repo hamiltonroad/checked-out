@@ -76,15 +76,23 @@ const typography = {
 
   displayLarge: {
     fontFamily,
-    fontSize: 57,
+    fontSize: {
+      xs: 40, // Mobile: scaled down for readability
+      sm: 48, // Tablet: scaled down moderately
+      md: 57, // Desktop: full MD3 spec size
+    },
     lineHeight: 64 / 57, // 1.12
-    fontWeight: 400,
+    fontWeight: 400, // MD3 spec: 400 (browsers display 400 as Regular)
     letterSpacing: '-0.25px',
   },
 
   displayMedium: {
     fontFamily,
-    fontSize: 45,
+    fontSize: {
+      xs: 32, // Mobile: scaled down for readability
+      sm: 38, // Tablet: scaled down moderately
+      md: 45, // Desktop: full MD3 spec size
+    },
     lineHeight: 52 / 45, // 1.16
     fontWeight: 400,
     letterSpacing: 0,
@@ -92,7 +100,11 @@ const typography = {
 
   displaySmall: {
     fontFamily,
-    fontSize: 36,
+    fontSize: {
+      xs: 28, // Mobile: scaled down for readability
+      sm: 32, // Tablet: scaled down moderately
+      md: 36, // Desktop: full MD3 spec size
+    },
     lineHeight: 44 / 36, // 1.22
     fontWeight: 400,
     letterSpacing: 0,
@@ -105,7 +117,11 @@ const typography = {
 
   headlineLarge: {
     fontFamily,
-    fontSize: 32,
+    fontSize: {
+      xs: 26, // Mobile: scaled down for readability
+      sm: 29, // Tablet: scaled down moderately
+      md: 32, // Desktop: full MD3 spec size
+    },
     lineHeight: 40 / 32, // 1.25
     fontWeight: 400,
     letterSpacing: 0,
@@ -113,7 +129,11 @@ const typography = {
 
   headlineMedium: {
     fontFamily,
-    fontSize: 28,
+    fontSize: {
+      xs: 24, // Mobile: scaled down for readability
+      sm: 26, // Tablet: scaled down moderately
+      md: 28, // Desktop: full MD3 spec size
+    },
     lineHeight: 36 / 28, // 1.29
     fontWeight: 400,
     letterSpacing: 0,
@@ -121,7 +141,11 @@ const typography = {
 
   headlineSmall: {
     fontFamily,
-    fontSize: 24,
+    fontSize: {
+      xs: 21, // Mobile: scaled down for readability
+      sm: 22, // Tablet: scaled down moderately
+      md: 24, // Desktop: full MD3 spec size
+    },
     lineHeight: 32 / 24, // 1.33
     fontWeight: 400,
     letterSpacing: 0,
@@ -135,7 +159,7 @@ const typography = {
   titleLarge: {
     fontFamily,
     fontSize: 22,
-    lineHeight: 28 / 22, // 1.27
+    lineHeight: 30 / 22, // 1.36 (corrected from 28/22 to match MD3 spec)
     fontWeight: 400,
     letterSpacing: 0,
   },
@@ -223,7 +247,11 @@ const typography = {
 
   h1: {
     fontFamily,
-    fontSize: 57,
+    fontSize: {
+      xs: 40, // Mobile: scaled down
+      sm: 48, // Tablet: scaled down
+      md: 57, // Desktop: full size
+    },
     lineHeight: 64 / 57,
     fontWeight: 400,
     letterSpacing: '-0.25px',
@@ -231,7 +259,11 @@ const typography = {
 
   h2: {
     fontFamily,
-    fontSize: 45,
+    fontSize: {
+      xs: 32, // Mobile: scaled down
+      sm: 38, // Tablet: scaled down
+      md: 45, // Desktop: full size
+    },
     lineHeight: 52 / 45,
     fontWeight: 400,
     letterSpacing: 0,
@@ -239,7 +271,11 @@ const typography = {
 
   h3: {
     fontFamily,
-    fontSize: 36,
+    fontSize: {
+      xs: 28, // Mobile: scaled down
+      sm: 32, // Tablet: scaled down
+      md: 36, // Desktop: full size
+    },
     lineHeight: 44 / 36,
     fontWeight: 400,
     letterSpacing: 0,
@@ -247,7 +283,11 @@ const typography = {
 
   h4: {
     fontFamily,
-    fontSize: 32,
+    fontSize: {
+      xs: 26, // Mobile: scaled down
+      sm: 29, // Tablet: scaled down
+      md: 32, // Desktop: full size
+    },
     lineHeight: 40 / 32,
     fontWeight: 400,
     letterSpacing: 0,
@@ -255,7 +295,11 @@ const typography = {
 
   h5: {
     fontFamily,
-    fontSize: 28,
+    fontSize: {
+      xs: 24, // Mobile: scaled down
+      sm: 26, // Tablet: scaled down
+      md: 28, // Desktop: full size
+    },
     lineHeight: 36 / 28,
     fontWeight: 400,
     letterSpacing: 0,
@@ -263,7 +307,11 @@ const typography = {
 
   h6: {
     fontFamily,
-    fontSize: 24,
+    fontSize: {
+      xs: 21, // Mobile: scaled down
+      sm: 22, // Tablet: scaled down
+      md: 24, // Desktop: full size
+    },
     lineHeight: 32 / 24,
     fontWeight: 400,
     letterSpacing: 0,
