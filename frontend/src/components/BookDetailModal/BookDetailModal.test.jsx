@@ -1,11 +1,11 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import BookDetailModal from './BookDetailModal';
-import * as useBookHook from '../hooks/useBook';
+import * as useBookHook from '../../hooks/useBook';
 import { vi } from 'vitest';
 
-vi.mock('../hooks/useBook');
+vi.mock('../../hooks/useBook');
 
 const renderWithQueryClient = (component) => {
   const queryClient = new QueryClient({
@@ -29,13 +29,18 @@ describe('BookDetailModal', () => {
     expect(screen.queryByText('Book Details')).not.toBeInTheDocument();
   });
 
-  it('should display loading state', () => {
+  it('should display skeleton loading state', async () => {
     useBookHook.useBook.mockReturnValue({ isLoading: true, data: null, error: null });
 
     renderWithQueryClient(<BookDetailModal open={true} onClose={mockOnClose} bookId={1} />);
 
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
     expect(screen.getByText('Book Details')).toBeInTheDocument();
+
+    // Verify skeleton elements are present - Dialog renders in body, not in container
+    await waitFor(() => {
+      const skeletons = document.querySelectorAll('.MuiSkeleton-root');
+      expect(skeletons.length).toBeGreaterThan(0);
+    });
   });
 
   it('should display error state', () => {

@@ -12,8 +12,9 @@ import {
   useTheme,
   Skeleton,
 } from '@mui/material';
-import { useBook } from '../hooks/useBook';
-import StatusChip from './StatusChip';
+import { useBook } from '../../hooks/useBook';
+import StatusChip from '../StatusChip';
+import SkeletonField from '../SkeletonField';
 
 /**
  * BookDetailModal displays detailed information about a book in a modal dialog
@@ -32,32 +33,11 @@ function BookDetailModal({ open, onClose, bookId }) {
         {isLoading && (
           <Box sx={{ pt: 1 }}>
             <Skeleton variant="text" sx={{ fontSize: '2rem', mb: 2 }} width="80%" />
-
-            <Box sx={{ mb: 2 }}>
-              <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width="30%" />
-              <Skeleton variant="text" sx={{ fontSize: '1rem' }} width="60%" />
-            </Box>
-
-            <Box sx={{ mb: 2 }}>
-              <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width="20%" />
-              <Skeleton variant="text" sx={{ fontSize: '1rem' }} width="50%" />
-            </Box>
-
-            <Box sx={{ mb: 2 }}>
-              <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width="30%" />
-              <Skeleton variant="text" sx={{ fontSize: '1rem' }} width="40%" />
-            </Box>
-
-            <Box sx={{ mb: 2 }}>
-              <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width="40%" />
-              <Skeleton variant="text" sx={{ fontSize: '1rem' }} width="25%" />
-            </Box>
-
-            <Box sx={{ mb: 2 }}>
-              <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width="25%" />
-              <Skeleton variant="text" sx={{ fontSize: '1rem' }} width="35%" />
-            </Box>
-
+            <SkeletonField labelWidth="30%" valueWidth="60%" />
+            <SkeletonField labelWidth="20%" valueWidth="50%" />
+            <SkeletonField labelWidth="30%" valueWidth="40%" />
+            <SkeletonField labelWidth="40%" valueWidth="25%" />
+            <SkeletonField labelWidth="25%" valueWidth="35%" />
             <Box sx={{ mb: 2 }}>
               <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width="20%" />
               <Skeleton variant="rounded" width={100} height={24} />
