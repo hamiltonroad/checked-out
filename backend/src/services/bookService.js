@@ -1,4 +1,5 @@
 const { Book, Author } = require('../models');
+const ApiError = require('../utils/ApiError');
 
 /**
  * Book Service - Business logic for book operations
@@ -31,6 +32,31 @@ class BookService {
       ],
       order: [['title', 'ASC']],
     });
+  }
+
+  /**
+   * Get a single book by ID with its authors
+   * @param {number} id - Book ID
+   * @returns {Promise<Object>} Book with authors
+   * @throws {ApiError} 404 if book not found
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async getBookById(id) {
+    const book = await Book.findByPk(id, {
+      include: [
+        {
+          model: Author,
+          as: 'authors',
+          through: { attributes: [] },
+        },
+      ],
+    });
+
+    if (!book) {
+      throw ApiError.notFound(`Book with ID ${id} not found`);
+    }
+
+    return book;
   }
 }
 

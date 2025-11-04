@@ -11,6 +11,11 @@ const bookValidator = {
       offset: Joi.number().integer().min(0).optional(),
     }),
   },
+  getById: {
+    params: Joi.object({
+      id: Joi.number().integer().required(),
+    }),
+  },
 };
 
 module.exports = bookValidator;

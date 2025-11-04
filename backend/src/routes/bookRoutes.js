@@ -10,6 +10,9 @@ const router = express.Router();
  * Base path: /api/v1/books
  */
 
+// GET /api/v1/books/:id - Get a single book by ID with authors
+router.get('/:id', validateRequest(bookValidator.getById), bookController.getBookById);
+
 // GET /api/v1/books - Get all books with authors
 router.get('/', validateRequest(bookValidator.getAll), bookController.getAllBooks);
 

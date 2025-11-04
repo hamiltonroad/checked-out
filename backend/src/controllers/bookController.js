@@ -25,6 +25,23 @@ class BookController {
       next(error);
     }
   }
+
+  /**
+   * Get a single book by ID with authors
+   * @param {Object} req - Express request
+   * @param {Object} res - Express response
+   * @param {Function} next - Express next middleware
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async getBookById(req, res, next) {
+    try {
+      const { id } = req.params;
+      const result = await bookService.getBookById(id);
+      res.json(ApiResponse.success(result, 'Book retrieved successfully'));
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new BookController();

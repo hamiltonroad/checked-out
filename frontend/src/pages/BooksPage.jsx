@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Container,
   Typography,
@@ -13,12 +14,25 @@ import {
   Box,
 } from '@mui/material';
 import { useBooks } from '../hooks/useBooks';
+import BookDetailModal from '../components/BookDetailModal';
 
 /**
  * BooksPage displays a list of all books in a table format
  */
 function BooksPage() {
   const { data, isLoading, error } = useBooks();
+  const [selectedBookId, setSelectedBookId] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleRowClick = (bookId) => {
+    setSelectedBookId(bookId);
+    setModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    setSelectedBookId(null);
+  };
 
   if (isLoading) {
     return (
@@ -62,7 +76,11 @@ function BooksPage() {
                 .join(', ');
 
               return (
-                <TableRow key={book.id}>
+                <TableRow
+                  key={book.id}
+                  onClick={() => handleRowClick(book.id)}
+                  sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
+                >
                   <TableCell>{book.title}</TableCell>
                   <TableCell>{authors}</TableCell>
                   {/* TODO: Replace with actual book.status when checkout feature is implemented */}
@@ -73,6 +91,7 @@ function BooksPage() {
           </TableBody>
         </Table>
       </TableContainer>
+      <BookDetailModal open={modalOpen} onClose={handleModalClose} bookId={selectedBookId} />
     </Container>
   );
 }
