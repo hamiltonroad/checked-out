@@ -8,17 +8,17 @@ const STATUS_CONFIG = {
   available: {
     label: 'Available',
     color: 'success',
-    icon: <CheckCircleIcon />,
+    IconComponent: CheckCircleIcon,
   },
   checked_out: {
     label: 'Checked Out',
     color: 'warning',
-    icon: <EventBusyIcon />,
+    IconComponent: EventBusyIcon,
   },
   overdue: {
     label: 'Overdue',
     color: 'error',
-    icon: <ErrorIcon />,
+    IconComponent: ErrorIcon,
   },
 };
 
@@ -30,7 +30,8 @@ const STATUS_CONFIG = {
  */
 function StatusChip({ status, size = 'small' }) {
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.available;
-  return <Chip label={config.label} color={config.color} size={size} icon={config.icon} />;
+  const { IconComponent } = config;
+  return <Chip label={config.label} color={config.color} size={size} icon={<IconComponent />} />;
 }
 
 StatusChip.propTypes = {
