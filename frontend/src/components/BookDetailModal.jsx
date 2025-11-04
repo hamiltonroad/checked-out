@@ -5,12 +5,12 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  CircularProgress,
   Alert,
   Typography,
   Box,
   useMediaQuery,
   useTheme,
+  Skeleton,
 } from '@mui/material';
 import { useBook } from '../hooks/useBook';
 import StatusChip from './StatusChip';
@@ -30,8 +30,38 @@ function BookDetailModal({ open, onClose, bookId }) {
       <DialogTitle>Book Details</DialogTitle>
       <DialogContent>
         {isLoading && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-            <CircularProgress />
+          <Box sx={{ pt: 1 }}>
+            <Skeleton variant="text" sx={{ fontSize: '2rem', mb: 2 }} width="80%" />
+
+            <Box sx={{ mb: 2 }}>
+              <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width="30%" />
+              <Skeleton variant="text" sx={{ fontSize: '1rem' }} width="60%" />
+            </Box>
+
+            <Box sx={{ mb: 2 }}>
+              <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width="20%" />
+              <Skeleton variant="text" sx={{ fontSize: '1rem' }} width="50%" />
+            </Box>
+
+            <Box sx={{ mb: 2 }}>
+              <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width="30%" />
+              <Skeleton variant="text" sx={{ fontSize: '1rem' }} width="40%" />
+            </Box>
+
+            <Box sx={{ mb: 2 }}>
+              <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width="40%" />
+              <Skeleton variant="text" sx={{ fontSize: '1rem' }} width="25%" />
+            </Box>
+
+            <Box sx={{ mb: 2 }}>
+              <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width="25%" />
+              <Skeleton variant="text" sx={{ fontSize: '1rem' }} width="35%" />
+            </Box>
+
+            <Box sx={{ mb: 2 }}>
+              <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width="20%" />
+              <Skeleton variant="rounded" width={100} height={24} />
+            </Box>
           </Box>
         )}
 
