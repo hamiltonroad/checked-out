@@ -192,7 +192,7 @@ describe('BooksPage', () => {
 
       const searchInput = screen.getByLabelText('Search Books');
       expect(searchInput).toBeInTheDocument();
-      expect(searchInput).toHaveAttribute('placeholder', 'Search by title or author...');
+      expect(searchInput).toHaveAttribute('placeholder', 'Search by title or author... (⌘K or Ctrl+K)');
     });
 
     it('should filter books by title (case-insensitive)', async () => {
