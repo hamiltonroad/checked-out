@@ -99,9 +99,21 @@ function BooksPage() {
           </Typography>
         </Box>
         <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', mb: 1.5 }}>
-            <Skeleton variant="rounded" height={56} sx={{ flexGrow: 1 }} />
-            <Skeleton variant="rounded" height={56} width={200} />
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: 2,
+              alignItems: 'flex-start',
+              mb: 1.5,
+            }}
+          >
+            <Skeleton
+              variant="rounded"
+              height={56}
+              sx={{ flexGrow: 1, width: { xs: '100%', sm: 'auto' } }}
+            />
+            <Skeleton variant="rounded" height={56} sx={{ width: { xs: '100%', sm: 200 } }} />
           </Box>
           <Skeleton variant="text" width={150} />
         </Paper>
@@ -150,7 +162,15 @@ function BooksPage() {
         </Typography>
       </Box>
       <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', mb: 1.5 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 2,
+            alignItems: 'flex-start',
+            mb: 1.5,
+          }}
+        >
           <TextField
             fullWidth
             label="Search Books"
@@ -172,7 +192,7 @@ function BooksPage() {
               ),
             }}
           />
-          <FormControl sx={{ minWidth: 200 }}>
+          <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
             <InputLabel id="availability-filter-label">Availability</InputLabel>
             <Select
               labelId="availability-filter-label"
@@ -242,6 +262,10 @@ function BooksPage() {
                   .map((author) => `${author.first_name} ${author.last_name}`)
                   .join(', ');
                 const isLastRow = index === filteredBooks.length - 1;
+                const tableCellSx = {
+                  borderBottom: isLastRow ? 'none' : '1px solid',
+                  borderColor: 'divider',
+                };
 
                 return (
                   <TableRow
@@ -253,31 +277,15 @@ function BooksPage() {
                         theme.transitions.create(['background-color'], {
                           duration: theme.transitions.duration.short,
                         }),
+                      '@media (prefers-reduced-motion: reduce)': {
+                        transition: 'none',
+                      },
                       '&:hover': { bgcolor: 'action.hover' },
                     }}
                   >
-                    <TableCell
-                      sx={{
-                        borderBottom: isLastRow ? 'none' : '1px solid',
-                        borderColor: 'divider',
-                      }}
-                    >
-                      {book.title}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        borderBottom: isLastRow ? 'none' : '1px solid',
-                        borderColor: 'divider',
-                      }}
-                    >
-                      {authors}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        borderBottom: isLastRow ? 'none' : '1px solid',
-                        borderColor: 'divider',
-                      }}
-                    >
+                    <TableCell sx={tableCellSx}>{book.title}</TableCell>
+                    <TableCell sx={tableCellSx}>{authors}</TableCell>
+                    <TableCell sx={tableCellSx}>
                       <StatusChip status={book.status} />
                     </TableCell>
                   </TableRow>
