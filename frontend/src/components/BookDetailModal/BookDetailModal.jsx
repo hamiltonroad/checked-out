@@ -31,6 +31,33 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 /**
+ * DetailField displays a labeled field value in the book details
+ * @param {Object} props - Component props
+ * @param {string} props.label - Field label
+ * @param {string|number} [props.value] - Field value (if not using children)
+ * @param {React.ReactNode} [props.children] - Custom field content
+ */
+function DetailField({ label, value, children }) {
+  // Don't render if no value and no children
+  if (!value && !children) return null;
+
+  return (
+    <Box sx={{ mb: 2 }}>
+      <Typography variant="subtitle2" color="text.secondary">
+        {label}
+      </Typography>
+      {children || <Typography variant="body1">{value}</Typography>}
+    </Box>
+  );
+}
+
+DetailField.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  children: PropTypes.node,
+};
+
+/**
  * BookDetailModal displays detailed information about a book in a modal dialog
  */
 function BookDetailModal({ open, onClose, bookId }) {
@@ -88,11 +115,7 @@ function BookDetailModal({ open, onClose, bookId }) {
         )}
 
         {book && (
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={3}
-            sx={{ pt: 1 }}
-          >
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ pt: 1 }}>
             <Box
               sx={{
                 width: { xs: '100%', sm: '33%' },
@@ -118,63 +141,30 @@ function BookDetailModal({ open, onClose, bookId }) {
                 {book.title}
               </Typography>
 
-              {book.authors && book.authors.length > 0 && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Author(s)
-                  </Typography>
-                  <Typography variant="body1">
-                    {book.authors
-                      .map((author) => `${author.first_name} ${author.last_name}`)
-                      .join(', ')}
-                  </Typography>
-                </Box>
-              )}
+              <DetailField
+                label="Author(s)"
+                value={
+                  book.authors && book.authors.length > 0
+                    ? book.authors
+                        .map((author) => `${author.first_name} ${author.last_name}`)
+                        .join(', ')
+                    : null
+                }
+              />
 
-              {book.isbn && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    ISBN
-                  </Typography>
-                  <Typography variant="body1">{book.isbn}</Typography>
-                </Box>
-              )}
+              <DetailField label="ISBN" value={book.isbn} />
 
-              {book.publisher && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Publisher
-                  </Typography>
-                  <Typography variant="body1">{book.publisher}</Typography>
-                </Box>
-              )}
+              <DetailField label="Publisher" value={book.publisher} />
 
-              {book.publication_year && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Publication Year
-                  </Typography>
-                  <Typography variant="body1">{book.publication_year}</Typography>
-                </Box>
-              )}
+              <DetailField label="Publication Year" value={book.publication_year} />
 
-              {book.genre && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Genre
-                  </Typography>
-                  <Typography variant="body1">{book.genre}</Typography>
-                </Box>
-              )}
+              <DetailField label="Genre" value={book.genre} />
 
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Status
-                </Typography>
+              <DetailField label="Status">
                 <Box sx={{ mt: 0.5 }}>
                   <StatusChip status={book.status || 'available'} size="medium" />
                 </Box>
-              </Box>
+              </DetailField>
             </Box>
           </Stack>
         )}
