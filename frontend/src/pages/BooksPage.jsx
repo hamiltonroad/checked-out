@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
   Container,
@@ -16,6 +16,10 @@ import {
   TextField,
   InputAdornment,
   IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -23,8 +27,21 @@ import { useBooks } from '../hooks/useBooks';
 import { useBookSearch } from '../hooks/useBookSearch';
 import BookDetailModal from '../components/BookDetailModal';
 
+// Availability filter constants
+const AVAILABILITY_FILTERS = {
+  ALL: 'all',
+  AVAILABLE: 'available',
+  CHECKED_OUT: 'checked_out',
+};
+
+const AVAILABILITY_FILTER_LABELS = {
+  [AVAILABILITY_FILTERS.ALL]: 'All Books',
+  [AVAILABILITY_FILTERS.AVAILABLE]: 'Available',
+  [AVAILABILITY_FILTERS.CHECKED_OUT]: 'Checked Out',
+};
+
 /**
- * BooksPage displays a list of all books in a table format
+ * BooksPage displays a list of all books in a table format with search and availability filtering
  */
 function BooksPage() {
   const { data, isLoading, error } = useBooks();
@@ -32,6 +49,7 @@ function BooksPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [availabilityFilter, setAvailabilityFilter] = useState(AVAILABILITY_FILTERS.ALL);
 
   const handleRowClick = (bookId) => {
     setSelectedBookId(bookId);
@@ -54,7 +72,15 @@ function BooksPage() {
 
   // Get books and filter by search term
   const books = data?.data || [];
-  const filteredBooks = useBookSearch(books, debouncedSearchTerm);
+  const searchFiltered = useBookSearch(books, debouncedSearchTerm);
+
+  // Apply availability filter
+  const filteredBooks = useMemo(() => {
+    if (availabilityFilter === AVAILABILITY_FILTERS.ALL) {
+      return searchFiltered;
+    }
+    return searchFiltered.filter((book) => book.status === availabilityFilter);
+  }, [searchFiltered, availabilityFilter]);
 
   if (isLoading) {
     return (
@@ -80,7 +106,7 @@ function BooksPage() {
       <Typography variant="h4" component="h1" gutterBottom>
         Books
       </Typography>
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
         <TextField
           fullWidth
           label="Search Books"
@@ -102,18 +128,35 @@ function BooksPage() {
             ),
           }}
         />
+        <FormControl sx={{ minWidth: 200 }}>
+          <InputLabel id="availability-filter-label">Availability</InputLabel>
+          <Select
+            labelId="availability-filter-label"
+            id="availability-filter"
+            value={availabilityFilter}
+            label="Availability"
+            onChange={(e) => setAvailabilityFilter(e.target.value)}
+          >
+            <MenuItem value={AVAILABILITY_FILTERS.ALL}>
+              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.ALL]}
+            </MenuItem>
+            <MenuItem value={AVAILABILITY_FILTERS.AVAILABLE}>
+              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE]}
+            </MenuItem>
+            <MenuItem value={AVAILABILITY_FILTERS.CHECKED_OUT}>
+              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT]}
+            </MenuItem>
+          </Select>
+        </FormControl>
       </Box>
-      {filteredBooks.length === 0 && debouncedSearchTerm && (
+      {filteredBooks.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography variant="h6" color="text.secondary">
-            No books found matching &quot;{debouncedSearchTerm}&quot;
-          </Typography>
-        </Box>
-      )}
-      {filteredBooks.length === 0 && !debouncedSearchTerm && (
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <Typography variant="h6" color="text.secondary">
-            No books in the library yet
+            {debouncedSearchTerm
+              ? `No ${availabilityFilter !== AVAILABILITY_FILTERS.ALL ? AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase() : ''} books found matching "${debouncedSearchTerm}"`
+              : availabilityFilter !== AVAILABILITY_FILTERS.ALL
+                ? `No ${AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase()} books`
+                : 'No books in the library yet'}
           </Typography>
         </Box>
       )}
@@ -141,8 +184,11 @@ function BooksPage() {
                   >
                     <TableCell>{book.title}</TableCell>
                     <TableCell>{authors}</TableCell>
-                    {/* TODO: Replace with actual book.status when checkout feature is implemented */}
-                    <TableCell>Available</TableCell>
+                    <TableCell>
+                      {book.status === AVAILABILITY_FILTERS.AVAILABLE
+                        ? AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE]
+                        : AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT]}
+                    </TableCell>
                   </TableRow>
                 );
               })}

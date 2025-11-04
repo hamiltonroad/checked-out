@@ -1,6 +1,5 @@
 const bookService = require('./bookService');
 const { Book, Author } = require('../models');
-const ApiError = require('../utils/ApiError');
 
 // Mock the models
 jest.mock('../models', () => ({

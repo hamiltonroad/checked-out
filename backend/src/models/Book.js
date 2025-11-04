@@ -49,6 +49,11 @@ module.exports = (sequelize) => {
       otherKey: 'author_id',
       as: 'authors',
     });
+
+    Book.hasMany(models.Copy, {
+      foreignKey: 'book_id',
+      as: 'copies',
+    });
   };
 
   return Book;
