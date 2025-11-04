@@ -43,8 +43,10 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API routes will be added here
-// app.use('/api/v1', routes);
+// API routes
+const routes = require('./routes');
+
+app.use('/api/v1', routes);
 
 // 404 handler
 app.use((req, res) => {
