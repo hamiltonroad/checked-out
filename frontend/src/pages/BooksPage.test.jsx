@@ -2,12 +2,20 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import BooksPage from './BooksPage';
 import { useBooks } from '../hooks/useBooks';
+import { useBook } from '../hooks/useBook';
 
 vi.mock('../hooks/useBooks');
+vi.mock('../hooks/useBook');
 
 describe('BooksPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Mock useBook hook to return idle state (modal closed by default)
+    useBook.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+    });
   });
 
   it('should show loading spinner when isLoading is true', () => {

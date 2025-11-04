@@ -13,4 +13,7 @@ const router = express.Router();
 // GET /api/v1/books - Get all books with authors
 router.get('/', validateRequest(bookValidator.getAll), bookController.getAllBooks);
 
+// GET /api/v1/books/:id - Get a single book by ID with authors
+router.get('/:id', validateRequest(bookValidator.getById), bookController.getBookById);
+
 module.exports = router;
