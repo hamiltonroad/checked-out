@@ -115,28 +115,32 @@ export const motion = {
    */
   easing: {
     /**
-     * Standard easing - Balanced, neutral motion
+     * Standard easing - Balanced, neutral motion (Material Design standard)
      * Use for most transitions where no emphasis is needed
+     * Cubic-bezier: (0.4, 0, 0.2, 1) - smooth acceleration and deceleration
      */
-    standard: 'cubic-bezier(0.2, 0, 0, 1)',
+    standard: 'cubic-bezier(0.4, 0, 0.2, 1)',
 
     /**
-     * Emphasized easing - More pronounced motion with impact
+     * Emphasized easing - Sharp, pronounced motion with impact (Material Design sharp)
      * Use for important state changes and focus movements
+     * Cubic-bezier: (0.4, 0, 0.6, 1) - more aggressive curve than standard
      */
-    emphasized: 'cubic-bezier(0.2, 0, 0, 1)',
+    emphasized: 'cubic-bezier(0.4, 0, 0.6, 1)',
 
     /**
-     * Decelerated easing - Fast start, slow end (ease-out)
+     * Decelerated easing - Fast start, slow end (ease-out, Material Design decelerate)
      * Use for entering elements (appear quickly, settle gently)
+     * Cubic-bezier: (0, 0, 0.2, 1) - elements entering the screen
      */
-    decelerated: 'cubic-bezier(0, 0, 0, 1)',
+    decelerated: 'cubic-bezier(0, 0, 0.2, 1)',
 
     /**
-     * Accelerated easing - Slow start, fast end (ease-in)
+     * Accelerated easing - Slow start, fast end (ease-in, Material Design accelerate)
      * Use for exiting elements (leave quickly, minimal distraction)
+     * Cubic-bezier: (0.4, 0, 1, 1) - elements leaving the screen
      */
-    accelerated: 'cubic-bezier(0.3, 0, 1, 1)',
+    accelerated: 'cubic-bezier(0.4, 0, 1, 1)',
   },
 };
 
