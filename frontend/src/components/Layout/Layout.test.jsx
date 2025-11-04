@@ -5,7 +5,7 @@ import Layout from './Layout';
 import { ThemeProvider } from '../../context/ThemeContext';
 
 describe('Layout', () => {
-  it('renders app title', () => {
+  it('renders app title and subtitle', () => {
     render(
       <BrowserRouter>
         <ThemeProvider>
@@ -14,7 +14,11 @@ describe('Layout', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText('Checked Out - Library Management')).toBeInTheDocument();
+    // Check for main title (h1 heading)
+    expect(screen.getByRole('heading', { name: /checked out/i })).toBeInTheDocument();
+
+    // Check for subtitle
+    expect(screen.getByText('Library Management')).toBeInTheDocument();
   });
 
   it('renders theme toggle button', () => {
@@ -154,5 +158,51 @@ describe('Layout', () => {
     expect(button).toBeInTheDocument();
     // Note: Can't directly test :focus-visible pseudo-class in JSDOM,
     // but we verify the component renders with the styling applied
+  });
+
+  it('renders menu book icon', () => {
+    render(
+      <BrowserRouter>
+        <ThemeProvider>
+          <Layout />
+        </ThemeProvider>
+      </BrowserRouter>
+    );
+
+    // Check for MenuBookIcon by its data-testid
+    const icon = screen.getByTestId('MenuBookIcon');
+    expect(icon).toBeInTheDocument();
+  });
+
+  it('uses sticky positioning for AppBar', () => {
+    const { container } = render(
+      <BrowserRouter>
+        <ThemeProvider>
+          <Layout />
+        </ThemeProvider>
+      </BrowserRouter>
+    );
+
+    // Check for AppBar with sticky position class
+    const appBar = container.querySelector('.MuiAppBar-positionSticky');
+    expect(appBar).toBeInTheDocument();
+  });
+
+  it('uses headlineSmall typography variant for main title', () => {
+    const { container } = render(
+      <BrowserRouter>
+        <ThemeProvider>
+          <Layout />
+        </ThemeProvider>
+      </BrowserRouter>
+    );
+
+    // Find the h1 element and check it has the headlineSmall class
+    const title = screen.getByRole('heading', { name: /checked out/i });
+    expect(title).toBeInTheDocument();
+
+    // Verify it's using Typography component with proper variant
+    const typography = container.querySelector('.MuiTypography-headlineSmall');
+    expect(typography).toBeInTheDocument();
   });
 });

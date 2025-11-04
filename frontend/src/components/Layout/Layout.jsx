@@ -37,7 +37,7 @@ function Layout() {
         position="sticky"
         sx={{
           bgcolor: 'surface.main',
-          color: 'onSurface.main',
+          color: 'text.primary',
           boxShadow: 0,
           borderBottom: 1,
           borderColor: 'divider',
