@@ -19,6 +19,8 @@ const db = {
 // Import models
 db.Book = require('./Book')(sequelize);
 db.Author = require('./Author')(sequelize);
+db.Copy = require('./Copy')(sequelize);
+db.Checkout = require('./Checkout')(sequelize);
 
 // Define associations
 Object.keys(db).forEach((modelName) => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
   Container,
@@ -16,6 +16,10 @@ import {
   TextField,
   InputAdornment,
   IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -32,6 +36,7 @@ function BooksPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [availabilityFilter, setAvailabilityFilter] = useState('all');
 
   const handleRowClick = (bookId) => {
     setSelectedBookId(bookId);
@@ -54,7 +59,15 @@ function BooksPage() {
 
   // Get books and filter by search term
   const books = data?.data || [];
-  const filteredBooks = useBookSearch(books, debouncedSearchTerm);
+  const searchFiltered = useBookSearch(books, debouncedSearchTerm);
+
+  // Apply availability filter
+  const filteredBooks = useMemo(() => {
+    if (availabilityFilter === 'all') {
+      return searchFiltered;
+    }
+    return searchFiltered.filter((book) => book.status === availabilityFilter);
+  }, [searchFiltered, availabilityFilter]);
 
   if (isLoading) {
     return (
@@ -80,7 +93,7 @@ function BooksPage() {
       <Typography variant="h4" component="h1" gutterBottom>
         Books
       </Typography>
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
         <TextField
           fullWidth
           label="Search Books"
@@ -102,6 +115,20 @@ function BooksPage() {
             ),
           }}
         />
+        <FormControl sx={{ minWidth: 200 }}>
+          <InputLabel id="availability-filter-label">Availability</InputLabel>
+          <Select
+            labelId="availability-filter-label"
+            id="availability-filter"
+            value={availabilityFilter}
+            label="Availability"
+            onChange={(e) => setAvailabilityFilter(e.target.value)}
+          >
+            <MenuItem value="all">All Books</MenuItem>
+            <MenuItem value="available">Available</MenuItem>
+            <MenuItem value="checked_out">Checked Out</MenuItem>
+          </Select>
+        </FormControl>
       </Box>
       {filteredBooks.length === 0 && debouncedSearchTerm && (
         <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -141,8 +168,9 @@ function BooksPage() {
                   >
                     <TableCell>{book.title}</TableCell>
                     <TableCell>{authors}</TableCell>
-                    {/* TODO: Replace with actual book.status when checkout feature is implemented */}
-                    <TableCell>Available</TableCell>
+                    <TableCell>
+                      {book.status === 'available' ? 'Available' : 'Checked Out'}
+                    </TableCell>
                   </TableRow>
                 );
               })}

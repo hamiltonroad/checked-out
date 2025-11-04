@@ -39,11 +39,13 @@ describe('BooksPage', () => {
           id: 1,
           title: 'The Great Gatsby',
           authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }],
+          status: 'available',
         },
         {
           id: 2,
           title: '1984',
           authors: [{ first_name: 'George', last_name: 'Orwell' }],
+          status: 'available',
         },
       ],
     };
@@ -89,6 +91,7 @@ describe('BooksPage', () => {
             { first_name: 'Terry', last_name: 'Pratchett' },
             { first_name: 'Neil', last_name: 'Gaiman' },
           ],
+          status: 'available',
         },
       ],
     };
@@ -104,7 +107,7 @@ describe('BooksPage', () => {
     expect(screen.getByText('Terry Pratchett, Neil Gaiman')).toBeInTheDocument();
   });
 
-  it('should show "Available" for all books', () => {
+  it('should show availability status from API data', () => {
     const mockData = {
       status: 'success',
       data: [
@@ -112,11 +115,13 @@ describe('BooksPage', () => {
           id: 1,
           title: 'Book 1',
           authors: [{ first_name: 'Author', last_name: 'One' }],
+          status: 'available',
         },
         {
           id: 2,
           title: 'Book 2',
           authors: [{ first_name: 'Author', last_name: 'Two' }],
+          status: 'checked_out',
         },
       ],
     };
@@ -129,8 +134,8 @@ describe('BooksPage', () => {
 
     render(<BooksPage />);
 
-    const availableCells = screen.getAllByText('Available');
-    expect(availableCells).toHaveLength(2);
+    expect(screen.getByText('Available')).toBeInTheDocument();
+    expect(screen.getByText('Checked Out')).toBeInTheDocument();
   });
 
   describe('Search Functionality', () => {
@@ -141,6 +146,7 @@ describe('BooksPage', () => {
           id: 1,
           title: 'Clean Code',
           authors: [{ first_name: 'Robert', last_name: 'Martin' }],
+          status: 'available',
         },
         {
           id: 2,
@@ -149,11 +155,13 @@ describe('BooksPage', () => {
             { first_name: 'Andrew', last_name: 'Hunt' },
             { first_name: 'David', last_name: 'Thomas' },
           ],
+          status: 'available',
         },
         {
           id: 3,
           title: 'Design Patterns',
           authors: [{ first_name: 'Erich', last_name: 'Gamma' }],
+          status: 'available',
         },
       ],
     };
@@ -370,6 +378,139 @@ describe('BooksPage', () => {
         },
         { timeout: 500 }
       );
+    });
+  });
+
+  describe('Availability Filter', () => {
+    const mockBooksData = {
+      status: 'success',
+      data: [
+        {
+          id: 1,
+          title: 'Available Book 1',
+          authors: [{ first_name: 'Author', last_name: 'One' }],
+          status: 'available',
+        },
+        {
+          id: 2,
+          title: 'Checked Out Book',
+          authors: [{ first_name: 'Author', last_name: 'Two' }],
+          status: 'checked_out',
+        },
+        {
+          id: 3,
+          title: 'Available Book 2',
+          authors: [{ first_name: 'Author', last_name: 'Three' }],
+          status: 'available',
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      useBooks.mockReturnValue({
+        data: mockBooksData,
+        isLoading: false,
+        error: null,
+      });
+    });
+
+    it('should render availability filter dropdown', () => {
+      render(<BooksPage />);
+
+      const filterLabel = screen.getByLabelText('Availability');
+      expect(filterLabel).toBeInTheDocument();
+    });
+
+    it('should show all books by default', () => {
+      render(<BooksPage />);
+
+      expect(screen.getByText('Available Book 1')).toBeInTheDocument();
+      expect(screen.getByText('Checked Out Book')).toBeInTheDocument();
+      expect(screen.getByText('Available Book 2')).toBeInTheDocument();
+    });
+
+    it('should filter to available books only', async () => {
+      const user = userEvent.setup();
+      render(<BooksPage />);
+
+      const filterSelect = screen.getByLabelText('Availability');
+      await user.click(filterSelect);
+
+      const availableOption = screen.getByRole('option', { name: 'Available' });
+      await user.click(availableOption);
+
+      await waitFor(() => {
+        expect(screen.getByText('Available Book 1')).toBeInTheDocument();
+        expect(screen.getByText('Available Book 2')).toBeInTheDocument();
+        expect(screen.queryByText('Checked Out Book')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should filter to checked out books only', async () => {
+      const user = userEvent.setup();
+      render(<BooksPage />);
+
+      const filterSelect = screen.getByLabelText('Availability');
+      await user.click(filterSelect);
+
+      const checkedOutOption = screen.getByRole('option', { name: 'Checked Out' });
+      await user.click(checkedOutOption);
+
+      await waitFor(() => {
+        expect(screen.getByText('Checked Out Book')).toBeInTheDocument();
+        expect(screen.queryByText('Available Book 1')).not.toBeInTheDocument();
+        expect(screen.queryByText('Available Book 2')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should combine search and availability filters', async () => {
+      const user = userEvent.setup();
+      render(<BooksPage />);
+
+      // Set availability filter to "Available"
+      const filterSelect = screen.getByLabelText('Availability');
+      await user.click(filterSelect);
+      const availableOption = screen.getByRole('option', { name: 'Available' });
+      await user.click(availableOption);
+
+      // Search for "Book 1"
+      const searchInput = screen.getByLabelText('Search Books');
+      await user.type(searchInput, 'Book 1');
+
+      await waitFor(
+        () => {
+          expect(screen.getByText('Available Book 1')).toBeInTheDocument();
+          expect(screen.queryByText('Available Book 2')).not.toBeInTheDocument();
+          expect(screen.queryByText('Checked Out Book')).not.toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+    });
+
+    it('should switch back to all books', async () => {
+      const user = userEvent.setup();
+      render(<BooksPage />);
+
+      // First filter to available
+      const filterSelect = screen.getByLabelText('Availability');
+      await user.click(filterSelect);
+      const availableOption = screen.getByRole('option', { name: 'Available' });
+      await user.click(availableOption);
+
+      await waitFor(() => {
+        expect(screen.queryByText('Checked Out Book')).not.toBeInTheDocument();
+      });
+
+      // Then switch back to all
+      await user.click(filterSelect);
+      const allOption = screen.getByRole('option', { name: 'All Books' });
+      await user.click(allOption);
+
+      await waitFor(() => {
+        expect(screen.getByText('Available Book 1')).toBeInTheDocument();
+        expect(screen.getByText('Checked Out Book')).toBeInTheDocument();
+        expect(screen.getByText('Available Book 2')).toBeInTheDocument();
+      });
     });
   });
 });
