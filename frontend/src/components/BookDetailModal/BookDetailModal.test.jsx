@@ -116,7 +116,7 @@ describe('BookDetailModal', () => {
     expect(screen.getByText('Available')).toBeInTheDocument();
   });
 
-  it('should call onClose when Close button is clicked', async () => {
+  it('should call onClose when Close button (in actions) is clicked', async () => {
     const user = userEvent.setup();
     const mockBook = {
       data: {
@@ -129,8 +129,9 @@ describe('BookDetailModal', () => {
 
     renderWithQueryClient(<BookDetailModal open={true} onClose={mockOnClose} bookId={1} />);
 
-    const closeButton = screen.getByRole('button', { name: /close/i });
-    await user.click(closeButton);
+    // Get all close buttons and click the second one (text button in actions)
+    const closeButtons = screen.getAllByRole('button', { name: /close/i });
+    await user.click(closeButtons[1]);
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
@@ -141,5 +142,78 @@ describe('BookDetailModal', () => {
     renderWithQueryClient(<BookDetailModal open={true} onClose={mockOnClose} bookId={null} />);
 
     expect(useBookHook.useBook).toHaveBeenCalledWith(null);
+  });
+
+  it('should call onClose when close icon button is clicked', async () => {
+    const user = userEvent.setup();
+    const mockBook = {
+      data: {
+        id: 1,
+        title: 'Test Book',
+        authors: [],
+      },
+    };
+    useBookHook.useBook.mockReturnValue({ isLoading: false, data: mockBook, error: null });
+
+    renderWithQueryClient(<BookDetailModal open={true} onClose={mockOnClose} bookId={1} />);
+
+    // Get all close buttons and click the first one (icon button in header)
+    const closeButtons = screen.getAllByRole('button', { name: /close/i });
+    await user.click(closeButtons[0]);
+
+    expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  it('should render dividers between sections', () => {
+    const mockBook = {
+      data: {
+        id: 1,
+        title: 'Test Book',
+        authors: [{ first_name: 'John', last_name: 'Doe' }],
+      },
+    };
+    useBookHook.useBook.mockReturnValue({ isLoading: false, data: mockBook, error: null });
+
+    renderWithQueryClient(<BookDetailModal open={true} onClose={mockOnClose} bookId={1} />);
+
+    const dividers = document.querySelectorAll('.MuiDivider-root');
+    expect(dividers.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('should render book cover placeholder with icon', () => {
+    const mockBook = {
+      data: {
+        id: 1,
+        title: 'Test Book',
+        authors: [{ first_name: 'John', last_name: 'Doe' }],
+      },
+    };
+    useBookHook.useBook.mockReturnValue({ isLoading: false, data: mockBook, error: null });
+
+    renderWithQueryClient(<BookDetailModal open={true} onClose={mockOnClose} bookId={1} />);
+
+    // MenuBookIcon should be rendered
+    const bookIcon = document.querySelector('[data-testid="MenuBookIcon"]');
+    expect(bookIcon).toBeInTheDocument();
+  });
+
+  it('should render responsive layout with correct structure', () => {
+    const mockBook = {
+      data: {
+        id: 1,
+        title: 'Test Book',
+        authors: [{ first_name: 'John', last_name: 'Doe' }],
+      },
+    };
+    useBookHook.useBook.mockReturnValue({ isLoading: false, data: mockBook, error: null });
+
+    renderWithQueryClient(<BookDetailModal open={true} onClose={mockOnClose} bookId={1} />);
+
+    // Stack container should be present for responsive layout
+    const stackContainer = document.querySelector('.MuiStack-root');
+    expect(stackContainer).toBeInTheDocument();
+
+    // Book title should be rendered in the layout
+    expect(screen.getByText('Test Book')).toBeInTheDocument();
   });
 });
