@@ -10,7 +10,9 @@ const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return ({ children }) => <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return ({ children }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
 };
 
 describe('useBook', () => {

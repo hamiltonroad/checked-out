@@ -10,9 +10,7 @@ module.exports = {
     }
 
     // Get book and author IDs dynamically
-    const [books] = await queryInterface.sequelize.query(
-      'SELECT id, title FROM books ORDER BY id'
-    );
+    const [books] = await queryInterface.sequelize.query('SELECT id, title FROM books ORDER BY id');
     const [authors] = await queryInterface.sequelize.query(
       'SELECT id, first_name, last_name FROM authors ORDER BY id'
     );
@@ -419,9 +417,7 @@ module.exports = {
     ];
 
     // Filter out any null entries (in case book or author not found)
-    const validBookAuthors = bookAuthors.filter(
-      (ba) => ba.book_id && ba.author_id
-    );
+    const validBookAuthors = bookAuthors.filter((ba) => ba.book_id && ba.author_id);
 
     if (validBookAuthors.length === 0) {
       throw new Error(
