@@ -19,16 +19,24 @@ describe('BooksPage', () => {
     });
   });
 
-  it('should show loading spinner when isLoading is true', () => {
+  it('should show skeleton loading state when isLoading is true', () => {
     useBooks.mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
     });
 
-    render(<BooksPage />);
+    const { container } = render(<BooksPage />);
 
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    // Check for page structure during loading
+    expect(screen.getByText('Books')).toBeInTheDocument();
+    expect(screen.getByText('Title')).toBeInTheDocument();
+    expect(screen.getByText('Author(s)')).toBeInTheDocument();
+    expect(screen.getByText('Availability')).toBeInTheDocument();
+
+    // Verify skeleton elements are present
+    const skeletons = container.querySelectorAll('.MuiSkeleton-root');
+    expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it('should display books table when data is loaded', async () => {

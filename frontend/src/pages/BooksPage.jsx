@@ -10,7 +10,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  CircularProgress,
   Alert,
   Box,
   TextField,
@@ -20,6 +19,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Skeleton,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -89,16 +89,41 @@ function BooksPage() {
 
   if (isLoading) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '60vh',
-        }}
-      >
-        <CircularProgress />
-      </Box>
+      <Container>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Books
+        </Typography>
+        <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+          <Skeleton variant="rounded" height={56} sx={{ flexGrow: 1 }} />
+          <Skeleton variant="rounded" height={56} width={200} />
+        </Box>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Title</TableCell>
+                <TableCell>Author(s)</TableCell>
+                <TableCell>Availability</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {[...Array(6)].map((_, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    <Skeleton variant="text" width="60%" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton variant="text" width="40%" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton variant="rounded" width={100} height={24} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Container>
     );
   }
 
