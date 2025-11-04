@@ -27,8 +27,21 @@ import { useBooks } from '../hooks/useBooks';
 import { useBookSearch } from '../hooks/useBookSearch';
 import BookDetailModal from '../components/BookDetailModal';
 
+// Availability filter constants
+const AVAILABILITY_FILTERS = {
+  ALL: 'all',
+  AVAILABLE: 'available',
+  CHECKED_OUT: 'checked_out',
+};
+
+const AVAILABILITY_FILTER_LABELS = {
+  [AVAILABILITY_FILTERS.ALL]: 'All Books',
+  [AVAILABILITY_FILTERS.AVAILABLE]: 'Available',
+  [AVAILABILITY_FILTERS.CHECKED_OUT]: 'Checked Out',
+};
+
 /**
- * BooksPage displays a list of all books in a table format
+ * BooksPage displays a list of all books in a table format with search and availability filtering
  */
 function BooksPage() {
   const { data, isLoading, error } = useBooks();
@@ -36,7 +49,7 @@ function BooksPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [availabilityFilter, setAvailabilityFilter] = useState('all');
+  const [availabilityFilter, setAvailabilityFilter] = useState(AVAILABILITY_FILTERS.ALL);
 
   const handleRowClick = (bookId) => {
     setSelectedBookId(bookId);
@@ -63,7 +76,7 @@ function BooksPage() {
 
   // Apply availability filter
   const filteredBooks = useMemo(() => {
-    if (availabilityFilter === 'all') {
+    if (availabilityFilter === AVAILABILITY_FILTERS.ALL) {
       return searchFiltered;
     }
     return searchFiltered.filter((book) => book.status === availabilityFilter);
@@ -124,23 +137,26 @@ function BooksPage() {
             label="Availability"
             onChange={(e) => setAvailabilityFilter(e.target.value)}
           >
-            <MenuItem value="all">All Books</MenuItem>
-            <MenuItem value="available">Available</MenuItem>
-            <MenuItem value="checked_out">Checked Out</MenuItem>
+            <MenuItem value={AVAILABILITY_FILTERS.ALL}>
+              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.ALL]}
+            </MenuItem>
+            <MenuItem value={AVAILABILITY_FILTERS.AVAILABLE}>
+              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE]}
+            </MenuItem>
+            <MenuItem value={AVAILABILITY_FILTERS.CHECKED_OUT}>
+              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT]}
+            </MenuItem>
           </Select>
         </FormControl>
       </Box>
-      {filteredBooks.length === 0 && debouncedSearchTerm && (
+      {filteredBooks.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography variant="h6" color="text.secondary">
-            No books found matching &quot;{debouncedSearchTerm}&quot;
-          </Typography>
-        </Box>
-      )}
-      {filteredBooks.length === 0 && !debouncedSearchTerm && (
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <Typography variant="h6" color="text.secondary">
-            No books in the library yet
+            {debouncedSearchTerm
+              ? `No ${availabilityFilter !== AVAILABILITY_FILTERS.ALL ? AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase() : ''} books found matching "${debouncedSearchTerm}"`
+              : availabilityFilter !== AVAILABILITY_FILTERS.ALL
+                ? `No ${AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase()} books`
+                : 'No books in the library yet'}
           </Typography>
         </Box>
       )}
@@ -169,7 +185,9 @@ function BooksPage() {
                     <TableCell>{book.title}</TableCell>
                     <TableCell>{authors}</TableCell>
                     <TableCell>
-                      {book.status === 'available' ? 'Available' : 'Checked Out'}
+                      {book.status === AVAILABILITY_FILTERS.AVAILABLE
+                        ? AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE]
+                        : AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT]}
                     </TableCell>
                   </TableRow>
                 );

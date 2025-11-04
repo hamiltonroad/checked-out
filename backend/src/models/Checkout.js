@@ -62,6 +62,11 @@ module.exports = (sequelize) => {
       foreignKey: 'copy_id',
       as: 'copy',
     });
+
+    Checkout.belongsTo(models.Patron, {
+      foreignKey: 'patron_id',
+      as: 'patron',
+    });
   };
 
   return Checkout;

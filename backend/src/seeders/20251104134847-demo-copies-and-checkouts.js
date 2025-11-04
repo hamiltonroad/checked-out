@@ -1,5 +1,4 @@
-const { QueryInterface, Sequelize } = require('sequelize');
-
+/* eslint-disable no-unused-vars */
 /**
  * Seed copies and checkouts for testing availability filter
  * Creates scenarios:
@@ -7,17 +6,24 @@ const { QueryInterface, Sequelize } = require('sequelize');
  * - Books that are currently checked out
  * - Books with overdue checkouts
  */
+
+// Date calculation constants
+const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+const FOURTEEN_DAYS = 14 * MILLISECONDS_PER_DAY;
+const TWENTY_ONE_DAYS = 21 * MILLISECONDS_PER_DAY;
+const SEVEN_DAYS = 7 * MILLISECONDS_PER_DAY;
+
 module.exports = {
   /**
-   * @param {QueryInterface} queryInterface
-   * @param {Sequelize} Sequelize
+   * @param {import('sequelize').QueryInterface} queryInterface
+   * @param {import('sequelize').Sequelize} Sequelize
    */
   async up(queryInterface, Sequelize) {
     const now = new Date();
-    const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-    const twentyOneDaysAgo = new Date(now.getTime() - 21 * 24 * 60 * 60 * 1000);
-    const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const fourteenDaysFromNow = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const fourteenDaysAgo = new Date(now.getTime() - FOURTEEN_DAYS);
+    const twentyOneDaysAgo = new Date(now.getTime() - TWENTY_ONE_DAYS);
+    const sevenDaysFromNow = new Date(now.getTime() + SEVEN_DAYS);
+    const fourteenDaysFromNow = new Date(now.getTime() + FOURTEEN_DAYS);
 
     // Get some book IDs to use
     const books = await queryInterface.sequelize.query(
