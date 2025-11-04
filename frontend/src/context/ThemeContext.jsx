@@ -24,7 +24,7 @@
  * ```
  */
 
-import { createContext, useState, useMemo, useContext } from 'react';
+import { createContext, useState, useMemo, useContext, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { getTheme } from '../theme/theme';
@@ -60,21 +60,23 @@ export function ThemeProvider({ children }) {
   /**
    * Toggle between light and dark mode
    * Persists the new mode to localStorage
+   * Memoized to prevent unnecessary re-renders of consuming components
    */
-  const toggleMode = () => {
+  const toggleMode = useCallback(() => {
     setMode((prevMode) => {
       const newMode = prevMode === 'light' ? 'dark' : 'light';
       localStorage.setItem('themeMode', newMode);
       return newMode;
     });
-  };
+  }, []);
 
   // Generate theme object based on current mode
   // Memoized to prevent unnecessary recalculations
   const theme = useMemo(() => getTheme(mode), [mode]);
 
   // Provide mode and toggleMode to consuming components
-  const contextValue = useMemo(() => ({ mode, toggleMode }), [mode]);
+  // Memoized to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({ mode, toggleMode }), [mode, toggleMode]);
 
   return (
     <ThemeContext.Provider value={contextValue}>
