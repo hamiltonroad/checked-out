@@ -77,16 +77,34 @@ export const getTheme = (mode = 'light') => {
     motion,
 
     // Component style overrides
-    // Reserved for future use - will contain MUI component customizations
-    // following Material Design 3 specifications
+    // MUI component customizations following Material Design 3 specifications
+    // and WCAG 2.1 AA accessibility guidelines for touch targets
     components: {
-      // Future component overrides will go here
-      // Example:
-      // MuiButton: {
-      //   styleOverrides: {
-      //     root: { ... }
-      //   }
-      // }
+      // IconButton - Larger touch targets for better mobile UX
+      // WCAG 2.1 AA requires minimum 44x44px, we use 48px base, 56px for touch
+      MuiIconButton: {
+        styleOverrides: {
+          root: {
+            minWidth: 48,
+            minHeight: 48,
+            // Increase size on touch devices (phones, tablets)
+            '@media (pointer: coarse)': {
+              minWidth: 56,
+              minHeight: 56,
+            },
+          },
+        },
+      },
+      // Button - Adequate touch targets and comfortable padding
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            minHeight: 48,
+            paddingLeft: 16,
+            paddingRight: 16,
+          },
+        },
+      },
     },
   });
 };
