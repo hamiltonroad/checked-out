@@ -32,6 +32,7 @@ import { lightPalette, darkPalette } from './palette.js';
 import typography from './typography.js';
 import spacing from './spacing.js';
 import motion from './motion.js';
+import { components } from './components.js';
 
 /**
  * Creates a theme object with all Material Design 3 tokens integrated
@@ -77,35 +78,9 @@ export const getTheme = (mode = 'light') => {
     motion,
 
     // Component style overrides
-    // MUI component customizations following Material Design 3 specifications
-    // and WCAG 2.1 AA accessibility guidelines for touch targets
-    components: {
-      // IconButton - Larger touch targets for better mobile UX
-      // WCAG 2.1 AA requires minimum 44x44px, we use 48px base, 56px for touch
-      MuiIconButton: {
-        styleOverrides: {
-          root: {
-            minWidth: 48,
-            minHeight: 48,
-            // Increase size on touch devices (phones, tablets)
-            '@media (pointer: coarse)': {
-              minWidth: 56,
-              minHeight: 56,
-            },
-          },
-        },
-      },
-      // Button - Adequate touch targets and comfortable padding
-      MuiButton: {
-        styleOverrides: {
-          root: {
-            minHeight: 48,
-            paddingLeft: 16,
-            paddingRight: 16,
-          },
-        },
-      },
-    },
+    // Global focus indicators, touch targets, and component customizations
+    // following Material Design 3 specifications and WCAG 2.1 AA accessibility
+    components,
   });
 };
 

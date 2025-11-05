@@ -60,18 +60,7 @@ function Layout() {
             </Typography>
           </Box>
           <Tooltip title="Toggle light/dark mode">
-            <IconButton
-              onClick={toggleMode}
-              color="inherit"
-              aria-label="toggle theme"
-              sx={{
-                '&:focus-visible': {
-                  outline: '2px solid',
-                  outlineColor: 'primary.main',
-                  outlineOffset: '2px',
-                },
-              }}
-            >
+            <IconButton onClick={toggleMode} color="inherit" aria-label="toggle theme">
               {/* Show icon for the mode that will be activated on click (not current mode) */}
               {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
             </IconButton>
