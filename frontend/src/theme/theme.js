@@ -32,6 +32,7 @@ import { lightPalette, darkPalette } from './palette.js';
 import typography from './typography.js';
 import spacing from './spacing.js';
 import motion from './motion.js';
+import { components } from './components.js';
 
 /**
  * Creates a theme object with all Material Design 3 tokens integrated
@@ -77,17 +78,9 @@ export const getTheme = (mode = 'light') => {
     motion,
 
     // Component style overrides
-    // Reserved for future use - will contain MUI component customizations
-    // following Material Design 3 specifications
-    components: {
-      // Future component overrides will go here
-      // Example:
-      // MuiButton: {
-      //   styleOverrides: {
-      //     root: { ... }
-      //   }
-      // }
-    },
+    // Global focus indicators and component customizations
+    // following Material Design 3 specifications and WCAG 2.1 AA accessibility
+    components,
   });
 };
 
