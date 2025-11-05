@@ -22,6 +22,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { useBook } from '../../hooks/useBook';
 import StatusChip from '../StatusChip';
 import SkeletonField from '../SkeletonField';
+import ProfanityWarning from '../ProfanityWarning';
 
 /**
  * Transition component for slide-up animation
@@ -137,9 +138,10 @@ function BookDetailModal({ open, onClose, bookId }) {
               </Box>
             </Box>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h5" gutterBottom>
-                {book.title}
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h5">{book.title}</Typography>
+                {book.has_profanity && <ProfanityWarning size="medium" />}
+              </Box>
 
               <DetailField
                 label="Author(s)"

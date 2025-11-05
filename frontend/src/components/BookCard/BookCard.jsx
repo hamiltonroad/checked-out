@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { Card, CardContent, Typography, Box } from '@mui/material';
 import StatusChip from '../StatusChip';
+import ProfanityWarning from '../ProfanityWarning';
 
 /**
  * BookCard displays book information in a card format for mobile views
@@ -52,9 +53,12 @@ function BookCard({ book, onClick }) {
       }}
     >
       <CardContent>
-        <Typography variant="h6" component="h3" gutterBottom>
-          {book.title}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          <Typography variant="h6" component="h3">
+            {book.title}
+          </Typography>
+          {book.has_profanity && <ProfanityWarning size="small" />}
+        </Box>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
           {authorsText}
         </Typography>
@@ -77,6 +81,7 @@ BookCard.propTypes = {
       })
     ).isRequired,
     status: PropTypes.oneOf(['available', 'checked_out', 'overdue']).isRequired,
+    has_profanity: PropTypes.bool,
   }).isRequired,
   onClick: PropTypes.func.isRequired,
 };

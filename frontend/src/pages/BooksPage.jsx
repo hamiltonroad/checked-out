@@ -26,6 +26,8 @@ import {
   Stack,
   useMediaQuery,
   useTheme,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -62,6 +64,7 @@ function BooksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [availabilityFilter, setAvailabilityFilter] = useState(AVAILABILITY_FILTERS.ALL);
+  const [hideProfanity, setHideProfanity] = useState(false);
   const searchInputRef = useRef(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -94,11 +97,12 @@ function BooksPage() {
         searchInputRef.current?.focus();
       }
 
-      // Escape to clear search and reset filter
+      // Escape to clear search and reset filters
       if (event.key === 'Escape') {
         setSearchTerm('');
         setDebouncedSearchTerm('');
         setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
+        setHideProfanity(false);
       }
     };
 
@@ -110,13 +114,22 @@ function BooksPage() {
   const books = data?.data || [];
   const searchFiltered = useBookSearch(books, debouncedSearchTerm);
 
-  // Apply availability filter
+  // Apply availability and profanity filters
   const filteredBooks = useMemo(() => {
-    if (availabilityFilter === AVAILABILITY_FILTERS.ALL) {
-      return searchFiltered;
+    let filtered = searchFiltered;
+
+    // Filter by availability
+    if (availabilityFilter !== AVAILABILITY_FILTERS.ALL) {
+      filtered = filtered.filter((book) => book.status === availabilityFilter);
     }
-    return searchFiltered.filter((book) => book.status === availabilityFilter);
-  }, [searchFiltered, availabilityFilter]);
+
+    // Filter by profanity
+    if (hideProfanity) {
+      filtered = filtered.filter((book) => !book.has_profanity);
+    }
+
+    return filtered;
+  }, [searchFiltered, availabilityFilter, hideProfanity]);
 
   if (isLoading) {
     return (
@@ -248,10 +261,23 @@ function BooksPage() {
               </Select>
             </FormControl>
           </Box>
+          <Box sx={{ mt: 1 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={hideProfanity}
+                  onChange={(e) => setHideProfanity(e.target.checked)}
+                />
+              }
+              label="Hide books with profanity"
+            />
+          </Box>
           <Typography variant="body2" color="text.secondary">
             Showing {filteredBooks.length} of {books.length} books
           </Typography>
-          {(debouncedSearchTerm || availabilityFilter !== AVAILABILITY_FILTERS.ALL) && (
+          {(debouncedSearchTerm ||
+            availabilityFilter !== AVAILABILITY_FILTERS.ALL ||
+            hideProfanity) && (
             <Box
               sx={{
                 display: 'flex',
@@ -282,13 +308,25 @@ function BooksPage() {
                   aria-label={`Remove availability filter: ${AVAILABILITY_FILTER_LABELS[availabilityFilter]}`}
                 />
               )}
-              {debouncedSearchTerm && availabilityFilter !== AVAILABILITY_FILTERS.ALL && (
+              {hideProfanity && (
+                <Chip
+                  label="Hiding profanity"
+                  onDelete={() => setHideProfanity(false)}
+                  size="small"
+                  variant="outlined"
+                  aria-label="Remove profanity filter"
+                />
+              )}
+              {(debouncedSearchTerm ||
+                availabilityFilter !== AVAILABILITY_FILTERS.ALL ||
+                hideProfanity) && (
                 <Button
                   size="small"
                   onClick={() => {
                     setSearchTerm('');
                     setDebouncedSearchTerm('');
                     setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
+                    setHideProfanity(false);
                   }}
                   sx={{ ml: 0.5 }}
                   aria-label="Clear all filters"

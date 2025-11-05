@@ -33,6 +33,11 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING(100),
         allowNull: true,
       },
+      has_profanity: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
     },
     {
       tableName: 'books',

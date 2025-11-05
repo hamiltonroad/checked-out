@@ -7,6 +7,11 @@ const ApiResponse = require('../utils/ApiResponse');
 class BookController {
   /**
    * Get all books with authors
+   * Query Parameters:
+   * - genre: Filter by genre
+   * - limit: Maximum number of results
+   * - offset: Number of records to skip
+   * - profanity: Filter by profanity status (true/false)
    * @param {Object} req - Express request
    * @param {Object} res - Express response
    * @param {Function} next - Express next middleware
@@ -18,6 +23,7 @@ class BookController {
         genre: req.query.genre,
         limit: req.query.limit,
         offset: req.query.offset,
+        profanity: req.query.profanity,
       };
       const result = await bookService.getAllBooks(filters);
       res.json(ApiResponse.success(result, 'Books retrieved successfully'));

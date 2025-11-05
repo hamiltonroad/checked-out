@@ -60,16 +60,22 @@ class BookService {
 
   /**
    * Get all books with their authors
-   * @param {Object} filters - Query filters (genre, limit, offset)
+   * @param {Object} filters - Query filters (genre, limit, offset, profanity)
    * @returns {Promise<Array>} List of books with authors and status
    */
   // eslint-disable-next-line class-methods-use-this
   async getAllBooks(filters = {}) {
-    const { genre, limit = 100, offset = 0 } = filters;
+    const { genre, limit = 100, offset = 0, profanity } = filters;
     const where = {};
 
     if (genre) {
       where.genre = genre;
+    }
+
+    // Filter by profanity status if specified
+    if (profanity !== undefined) {
+      const profanityBool = profanity === 'true' || profanity === true;
+      where.has_profanity = profanityBool;
     }
 
     const books = await Book.findAll({

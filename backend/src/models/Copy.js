@@ -43,11 +43,7 @@ module.exports = (sequelize) => {
       tableName: 'copies',
       timestamps: true,
       underscored: true,
-      indexes: [
-        { fields: ['book_id'] },
-        { fields: ['barcode'] },
-        { fields: ['format'] },
-      ],
+      indexes: [{ fields: ['book_id'] }, { fields: ['barcode'] }, { fields: ['format'] }],
     }
   );
 

@@ -59,11 +59,7 @@ module.exports = (sequelize) => {
       tableName: 'patrons',
       timestamps: true,
       underscored: true,
-      indexes: [
-        { fields: ['card_number'] },
-        { fields: ['email'] },
-        { fields: ['status'] },
-      ],
+      indexes: [{ fields: ['card_number'] }, { fields: ['email'] }, { fields: ['status'] }],
     }
   );
 
