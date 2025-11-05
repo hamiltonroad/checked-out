@@ -7,6 +7,7 @@ import { Outlet } from 'react-router-dom';
 import { useThemeMode } from '../../context/ThemeContext';
 import AppDrawer from '../AppDrawer';
 import MobileNav from '../MobileNav';
+import { DRAWER_WIDTH } from '../../constants/navigation';
 
 /**
  * Layout component providing app structure with header, navigation, and main content area
@@ -82,7 +83,7 @@ function Layout() {
             mt: 4,
             mb: { xs: 8, md: 4 },
             flexGrow: 1,
-            width: { xs: '100%', md: 'calc(100% - 240px)' },
+            width: { xs: '100%', md: `calc(100% - ${DRAWER_WIDTH}px)` },
           }}
         >
           <Outlet />

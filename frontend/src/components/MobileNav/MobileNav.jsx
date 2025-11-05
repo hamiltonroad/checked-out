@@ -1,9 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import PeopleIcon from '@mui/icons-material/People';
-import AssessmentIcon from '@mui/icons-material/Assessment';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { NAVIGATION_ITEMS } from '../../constants/navigation';
 
 /**
  * MobileNav component providing mobile bottom navigation
@@ -11,10 +9,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
  * Features:
  * - Bottom navigation with icons and labels
  * - Fixed positioning at bottom of screen
- * - Navigation items: Books, Patrons, Reports
+ * - Navigation items from shared NAVIGATION_ITEMS constant
  * - Responsive display (xs-sm breakpoint only)
  * - Touch-friendly navigation for mobile devices
- * - Active route highlighting
+ * - Active route highlighting with state sync
+ * - Syncs with browser navigation (back/forward buttons)
  *
  * The mobile nav only displays on mobile devices (< md breakpoint).
  * On desktop, the AppDrawer component provides navigation instead.
@@ -36,30 +35,24 @@ function MobileNav() {
 
   // Determine current value based on route
   const getCurrentValue = () => {
-    if (location.pathname === '/') return 0;
-    if (location.pathname === '/patrons') return 1;
-    if (location.pathname === '/reports') return 2;
-    return 0; // Default to Books
+    const index = NAVIGATION_ITEMS.findIndex((item) => item.path === location.pathname);
+    return index >= 0 ? index : 0; // Default to first item (Books) if no match
   };
 
   const [value, setValue] = useState(getCurrentValue());
 
+  // Sync state with location changes (e.g., browser back/forward buttons)
+  useEffect(() => {
+    const index = NAVIGATION_ITEMS.findIndex((item) => item.path === location.pathname);
+    setValue(index >= 0 ? index : 0);
+  }, [location.pathname]);
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
 
-    // Navigate based on selected value
-    switch (newValue) {
-      case 0:
-        navigate('/');
-        break;
-      case 1:
-        // Patrons is disabled, don't navigate
-        break;
-      case 2:
-        // Reports is disabled, don't navigate
-        break;
-      default:
-        break;
+    const selectedItem = NAVIGATION_ITEMS[newValue];
+    if (selectedItem && !selectedItem.disabled) {
+      navigate(selectedItem.path);
     }
   };
 
@@ -85,23 +78,18 @@ function MobileNav() {
           bgcolor: 'surface.main',
         }}
       >
-        <BottomNavigationAction
-          label="Books"
-          icon={<MenuBookIcon />}
-          aria-label="Navigate to Books"
-        />
-        <BottomNavigationAction
-          label="Patrons"
-          icon={<PeopleIcon />}
-          disabled
-          aria-label="Patrons (coming soon)"
-        />
-        <BottomNavigationAction
-          label="Reports"
-          icon={<AssessmentIcon />}
-          disabled
-          aria-label="Reports (coming soon)"
-        />
+        {NAVIGATION_ITEMS.map((item) => {
+          const Icon = item.icon;
+          return (
+            <BottomNavigationAction
+              key={item.id}
+              label={item.label}
+              icon={<Icon />}
+              disabled={item.disabled}
+              aria-label={item.ariaLabel}
+            />
+          );
+        })}
       </BottomNavigation>
     </Paper>
   );

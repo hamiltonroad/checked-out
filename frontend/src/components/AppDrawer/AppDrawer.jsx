@@ -1,19 +1,18 @@
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import PeopleIcon from '@mui/icons-material/People';
-import AssessmentIcon from '@mui/icons-material/Assessment';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { NAVIGATION_ITEMS, DRAWER_WIDTH } from '../../constants/navigation';
 
 /**
  * AppDrawer component providing desktop navigation
  *
  * Features:
  * - Permanent drawer variant (always visible on desktop)
- * - 240px fixed width
- * - Navigation items: Books, Patrons, Reports
+ * - Fixed width using DRAWER_WIDTH constant
+ * - Navigation items from shared NAVIGATION_ITEMS constant
  * - Active route highlighting
  * - Responsive display (md+ breakpoint only)
  * - Keyboard accessible navigation
+ * - Uses theme tokens for AppBar height
  *
  * The drawer only displays on desktop (md breakpoint and above).
  * On mobile devices, the MobileNav component provides navigation instead.
@@ -32,60 +31,34 @@ function AppDrawer() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const navigationItems = [
-    {
-      label: 'Books',
-      icon: <MenuBookIcon />,
-      path: '/',
-      disabled: false,
-    },
-    {
-      label: 'Patrons',
-      icon: <PeopleIcon />,
-      path: '/patrons',
-      disabled: true,
-    },
-    {
-      label: 'Reports',
-      icon: <AssessmentIcon />,
-      path: '/reports',
-      disabled: true,
-    },
-  ];
-
-  const handleNavigation = (path, disabled) => {
-    if (!disabled) {
-      navigate(path);
-    }
-  };
-
   return (
     <Drawer
       variant="permanent"
       sx={{
         display: { xs: 'none', md: 'block' },
-        width: 240,
+        width: DRAWER_WIDTH,
         flexShrink: 0,
         '& .MuiDrawer-paper': {
-          width: 240,
+          width: DRAWER_WIDTH,
           boxSizing: 'border-box',
-          top: 64, // Account for AppBar height
-          height: 'calc(100% - 64px)',
+          top: (theme) => `${theme.mixins.toolbar.minHeight}px`,
+          height: (theme) => `calc(100% - ${theme.mixins.toolbar.minHeight}px)`,
           borderRight: 1,
           borderColor: 'divider',
         },
       }}
     >
       <List>
-        {navigationItems.map((item) => {
+        {NAVIGATION_ITEMS.map((item) => {
           const isActive = location.pathname === item.path;
+          const Icon = item.icon;
 
           return (
-            <ListItem key={item.label} disablePadding>
+            <ListItem key={item.id} disablePadding>
               <ListItemButton
                 selected={isActive}
                 disabled={item.disabled}
-                onClick={() => handleNavigation(item.path, item.disabled)}
+                onClick={() => !item.disabled && navigate(item.path)}
                 sx={{
                   '&.Mui-selected': {
                     bgcolor: 'action.selected',
@@ -100,7 +73,7 @@ function AppDrawer() {
                     color: isActive ? 'primary.main' : 'inherit',
                   }}
                 >
-                  {item.icon}
+                  <Icon />
                 </ListItemIcon>
                 <ListItemText primary={item.label} />
               </ListItemButton>
