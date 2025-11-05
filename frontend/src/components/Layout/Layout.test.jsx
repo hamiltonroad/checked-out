@@ -169,9 +169,9 @@ describe('Layout', () => {
       </BrowserRouter>
     );
 
-    // Check for MenuBookIcon by its data-testid
-    const icon = screen.getByTestId('MenuBookIcon');
-    expect(icon).toBeInTheDocument();
+    // Check for MenuBookIcon by its data-testid (now appears twice: AppBar + drawer)
+    const icons = screen.getAllByTestId('MenuBookIcon');
+    expect(icons.length).toBeGreaterThanOrEqual(1);
   });
 
   it('uses sticky positioning for AppBar', () => {
