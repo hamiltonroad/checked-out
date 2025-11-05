@@ -400,6 +400,4 @@ function BooksPage() {
   );
 }
 
-BooksPage.propTypes = {};
-
 export default BooksPage;

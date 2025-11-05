@@ -13,6 +13,13 @@ function BookCard({ book, onClick }) {
     onClick(book.id);
   };
 
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleClick();
+    }
+  };
+
   // Format authors as comma-separated string
   const authorsText = book.authors
     .map((author) => `${author.first_name} ${author.last_name}`)
@@ -21,11 +28,24 @@ function BookCard({ book, onClick }) {
   return (
     <Card
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`View details for ${book.title}`}
       sx={{
         width: '100%',
         cursor: 'pointer',
         transition: 'box-shadow 0.3s ease-in-out',
+        '@media (prefers-reduced-motion: reduce)': {
+          transition: 'none',
+        },
         '&:hover': {
+          boxShadow: 3,
+        },
+        '&:focus-visible': {
+          outline: '2px solid',
+          outlineColor: 'primary.main',
+          outlineOffset: '2px',
           boxShadow: 3,
         },
         boxShadow: 1,

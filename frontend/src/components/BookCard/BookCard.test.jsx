@@ -57,7 +57,7 @@ describe('BookCard', () => {
     const user = userEvent.setup();
     render(<BookCard book={mockBook} onClick={mockOnClick} />);
 
-    const card = screen.getByText('The Great Gatsby').closest('.MuiCard-root');
+    const card = screen.getByRole('button', { name: /view details for the great gatsby/i });
     await user.click(card);
 
     expect(mockOnClick).toHaveBeenCalledTimes(1);
@@ -89,5 +89,45 @@ describe('BookCard', () => {
     rerender(<BookCard book={overdueBook} onClick={mockOnClick} />);
 
     expect(screen.getByText('Overdue')).toBeInTheDocument();
+  });
+
+  // Keyboard accessibility tests
+  it('should activate card when Enter key is pressed', async () => {
+    const user = userEvent.setup();
+    render(<BookCard book={mockBook} onClick={mockOnClick} />);
+
+    const card = screen.getByRole('button', { name: /view details for the great gatsby/i });
+    card.focus();
+    await user.keyboard('{Enter}');
+
+    expect(mockOnClick).toHaveBeenCalledTimes(1);
+    expect(mockOnClick).toHaveBeenCalledWith(1);
+  });
+
+  it('should activate card when Space key is pressed', async () => {
+    const user = userEvent.setup();
+    render(<BookCard book={mockBook} onClick={mockOnClick} />);
+
+    const card = screen.getByRole('button', { name: /view details for the great gatsby/i });
+    card.focus();
+    await user.keyboard(' ');
+
+    expect(mockOnClick).toHaveBeenCalledTimes(1);
+    expect(mockOnClick).toHaveBeenCalledWith(1);
+  });
+
+  it('should be keyboard focusable with tabIndex', () => {
+    render(<BookCard book={mockBook} onClick={mockOnClick} />);
+
+    const card = screen.getByRole('button');
+    expect(card).toHaveAttribute('tabIndex', '0');
+  });
+
+  it('should have accessible role and aria-label', () => {
+    render(<BookCard book={mockBook} onClick={mockOnClick} />);
+
+    const card = screen.getByRole('button', { name: /view details for the great gatsby/i });
+    expect(card).toHaveAttribute('role', 'button');
+    expect(card).toHaveAttribute('aria-label', 'View details for The Great Gatsby');
   });
 });
