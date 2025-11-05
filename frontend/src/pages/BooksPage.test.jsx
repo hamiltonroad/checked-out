@@ -8,9 +8,28 @@ import { useBook } from '../hooks/useBook';
 vi.mock('../hooks/useBooks');
 vi.mock('../hooks/useBook');
 
+// Mock useMediaQuery and useTheme from Material-UI
+const mockUseMediaQuery = vi.fn();
+const mockUseTheme = vi.fn(() => ({
+  breakpoints: {
+    down: () => 'md',
+  },
+}));
+
+vi.mock('@mui/material', async () => {
+  const actual = await vi.importActual('@mui/material');
+  return {
+    ...actual,
+    useMediaQuery: () => mockUseMediaQuery(),
+    useTheme: () => mockUseTheme(),
+  };
+});
+
 describe('BooksPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default to desktop view (not mobile)
+    mockUseMediaQuery.mockReturnValue(false);
     // Mock useBook hook to return idle state (modal closed by default)
     useBook.mockReturnValue({
       data: undefined,
@@ -715,6 +734,162 @@ describe('BooksPage', () => {
         },
         { timeout: 500 }
       );
+    });
+  });
+
+  describe('Responsive Rendering', () => {
+    const mockBooksData = {
+      status: 'success',
+      data: [
+        {
+          id: 1,
+          title: 'The Great Gatsby',
+          authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }],
+          status: 'available',
+        },
+        {
+          id: 2,
+          title: '1984',
+          authors: [{ first_name: 'George', last_name: 'Orwell' }],
+          status: 'checked_out',
+        },
+      ],
+    };
+
+    it('should display table view on desktop (not mobile)', () => {
+      mockUseMediaQuery.mockReturnValue(false); // Desktop
+      useBooks.mockReturnValue({
+        data: mockBooksData,
+        isLoading: false,
+        error: null,
+      });
+
+      const { container } = render(<BooksPage />);
+
+      // Check for table elements
+      expect(screen.getByRole('table')).toBeInTheDocument();
+      expect(screen.getByText('Title')).toBeInTheDocument();
+      expect(screen.getByText('Author(s)')).toBeInTheDocument();
+      // "Availability" appears in both table header and filter label, check table header specifically
+      const tableHeaders = container.querySelectorAll('th');
+      const availabilityHeader = Array.from(tableHeaders).find((th) =>
+        th.textContent.includes('Availability')
+      );
+      expect(availabilityHeader).toBeInTheDocument();
+
+      // Check that books are displayed in table
+      expect(screen.getByText('The Great Gatsby')).toBeInTheDocument();
+      expect(screen.getByText('1984')).toBeInTheDocument();
+
+      // Should not have BookCard elements
+      const cards = container.querySelectorAll('.MuiCard-root');
+      expect(cards.length).toBe(0);
+    });
+
+    it('should display card view on mobile', () => {
+      mockUseMediaQuery.mockReturnValue(true); // Mobile
+      useBooks.mockReturnValue({
+        data: mockBooksData,
+        isLoading: false,
+        error: null,
+      });
+
+      const { container } = render(<BooksPage />);
+
+      // Should have Stack with cards
+      const stack = container.querySelector('.MuiStack-root');
+      expect(stack).toBeInTheDocument();
+
+      // Should have BookCard elements
+      const cards = container.querySelectorAll('.MuiCard-root');
+      expect(cards.length).toBe(2); // One card per book
+
+      // Check that books are displayed in cards
+      expect(screen.getByText('The Great Gatsby')).toBeInTheDocument();
+      expect(screen.getByText('1984')).toBeInTheDocument();
+
+      // Should not have table
+      expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    });
+
+    it('should open modal when clicking book card on mobile', async () => {
+      const user = userEvent.setup();
+      mockUseMediaQuery.mockReturnValue(true); // Mobile
+      useBooks.mockReturnValue({
+        data: mockBooksData,
+        isLoading: false,
+        error: null,
+      });
+
+      const { container } = render(<BooksPage />);
+
+      // Find and click the first book card
+      const firstCard = container.querySelector('.MuiCard-root');
+      expect(firstCard).toBeInTheDocument();
+
+      await user.click(firstCard);
+
+      // Modal should open - check for dialog
+      await waitFor(() => {
+        const dialog = screen.queryByRole('dialog');
+        expect(dialog).toBeInTheDocument();
+      });
+    });
+
+    it('should work with search in mobile view', async () => {
+      const user = userEvent.setup();
+      mockUseMediaQuery.mockReturnValue(true); // Mobile
+      useBooks.mockReturnValue({
+        data: mockBooksData,
+        isLoading: false,
+        error: null,
+      });
+
+      const { container } = render(<BooksPage />);
+
+      // Type in search
+      const searchInput = screen.getByLabelText('Search Books');
+      await user.type(searchInput, 'Gatsby');
+
+      // Wait for debounce
+      await waitFor(
+        () => {
+          // Should show only 1 card (Gatsby)
+          const cards = container.querySelectorAll('.MuiCard-root');
+          expect(cards.length).toBe(1);
+          expect(screen.getByText('The Great Gatsby')).toBeInTheDocument();
+          expect(screen.queryByText('1984')).not.toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+    });
+
+    it('should work with availability filter in mobile view', async () => {
+      const user = userEvent.setup();
+      mockUseMediaQuery.mockReturnValue(true); // Mobile
+      useBooks.mockReturnValue({
+        data: mockBooksData,
+        isLoading: false,
+        error: null,
+      });
+
+      const { container } = render(<BooksPage />);
+
+      // Open availability filter and select "Available"
+      const filterSelect = screen.getByLabelText('Availability');
+      await user.click(filterSelect);
+
+      // Use getByRole with name option to find the menu item
+      const availableOption = await screen.findByRole('option', { name: 'Available' });
+      await user.click(availableOption);
+
+      await waitFor(() => {
+        // Should show only 1 card (available book)
+        const cards = container.querySelectorAll('.MuiCard-root');
+        expect(cards.length).toBe(1);
+        expect(screen.getByText('The Great Gatsby')).toBeInTheDocument();
+        expect(screen.queryByText('1984')).not.toBeInTheDocument();
+      });
     });
   });
 });

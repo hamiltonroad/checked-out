@@ -23,6 +23,9 @@ import {
   Chip,
   Button,
   Fade,
+  Stack,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -34,6 +37,7 @@ import { useBookSearch } from '../hooks/useBookSearch';
 import BookDetailModal from '../components/BookDetailModal';
 import StatusChip from '../components/StatusChip';
 import EmptyState from '../components/EmptyState';
+import BookCard from '../components/BookCard';
 
 // Availability filter constants
 const AVAILABILITY_FILTERS = {
@@ -59,6 +63,8 @@ function BooksPage() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [availabilityFilter, setAvailabilityFilter] = useState(AVAILABILITY_FILTERS.ALL);
   const searchInputRef = useRef(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleRowClick = (bookId) => {
     setSelectedBookId(bookId);
@@ -329,7 +335,7 @@ function BooksPage() {
             </Fade>
           );
         })()}
-      {filteredBooks.length > 0 && (
+      {filteredBooks.length > 0 && !isMobile && (
         <Fade in={!isLoading} timeout={500}>
           <TableContainer component={Paper}>
             <Table>
@@ -380,11 +386,18 @@ function BooksPage() {
           </TableContainer>
         </Fade>
       )}
+      {filteredBooks.length > 0 && isMobile && (
+        <Fade in={!isLoading} timeout={500}>
+          <Stack spacing={2}>
+            {filteredBooks.map((book) => (
+              <BookCard key={book.id} book={book} onClick={handleRowClick} />
+            ))}
+          </Stack>
+        </Fade>
+      )}
       <BookDetailModal open={modalOpen} onClose={handleModalClose} bookId={selectedBookId} />
     </Container>
   );
 }
-
-BooksPage.propTypes = {};
 
 export default BooksPage;
