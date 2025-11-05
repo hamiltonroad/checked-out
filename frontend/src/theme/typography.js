@@ -319,9 +319,9 @@ const typography = {
 
   body1: {
     fontFamily,
-    fontSize: {
-      xs: 14, // Mobile: smaller for readability on small screens
-      sm: 16, // Tablet+: full MD3 spec size
+    fontSize: 14, // Mobile: smaller for readability on small screens
+    '@media (min-width:600px)': {
+      fontSize: 16, // Tablet+: full MD3 spec size
     },
     lineHeight: 24 / 16, // 1.5
     fontWeight: 400,
@@ -330,9 +330,9 @@ const typography = {
 
   body2: {
     fontFamily,
-    fontSize: {
-      xs: 12, // Mobile: smaller for readability on small screens
-      sm: 14, // Tablet+: full MD3 spec size
+    fontSize: 12, // Mobile: smaller for readability on small screens
+    '@media (min-width:600px)': {
+      fontSize: 14, // Tablet+: full MD3 spec size
     },
     lineHeight: 20 / 14, // 1.43
     fontWeight: 400,
