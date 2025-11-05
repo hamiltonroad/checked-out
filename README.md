@@ -1,6 +1,85 @@
 # Checked Out
 
-A 3-tier web application for teaching purposes, demonstrating full-stack development with modern technologies.
+A working 3-tier library management application built as a teaching tool for full-stack web development. This application was developed in approximately 8 hours to create a functional foundation demonstrating modern web technologies, best practices, and architectural patterns.
+
+## About This Project
+
+**Purpose**: This is an intentionally simplified but fully functional application designed for teaching and learning. It provides a real-world codebase where students and developers can:
+- Study modern full-stack architecture patterns
+- Practice adding new features to an existing codebase
+- Learn from working code that follows industry standards
+- Build upon a solid foundation with clear opportunities for extension
+
+**Status**: The application currently implements core book browsing functionality with a complete backend infrastructure. Many features are intentionally left unimplemented to provide learning opportunities for students and developers.
+
+## Current Features
+
+### What Works Now
+- **Browse Books**: View all books in a responsive interface (table on desktop, cards on mobile)
+- **Search**: Real-time search across book titles and author names with debouncing
+- **Filter**: Filter books by availability status (All Books, Available, Checked Out)
+- **Book Details**: View detailed information about each book including authors, ISBN, publisher, publication year, and genre
+- **Availability Tracking**: Automatic calculation of book availability based on physical and Kindle copies and checkout records
+- **Responsive Design**: Mobile-optimized with bottom navigation and card layouts
+- **Theme Toggle**: Switch between light and dark modes
+- **Keyboard Navigation**: Search shortcuts (Cmd/Ctrl+K) and accessible navigation
+
+### Database & Backend
+- Complete relational database schema with 5 models:
+  - **Books**: Core metadata (title, ISBN, publisher, publication year, genre)
+  - **Authors**: Many-to-many relationships with books
+  - **Copies**: Physical and Kindle format tracking
+  - **Patrons**: Library cardholder information
+  - **Checkouts**: Transaction history with checkout and return dates
+- Two working API endpoints: `GET /api/v1/books` and `GET /api/v1/books/:id`
+- Business logic for calculating book availability from copy and checkout records
+- Seed data with 30+ books, authors, and sample checkout records
+
+### What's Not Implemented Yet
+
+The following features are **intentionally disabled or incomplete** to provide learning opportunities:
+
+- **Patron Management**: Database models exist but no UI or API endpoints
+- **Reports Dashboard**: Placeholder in navigation only
+- **Book Management**: No create, update, or delete functionality
+- **Checkout/Return Process**: Models exist but no workflow implementation
+- **Authentication**: Passport.js and JWT configured but not implemented
+- **Authorization**: No role-based access control
+- **Advanced Filtering**: Backend supports genre filtering but frontend doesn't use it
+- **Pagination**: All books loaded at once (limited to 100)
+- **Image Upload**: Books show placeholder icons only
+- **Overdue Tracking**: No overdue status calculation or notifications
+
+## Learning Opportunities
+
+This codebase provides excellent opportunities to:
+
+1. **Add New Features**:
+   - Implement patron management pages and API endpoints
+   - Build the book checkout/return workflow
+   - Add authentication and user accounts
+   - Create a reports dashboard with analytics
+   - Implement book management (add, edit, delete)
+
+2. **Fix and Improve Tests**:
+   - Add missing unit tests for services and controllers
+   - Write integration tests for API endpoints
+   - Add frontend component tests
+   - Increase test coverage
+
+3. **Enhance Existing Features**:
+   - Add server-side pagination for better performance
+   - Implement book cover image uploads
+   - Add overdue book tracking and notifications
+   - Create advanced search with multiple filters
+   - Add data export functionality
+
+4. **Code Quality**:
+   - Refactor duplicated code
+   - Improve error handling
+   - Add API documentation with Swagger/OpenAPI
+   - Optimize database queries
+   - Add performance monitoring
 
 ## Tech Stack
 
@@ -215,11 +294,45 @@ npm run format
 
 ## API Documentation
 
-API endpoints will be documented as they are developed.
-
 Base URL (development): `http://localhost:3000/api`
 
-Health check: `GET /health`
+### Available Endpoints
+
+**Health Check**
+```
+GET /health
+```
+Returns server health status.
+
+**Books**
+```
+GET /api/v1/books
+```
+Get all books with authors and availability status.
+
+Query Parameters:
+- `genre` (optional): Filter by genre
+- `limit` (optional, default: 100): Maximum number of results
+- `offset` (optional, default: 0): Number of records to skip
+
+Response: Array of book objects with authors array and calculated `status` field (either "available" or "checked_out").
+
+```
+GET /api/v1/books/:id
+```
+Get a single book by ID with full details.
+
+Response: Book object with authors array and availability status.
+
+### Planned Endpoints (Not Implemented)
+- `POST /api/v1/books` - Create a new book
+- `PUT /api/v1/books/:id` - Update a book
+- `DELETE /api/v1/books/:id` - Delete a book
+- `GET /api/v1/patrons` - List patrons
+- `POST /api/v1/checkouts` - Check out a book
+- `PUT /api/v1/checkouts/:id/return` - Return a book
+- `POST /api/v1/auth/login` - Authenticate user
+- `POST /api/v1/auth/register` - Register new user
 
 ## Contributing
 
