@@ -13,6 +13,19 @@
  * - 2px negative offset for table rows (keeps indicator within row bounds)
  * - Smooth transitions with motion tokens (respects prefers-reduced-motion)
  *
+ * Components Covered:
+ * - MuiButton, MuiIconButton (3px outline)
+ * - MuiTableRow (2px outline, inside bounds)
+ * - MuiOutlinedInput (powers TextField and Select)
+ * - MuiMenuItem (dropdown navigation)
+ * - MuiChip (filter chips)
+ * - MuiDialog (modal focus)
+ *
+ * Not Yet Needed (verified 2025-11-04):
+ * - MuiLink - No Link components in current codebase
+ * - MuiListItem - No clickable ListItems in current codebase
+ * (Add these overrides if/when these components are used for navigation)
+ *
  * WCAG 2.1 AA Compliance:
  * - Focus indicators have 3:1 minimum contrast ratio with adjacent colors
  * - Primary color provides sufficient contrast in both light and dark modes
