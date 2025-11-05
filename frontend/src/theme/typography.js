@@ -319,16 +319,22 @@ const typography = {
 
   body1: {
     fontFamily,
-    fontSize: 16,
-    lineHeight: 24 / 16,
+    fontSize: 14, // Mobile: smaller for readability on small screens
+    '@media (min-width:600px)': {
+      fontSize: 16, // Tablet+: full MD3 spec size
+    },
+    lineHeight: 24 / 16, // 1.5
     fontWeight: 400,
     letterSpacing: '0.5px',
   },
 
   body2: {
     fontFamily,
-    fontSize: 14,
-    lineHeight: 20 / 14,
+    fontSize: 12, // Mobile: smaller for readability on small screens
+    '@media (min-width:600px)': {
+      fontSize: 14, // Tablet+: full MD3 spec size
+    },
+    lineHeight: 20 / 14, // 1.43
     fontWeight: 400,
     letterSpacing: '0.25px',
   },

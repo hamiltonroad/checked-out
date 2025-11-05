@@ -1,8 +1,9 @@
 /**
- * Material Design 3 Component Overrides - Focus Indicators
+ * Material Design 3 Component Overrides - Focus Indicators & Touch Targets
  *
- * This file defines global focus indicators for all interactive Material UI components
- * following Material Design 3 accessibility guidelines and WCAG 2.1 AA standards.
+ * This file defines global focus indicators and touch target optimizations for all
+ * interactive Material UI components following Material Design 3 accessibility
+ * guidelines and WCAG 2.1 AA standards.
  *
  * Focus Indicator System:
  * - Uses :focus-visible pseudo-class (keyboard navigation only, not mouse clicks)
@@ -13,8 +14,14 @@
  * - 2px negative offset for table rows (keeps indicator within row bounds)
  * - Smooth transitions with motion tokens (respects prefers-reduced-motion)
  *
+ * Touch Target Optimization (Mobile UX):
+ * - MuiButton: 48px minimum height, 16px horizontal padding
+ * - MuiIconButton: 48x48px base size, 56x56px on touch devices (@media pointer: coarse)
+ * - Meets WCAG 2.1 AA requirement of 44x44px minimum touch targets
+ * - Improves tap accuracy and reduces misclicks on mobile devices
+ *
  * Components Covered:
- * - MuiButton, MuiIconButton (3px outline)
+ * - MuiButton, MuiIconButton (3px outline + touch targets)
  * - MuiTableRow (2px outline, inside bounds)
  * - MuiOutlinedInput (powers TextField and Select)
  * - MuiMenuItem (dropdown navigation)
@@ -30,6 +37,7 @@
  * - Focus indicators have 3:1 minimum contrast ratio with adjacent colors
  * - Primary color provides sufficient contrast in both light and dark modes
  * - Focus-visible ensures keyboard users can always see focused element
+ * - Touch targets meet 44x44px minimum size requirement
  *
  * Usage:
  * This file is automatically applied to all MUI components via theme integration.
@@ -58,15 +66,21 @@
  */
 export const components = {
   /**
-   * Button focus indicators
-   * - 3px solid outline for high visibility
-   * - 2px offset creates space between button and outline
+   * Button focus indicators and touch targets
+   * - 3px solid outline for high visibility (focus)
+   * - 2px offset creates space between button and outline (focus)
+   * - 48px minimum height for adequate touch targets (WCAG 2.1 AA)
+   * - 16px horizontal padding for comfortable clickable area
    * - Smooth transition for polished appearance
    * - Works with all button variants (contained, outlined, text)
    */
   MuiButton: {
     styleOverrides: {
       root: ({ theme }) => ({
+        // Touch target optimization - WCAG 2.1 AA requires minimum 44x44px
+        minHeight: 48,
+        paddingLeft: 16,
+        paddingRight: 16,
         // Only show focus on keyboard navigation, not mouse clicks
         '&:focus-visible': {
           outline: `3px solid ${theme.palette.primary.main}`,
@@ -85,14 +99,24 @@ export const components = {
   },
 
   /**
-   * IconButton focus indicators
+   * IconButton focus indicators and touch targets
    * - Same styling as regular buttons for consistency
-   * - 3px solid outline, 2px offset
+   * - 3px solid outline, 2px offset (focus)
+   * - 48px minimum width/height for adequate touch targets (WCAG 2.1 AA)
+   * - 56px on touch devices for easier tapping (pointer: coarse)
    * - Essential for buttons without text labels (accessibility critical)
    */
   MuiIconButton: {
     styleOverrides: {
       root: ({ theme }) => ({
+        // Touch target optimization - WCAG 2.1 AA requires minimum 44x44px
+        minWidth: 48,
+        minHeight: 48,
+        // Increase size on touch devices (phones, tablets) for better UX
+        '@media (pointer: coarse)': {
+          minWidth: 56,
+          minHeight: 56,
+        },
         '&:focus-visible': {
           outline: `3px solid ${theme.palette.primary.main}`,
           outlineOffset: '2px',

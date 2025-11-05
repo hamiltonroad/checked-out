@@ -78,7 +78,7 @@ export const getTheme = (mode = 'light') => {
     motion,
 
     // Component style overrides
-    // Global focus indicators and component customizations
+    // Global focus indicators, touch targets, and component customizations
     // following Material Design 3 specifications and WCAG 2.1 AA accessibility
     components,
   });
