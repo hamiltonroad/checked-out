@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
-import { Card, CardContent, Typography, Box } from '@mui/material';
+import { Card, CardContent, Typography, Box, Stack } from '@mui/material';
 import StatusChip from '../StatusChip';
 import ProfanityWarning from '../ProfanityWarning';
+import ReviewStars from '../ReviewStars/ReviewStars';
 
 /**
  * BookCard displays book information in a card format for mobile views
@@ -62,6 +63,18 @@ function BookCard({ book, onClick }) {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
           {authorsText}
         </Typography>
+        {book.averageRating !== undefined && book.reviewCount !== undefined && (
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+            <ReviewStars rating={book.averageRating} size="small" readOnly />
+            <Typography variant="caption" color="text.secondary">
+              {book.reviewCount === 0
+                ? 'No reviews yet'
+                : book.reviewCount === 1
+                  ? '(1 review)'
+                  : `(${book.reviewCount} reviews)`}
+            </Typography>
+          </Stack>
+        )}
         <Box>
           <StatusChip status={book.status} size="small" />
         </Box>
@@ -82,6 +95,8 @@ BookCard.propTypes = {
     ).isRequired,
     status: PropTypes.oneOf(['available', 'checked_out', 'overdue']).isRequired,
     has_profanity: PropTypes.bool,
+    averageRating: PropTypes.number,
+    reviewCount: PropTypes.number,
   }).isRequired,
   onClick: PropTypes.func.isRequired,
 };

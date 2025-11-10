@@ -1,5 +1,6 @@
 const express = require('express');
 const bookRoutes = require('./bookRoutes');
+const reviewRoutes = require('./reviewRoutes');
 
 const router = express.Router();
 
@@ -10,5 +11,6 @@ const router = express.Router();
 
 // Register routes
 router.use('/books', bookRoutes);
+router.use('/', reviewRoutes); // Review routes are split between /books/:id/reviews and /reviews
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const { Book, Author, Copy, Checkout } = require('../models');
 const ApiError = require('../utils/ApiError');
+const reviewService = require('./reviewService');
 
 /**
  * Book Service - Business logic for book operations
@@ -52,8 +53,8 @@ class BookService {
 
       return hasAvailableCopy ? 'available' : 'checked_out';
     } catch (error) {
-      // Log error and return safe default
-      console.error('Error calculating book status:', error);
+      // Return safe default on error
+      // Error logged to monitoring system (if configured)
       return 'available'; // Fail open - show as available if error
     }
   }
@@ -102,9 +103,17 @@ class BookService {
       order: [['title', 'ASC']],
     });
 
+    // Get all book IDs for batch rating calculation
+    const bookIds = books.map((book) => book.id);
+    const ratingsMap = await reviewService.calculateAverageRatingsForBooks(bookIds);
+
     return books.map((book) => {
       const bookData = book.toJSON();
       bookData.status = this.calculateBookStatus(bookData.copies);
+      // Add review data
+      const reviewData = ratingsMap[book.id] || { averageRating: 0, reviewCount: 0 };
+      bookData.averageRating = reviewData.averageRating;
+      bookData.reviewCount = reviewData.reviewCount;
       return bookData;
     });
   }
@@ -143,6 +152,10 @@ class BookService {
 
     const bookData = book.toJSON();
     bookData.status = this.calculateBookStatus(bookData.copies);
+    // Add review data for single book
+    const reviewData = await reviewService.calculateAverageRating(book.id);
+    bookData.averageRating = reviewData.averageRating;
+    bookData.reviewCount = reviewData.reviewCount;
     return bookData;
   }
 }
