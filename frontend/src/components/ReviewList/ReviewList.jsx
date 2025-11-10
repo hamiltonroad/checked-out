@@ -112,7 +112,7 @@ function ReviewList({ reviews = [], currentPatronId, onEdit, onDelete, loading =
                       {patronName}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {formatDate(review.created_at)}
+                      {formatDate(review.createdAt)}
                     </Typography>
                   </Box>
                   {isOwner && (
@@ -134,9 +134,9 @@ function ReviewList({ reviews = [], currentPatronId, onEdit, onDelete, loading =
                   </Typography>
                 )}
 
-                {review.updated_at && review.updated_at !== review.created_at && (
+                {review.updatedAt && review.updatedAt !== review.createdAt && (
                   <Typography variant="caption" color="text.secondary" fontStyle="italic">
-                    Edited on {formatDate(review.updated_at)}
+                    Edited on {formatDate(review.updatedAt)}
                   </Typography>
                 )}
               </Stack>
@@ -178,8 +178,8 @@ ReviewList.propTypes = {
       patron_id: PropTypes.number.isRequired,
       rating: PropTypes.number.isRequired,
       review_text: PropTypes.string,
-      created_at: PropTypes.string.isRequired,
-      updated_at: PropTypes.string,
+      createdAt: PropTypes.string.isRequired,
+      updatedAt: PropTypes.string,
       patron: PropTypes.shape({
         first_name: PropTypes.string.isRequired,
         last_name: PropTypes.string.isRequired,
