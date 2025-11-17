@@ -52,18 +52,18 @@ function Layout() {
       >
         <Toolbar>
           <MenuBookIcon sx={{ mr: 2, fontSize: 28 }} />
-          <Box sx={{ flexGrow: 1 }}>
+          <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'baseline', gap: 1 }}>
             <Typography variant="headlineSmall" component="h1">
               Checked Out
             </Typography>
             <Typography
               variant="labelMedium"
               sx={{
-                display: { xs: 'none', sm: 'block' },
+                display: { xs: 'none', sm: 'inline' },
                 opacity: 0.7,
               }}
             >
-              Library Management
+              • Library Management
             </Typography>
           </Box>
           <Tooltip title="Toggle light/dark mode">
