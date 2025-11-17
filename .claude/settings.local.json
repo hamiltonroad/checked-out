@@ -57,7 +57,9 @@
       "Bash(bash:*)",
       "Bash(test:*)",
       "Bash(gh issue comment:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npx sequelize-cli migration:create:*)",
+      "Bash(timeout 20 npm run dev)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Ratings API</title>
+</head>
+<body>
+    <h1>Testing Ratings API</h1>
+    <button onclick="testAPI()">Test Book 185 Ratings</button>
+    <pre id="result"></pre>
+
+    <script>
+    async function testAPI() {
+        const resultDiv = document.getElementById('result');
+        try {
+            // Test direct API call
+            const response = await fetch('http://localhost:3000/api/v1/books/185/ratings');
+            const data = await response.json();
+
+            resultDiv.textContent = JSON.stringify(data, null, 2);
+            console.log('API Response:', data);
+
+            // Check if we got the expected structure
+            if (data.success && data.data && data.data.ratings) {
+                alert(`Success! Found ${data.data.ratings.length} ratings`);
+            } else {
+                alert('Unexpected response structure');
+            }
+        } catch (error) {
+            resultDiv.textContent = 'Error: ' + error.message;
+            console.error('Error:', error);
+        }
+    }
+
+    // Test on load
+    window.onload = testAPI;
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   Dialog,
@@ -16,13 +16,20 @@ import {
   IconButton,
   Divider,
   Stack,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import StarIcon from '@mui/icons-material/Star';
+import RateReviewIcon from '@mui/icons-material/RateReview';
 import { useBook } from '../../hooks/useBook';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import StatusChip from '../StatusChip';
 import SkeletonField from '../SkeletonField';
 import ProfanityWarning from '../ProfanityWarning';
+import { RatingDisplay, RatingInput, ReviewsList, RatingStats } from '../Rating';
+import ratingService from '../../services/ratingService';
 
 /**
  * Transition component for slide-up animation
@@ -64,9 +71,52 @@ DetailField.propTypes = {
 function BookDetailModal({ open, onClose, bookId }) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  const { data, isLoading, error } = useBook(bookId);
+  const queryClient = useQueryClient();
+  const [tabValue, setTabValue] = useState(0);
+  const [showRatingInput, setShowRatingInput] = useState(false);
+  const [reviewPage, setReviewPage] = useState(1);
 
+  const { data, isLoading, error } = useBook(bookId);
   const book = data?.data;
+
+  // Fetch ratings and reviews
+  const { data: ratingsData, isLoading: ratingsLoading, error: ratingsError } = useQuery({
+    queryKey: ['bookRatings', bookId, reviewPage],
+    queryFn: async () => {
+      const result = await ratingService.getBookRatings(bookId, {
+        limit: 10,
+        offset: (reviewPage - 1) * 10
+      });
+      return result;
+    },
+    enabled: !!bookId && open && tabValue === 1,
+  });
+
+  // Fetch rating stats
+  const { data: statsData } = useQuery({
+    queryKey: ['bookRatingStats', bookId],
+    queryFn: () => ratingService.getBookRatingStats(bookId),
+    enabled: !!bookId && open,
+  });
+
+  // Submit rating mutation
+  const submitRatingMutation = useMutation({
+    mutationFn: ratingService.submitRating,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['bookRatings', bookId]);
+      queryClient.invalidateQueries(['bookRatingStats', bookId]);
+      queryClient.invalidateQueries(['books']); // Refresh book list
+      setShowRatingInput(false);
+    },
+  });
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  const handlePageChange = (event, page) => {
+    setReviewPage(page);
+  };
 
   return (
     <Dialog
@@ -95,6 +145,11 @@ function BookDetailModal({ open, onClose, bookId }) {
         </IconButton>
       </DialogTitle>
       <Divider />
+      <Tabs value={tabValue} onChange={handleTabChange} sx={{ px: 2 }}>
+        <Tab label="Details" />
+        <Tab label="Reviews" />
+      </Tabs>
+      <Divider />
       <DialogContent>
         {isLoading && (
           <Box sx={{ pt: 1 }}>
@@ -115,7 +170,8 @@ function BookDetailModal({ open, onClose, bookId }) {
           <Alert severity="error">Error loading book: {error.message || 'Unknown error'}</Alert>
         )}
 
-        {book && (
+        {/* Details Tab */}
+        {tabValue === 0 && book && (
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ pt: 1 }}>
             <Box
               sx={{
@@ -142,6 +198,15 @@ function BookDetailModal({ open, onClose, bookId }) {
                 <Typography variant="h5">{book.title}</Typography>
                 {book.has_profanity && <ProfanityWarning size="medium" />}
               </Box>
+
+              <DetailField label="Rating">
+                <RatingDisplay
+                  rating={book.average_rating || statsData?.average_rating}
+                  totalRatings={book.total_ratings || statsData?.total_ratings}
+                  size="medium"
+                  showCount
+                />
+              </DetailField>
 
               <DetailField
                 label="Author(s)"
@@ -170,9 +235,54 @@ function BookDetailModal({ open, onClose, bookId }) {
             </Box>
           </Stack>
         )}
+
+        {/* Reviews Tab */}
+        {tabValue === 1 && book && (
+          <Box sx={{ pt: 2 }}>
+            {ratingsError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                Error loading reviews: {ratingsError.message || 'Unknown error'}
+              </Alert>
+            )}
+
+            {statsData && (
+              <Box sx={{ mb: 3 }}>
+                <RatingStats stats={statsData} />
+              </Box>
+            )}
+
+            <ReviewsList
+              reviews={ratingsData?.ratings}
+              isLoading={ratingsLoading}
+              totalReviews={ratingsData?.stats?.total_ratings || 0}
+              currentPage={reviewPage}
+              onPageChange={handlePageChange}
+            />
+          </Box>
+        )}
+
+        {/* Rating Input Dialog */}
+        {showRatingInput && book && (
+          <RatingInput
+            bookId={bookId}
+            bookTitle={book.title}
+            existingRating={null} // TODO: Fetch user's existing rating
+            onSubmit={submitRatingMutation.mutate}
+            onClose={() => setShowRatingInput(false)}
+          />
+        )}
       </DialogContent>
       <Divider />
       <DialogActions>
+        {book && (
+          <Button
+            onClick={() => setShowRatingInput(true)}
+            startIcon={<StarIcon />}
+            variant="outlined"
+          >
+            Rate this Book
+          </Button>
+        )}
         <Button onClick={onClose}>Close</Button>
       </DialogActions>
     </Dialog>

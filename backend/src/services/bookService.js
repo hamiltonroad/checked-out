@@ -1,4 +1,4 @@
-const { Book, Author, Copy, Checkout } = require('../models');
+const { Book, Author, Copy, Checkout, Rating, sequelize } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -82,6 +82,26 @@ class BookService {
       where,
       limit: parseInt(limit, 10),
       offset: parseInt(offset, 10),
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.book_id = Book.id
+            )`),
+            'average_rating',
+          ],
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM ratings
+              WHERE ratings.book_id = Book.id
+            )`),
+            'total_ratings',
+          ],
+        ],
+      },
       include: [
         {
           model: Author,
@@ -105,6 +125,10 @@ class BookService {
     return books.map((book) => {
       const bookData = book.toJSON();
       bookData.status = this.calculateBookStatus(bookData.copies);
+      bookData.average_rating = bookData.average_rating
+        ? parseFloat(bookData.average_rating).toFixed(1)
+        : null;
+      bookData.total_ratings = parseInt(bookData.total_ratings || 0, 10);
       return bookData;
     });
   }
@@ -118,6 +142,26 @@ class BookService {
   // eslint-disable-next-line class-methods-use-this
   async getBookById(id) {
     const book = await Book.findByPk(id, {
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.book_id = Book.id
+            )`),
+            'average_rating',
+          ],
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM ratings
+              WHERE ratings.book_id = Book.id
+            )`),
+            'total_ratings',
+          ],
+        ],
+      },
       include: [
         {
           model: Author,
@@ -143,6 +187,10 @@ class BookService {
 
     const bookData = book.toJSON();
     bookData.status = this.calculateBookStatus(bookData.copies);
+    bookData.average_rating = bookData.average_rating
+      ? parseFloat(bookData.average_rating).toFixed(1)
+      : null;
+    bookData.total_ratings = parseInt(bookData.total_ratings || 0, 10);
     return bookData;
   }
 }
