@@ -22,9 +22,7 @@ class RatingController {
         reviewText,
       });
 
-      res.status(201).json(
-        ApiResponse.success(result, 'Rating submitted successfully')
-      );
+      res.status(201).json(ApiResponse.success(result, 'Rating submitted successfully'));
     } catch (error) {
       next(error);
     }
@@ -120,11 +118,7 @@ class RatingController {
         throw new ApiError(401, 'Authentication required');
       }
 
-      const result = await ratingService.deleteRating(
-        bookId,
-        patronId,
-        patronId
-      );
+      const result = await ratingService.deleteRating(bookId, patronId, patronId);
 
       res.json(ApiResponse.success(result));
     } catch (error) {
@@ -137,12 +131,7 @@ class RatingController {
    */
   async getTopRatedBooks(req, res, next) {
     try {
-      const {
-        limit = 20,
-        offset = 0,
-        minRating = null,
-        sortBy = 'average_rating',
-      } = req.query;
+      const { limit = 20, offset = 0, minRating = null, sortBy = 'average_rating' } = req.query;
 
       const result = await ratingService.getBooksWithRatings({
         limit: parseInt(limit, 10),

@@ -1,6 +1,7 @@
 const express = require('express');
 const bookRoutes = require('./bookRoutes');
 const ratingRoutes = require('./ratingRoutes');
+const checkoutRoutes = require('./checkoutRoutes');
 
 const router = express.Router();
 
@@ -9,8 +10,9 @@ const router = express.Router();
  * Base path: /api/v1
  */
 
-// Register routes
+// Register routes (specific routes first, catch-all routes last)
 router.use('/books', bookRoutes);
-router.use('/', ratingRoutes);
+router.use('/checkouts', checkoutRoutes);
+router.use('/', ratingRoutes); // Catch-all for rating routes
 
 module.exports = router;
