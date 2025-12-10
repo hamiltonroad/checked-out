@@ -59,6 +59,11 @@ module.exports = (sequelize) => {
       foreignKey: 'book_id',
       as: 'copies',
     });
+
+    Book.hasMany(models.Rating, {
+      foreignKey: 'book_id',
+      as: 'ratings',
+    });
   };
 
   return Book;

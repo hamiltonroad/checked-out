@@ -68,6 +68,11 @@ module.exports = (sequelize) => {
       foreignKey: 'patron_id',
       as: 'checkouts',
     });
+
+    Patron.hasMany(models.Rating, {
+      foreignKey: 'patron_id',
+      as: 'ratings',
+    });
   };
 
   return Patron;

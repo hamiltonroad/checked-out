@@ -18,7 +18,13 @@ All standards are in `/standards/quick-ref/`:
 - [craftsmanship-quick-ref.md](standards/quick-ref/craftsmanship-quick-ref.md) - DRY, KISS, SOLID principles
 
 ### 3. Workflow
-Use the three-phase issue workflow:
+
+**Agent-based workflow (recommended for context efficiency):**
+```bash
+/story-runner <number>   # Runs all 3 phases via agents, minimal context usage
+```
+
+**Manual workflow (for control or debugging):**
 ```bash
 /prep-issue <number>     # Phase 1: Setup and context (Sonnet)
 /plan-issue <number>     # Phase 2: Deep planning (Opus)
@@ -26,6 +32,37 @@ Use the three-phase issue workflow:
 ```
 
 See [.claude/commands/](.claude/commands/) for complete command documentation.
+
+---
+
+## Agent-Based Workflow
+
+For maximum context efficiency, use the agent-based workflow:
+
+```bash
+/story-runner <issue-number>
+```
+
+This spawns three agents in sequence, each in an isolated context:
+
+1. **prep-agent** - Fetch issue, create branch, generate context hints
+2. **plan-agent** - Deep analysis, create implementation plan (with enterprise patterns)
+3. **implement-agent** - Execute plan, test, commit, create PR
+
+**Benefits:**
+- Each agent runs in isolated 200k context
+- Main context preserved for other work (~2-5k tokens used for orchestration)
+- Can run multiple issues in parallel via worktrees
+- Same quality as manual workflow, but automated
+
+**When to use manual workflow instead:**
+- Agent aborted and you want to resume from a specific phase
+- Complex/ambiguous issue where you expect mid-flight decisions
+- Debugging agent behavior
+- Teaching someone the workflow
+
+**Agent definitions:** `.claude/agents/`
+**Enterprise patterns:** `standards/quick-ref/enterprise-patterns-quick-ref.md`
 
 ---
 
