@@ -1,5 +1,5 @@
 ---
-model: claude-opus-4-20250514
+
 ---
 
 # Plan Issue (Phase 2: Planning)
@@ -206,6 +206,21 @@ For dependencies:
 - How to verify the changes work?
 - What edge cases need consideration?
 
+**Enterprise patterns review (REQUIRED):**
+- Load `standards/quick-ref/enterprise-patterns-quick-ref.md`
+- For each pattern, determine if applicable to this feature:
+  - Validation (FE+BE symmetry)
+  - State transitions
+  - Referential integrity
+  - Concurrency
+  - Permissions
+  - Audit trail
+  - Error handling
+  - Idempotency
+  - Pagination
+  - Sensitive data
+- Include enterprise patterns table in plan output (see Step 6)
+
 **Escalation protocol:**
 - If issue is too complex or ambiguous after analysis: Stop and ask human for clarification
 - If multiple valid approaches exist with unclear trade-offs: Present options to human
@@ -255,6 +270,23 @@ This plan was created by Opus for Sonnet to execute. Remove when:
 **Human decisions needed:**
 - <Decision 1>
 - <Decision 2>
+
+---
+
+## Enterprise Patterns Addressed
+
+| Pattern | Applicable? | How Addressed |
+|---------|-------------|---------------|
+| Validation (FE+BE) | Yes/No/N/A | <explanation> |
+| State Transitions | Yes/No/N/A | <explanation> |
+| Referential Integrity | Yes/No/N/A | <explanation> |
+| Concurrency | Yes/No/N/A | <explanation> |
+| Permissions | Yes/No/N/A | <explanation> |
+| Audit Trail | Yes/No/N/A | <explanation> |
+| Error Handling | Yes/No/N/A | <explanation> |
+| Idempotency | Yes/No/N/A | <explanation> |
+| Pagination | Yes/No/N/A | <explanation> |
+| Sensitive Data | Yes/No/N/A | <explanation> |
 
 ---
 
