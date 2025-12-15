@@ -6,12 +6,12 @@ function TestRatings() {
 
   useEffect(() => {
     fetch('http://localhost:3000/api/v1/books/185/ratings')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         console.log('Direct fetch successful:', data);
         setData(data);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('Direct fetch error:', err);
         setError(err.message);
       });
