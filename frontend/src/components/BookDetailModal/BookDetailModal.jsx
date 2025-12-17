@@ -23,6 +23,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import StarIcon from '@mui/icons-material/Star';
 import RateReviewIcon from '@mui/icons-material/RateReview';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { useBook } from '../../hooks/useBook';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import StatusChip from '../StatusChip';
@@ -30,6 +31,7 @@ import SkeletonField from '../SkeletonField';
 import ProfanityWarning from '../ProfanityWarning';
 import { RatingDisplay, RatingInput, ReviewsList, RatingStats } from '../Rating';
 import ratingService from '../../services/ratingService';
+import CheckoutDialog from '../CheckoutDialog';
 
 /**
  * Transition component for slide-up animation
@@ -74,18 +76,23 @@ function BookDetailModal({ open, onClose, bookId }) {
   const queryClient = useQueryClient();
   const [tabValue, setTabValue] = useState(0);
   const [showRatingInput, setShowRatingInput] = useState(false);
+  const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
   const [reviewPage, setReviewPage] = useState(1);
 
   const { data, isLoading, error } = useBook(bookId);
   const book = data?.data;
 
   // Fetch ratings and reviews
-  const { data: ratingsData, isLoading: ratingsLoading, error: ratingsError } = useQuery({
+  const {
+    data: ratingsData,
+    isLoading: ratingsLoading,
+    error: ratingsError,
+  } = useQuery({
     queryKey: ['bookRatings', bookId, reviewPage],
     queryFn: async () => {
       const result = await ratingService.getBookRatings(bookId, {
         limit: 10,
-        offset: (reviewPage - 1) * 10
+        offset: (reviewPage - 1) * 10,
       });
       return result;
     },
@@ -116,6 +123,12 @@ function BookDetailModal({ open, onClose, bookId }) {
 
   const handlePageChange = (event, page) => {
     setReviewPage(page);
+  };
+
+  const handleCheckoutSuccess = () => {
+    queryClient.invalidateQueries(['books']);
+    queryClient.invalidateQueries(['book', bookId]);
+    setShowCheckoutDialog(false);
   };
 
   return (
@@ -271,17 +284,37 @@ function BookDetailModal({ open, onClose, bookId }) {
             onClose={() => setShowRatingInput(false)}
           />
         )}
+
+        {/* Checkout Dialog */}
+        {showCheckoutDialog && book && (
+          <CheckoutDialog
+            open={showCheckoutDialog}
+            onClose={() => setShowCheckoutDialog(false)}
+            bookId={bookId}
+            bookTitle={book.title}
+            onCheckoutSuccess={handleCheckoutSuccess}
+          />
+        )}
       </DialogContent>
       <Divider />
       <DialogActions>
         {book && (
-          <Button
-            onClick={() => setShowRatingInput(true)}
-            startIcon={<StarIcon />}
-            variant="outlined"
-          >
-            Rate this Book
-          </Button>
+          <>
+            <Button
+              onClick={() => setShowCheckoutDialog(true)}
+              startIcon={<LibraryBooksIcon />}
+              variant="contained"
+            >
+              Check Out
+            </Button>
+            <Button
+              onClick={() => setShowRatingInput(true)}
+              startIcon={<StarIcon />}
+              variant="outlined"
+            >
+              Rate this Book
+            </Button>
+          </>
         )}
         <Button onClick={onClose}>Close</Button>
       </DialogActions>
