@@ -18,11 +18,11 @@ import {
   Stack,
   Tabs,
   Tab,
+  Snackbar,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import StarIcon from '@mui/icons-material/Star';
-import RateReviewIcon from '@mui/icons-material/RateReview';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { useBook } from '../../hooks/useBook';
 import { useCheckout } from '../../hooks/useCheckout';
@@ -329,15 +329,16 @@ function BookDetailModal({ open, onClose, bookId }) {
         }
       />
 
-      {checkoutSuccess && (
-        <Alert
-          severity="success"
-          onClose={() => setCheckoutSuccess(false)}
-          sx={{ position: 'fixed', bottom: 16, left: 16, right: 16, zIndex: 9999 }}
-        >
+      <Snackbar
+        open={checkoutSuccess}
+        autoHideDuration={4000}
+        onClose={() => setCheckoutSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setCheckoutSuccess(false)}>
           Book checked out successfully!
         </Alert>
-      )}
+      </Snackbar>
     </Dialog>
   );
 }

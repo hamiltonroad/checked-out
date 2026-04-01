@@ -26,7 +26,7 @@ function computeDueDate() {
 /**
  * CheckoutDialog displays a form for checking out a book copy to a patron
  */
-function CheckoutDialog({ open, onClose, onSubmit, isSubmitting, error }) {
+function CheckoutDialog({ open, onClose, onSubmit, isSubmitting = false, error = null }) {
   const [patronId, setPatronId] = useState('');
   const [copyId, setCopyId] = useState('');
   const [validationError, setValidationError] = useState('');
@@ -119,11 +119,6 @@ CheckoutDialog.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   isSubmitting: PropTypes.bool,
   error: PropTypes.string,
-};
-
-CheckoutDialog.defaultProps = {
-  isSubmitting: false,
-  error: null,
 };
 
 export default CheckoutDialog;
