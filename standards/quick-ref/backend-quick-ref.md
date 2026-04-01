@@ -98,11 +98,9 @@ class ApiError extends Error {
 // middlewares/errorHandler.js
 const errorHandler = (err, req, res, next) => {
   const statusCode = err.statusCode || 500;
-  res.status(statusCode).json({
-    success: false,
-    message: err.message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-  });
+  const message = err.message || 'Internal Server Error';
+  const extras = process.env.NODE_ENV === 'development' ? { stack: err.stack } : {};
+  res.status(statusCode).json(ApiResponse.error(message, statusCode, extras));
 };
 ```
 
