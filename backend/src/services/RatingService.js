@@ -105,10 +105,7 @@ class RatingService {
     // Get distribution
     const distribution = await Rating.findAll({
       where: { book_id: bookId },
-      attributes: [
-        'rating',
-        [sequelize.fn('COUNT', sequelize.col('rating')), 'count'],
-      ],
+      attributes: ['rating', [sequelize.fn('COUNT', sequelize.col('rating')), 'count']],
       group: ['rating'],
       raw: true,
     });
@@ -262,14 +259,13 @@ class RatingService {
           through: { attributes: [] },
         },
       ],
-      having: minRating
-        ? sequelize.literal(`average_rating >= ${minRating}`)
-        : undefined,
-      order: sortBy === 'average_rating'
-        ? [[sequelize.literal('average_rating'), 'DESC NULLS LAST']]
-        : sortBy === 'total_ratings'
-        ? [[sequelize.literal('total_ratings'), 'DESC']]
-        : [['title', 'ASC']],
+      having: minRating ? sequelize.literal(`average_rating >= ${minRating}`) : undefined,
+      order:
+        sortBy === 'average_rating'
+          ? [[sequelize.literal('average_rating'), 'DESC NULLS LAST']]
+          : sortBy === 'total_ratings'
+            ? [[sequelize.literal('total_ratings'), 'DESC']]
+            : [['title', 'ASC']],
       limit,
       offset,
       subQuery: false,

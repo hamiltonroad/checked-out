@@ -16,11 +16,11 @@ app.use(helmet());
 // CORS
 app.use(
   cors({
-    origin: function(origin, callback) {
+    origin: function (origin, callback) {
       const allowedOrigins = [
         'http://localhost:5173',
         'http://localhost:5174',
-        'http://localhost:5175'
+        'http://localhost:5175',
       ];
       // Allow requests with no origin (like from Postman or curl)
       if (!origin || allowedOrigins.includes(origin)) {

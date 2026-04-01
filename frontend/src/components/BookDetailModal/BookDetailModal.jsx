@@ -18,17 +18,20 @@ import {
   Stack,
   Tabs,
   Tab,
+  Snackbar,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import StarIcon from '@mui/icons-material/Star';
-import RateReviewIcon from '@mui/icons-material/RateReview';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { useBook } from '../../hooks/useBook';
+import { useCheckout } from '../../hooks/useCheckout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import StatusChip from '../StatusChip';
 import SkeletonField from '../SkeletonField';
 import ProfanityWarning from '../ProfanityWarning';
 import { RatingDisplay, RatingInput, ReviewsList, RatingStats } from '../Rating';
+import CheckoutDialog from '../CheckoutDialog';
 import ratingService from '../../services/ratingService';
 
 /**
@@ -75,17 +78,24 @@ function BookDetailModal({ open, onClose, bookId }) {
   const [tabValue, setTabValue] = useState(0);
   const [showRatingInput, setShowRatingInput] = useState(false);
   const [reviewPage, setReviewPage] = useState(1);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false);
 
   const { data, isLoading, error } = useBook(bookId);
+  const checkoutMutation = useCheckout();
   const book = data?.data;
 
   // Fetch ratings and reviews
-  const { data: ratingsData, isLoading: ratingsLoading, error: ratingsError } = useQuery({
+  const {
+    data: ratingsData,
+    isLoading: ratingsLoading,
+    error: ratingsError,
+  } = useQuery({
     queryKey: ['bookRatings', bookId, reviewPage],
     queryFn: async () => {
       const result = await ratingService.getBookRatings(bookId, {
         limit: 10,
-        offset: (reviewPage - 1) * 10
+        offset: (reviewPage - 1) * 10,
       });
       return result;
     },
@@ -116,6 +126,17 @@ function BookDetailModal({ open, onClose, bookId }) {
 
   const handlePageChange = (event, page) => {
     setReviewPage(page);
+  };
+
+  const handleCheckoutSubmit = async (checkoutData) => {
+    try {
+      await checkoutMutation.mutateAsync(checkoutData);
+      setCheckoutOpen(false);
+      setCheckoutSuccess(true);
+      queryClient.invalidateQueries({ queryKey: ['books', bookId] });
+    } catch {
+      // Error is captured by mutation state and displayed in dialog
+    }
   };
 
   return (
@@ -276,6 +297,15 @@ function BookDetailModal({ open, onClose, bookId }) {
       <DialogActions>
         {book && (
           <Button
+            onClick={() => setCheckoutOpen(true)}
+            startIcon={<LibraryBooksIcon />}
+            variant="contained"
+          >
+            Check Out
+          </Button>
+        )}
+        {book && (
+          <Button
             onClick={() => setShowRatingInput(true)}
             startIcon={<StarIcon />}
             variant="outlined"
@@ -285,6 +315,30 @@ function BookDetailModal({ open, onClose, bookId }) {
         )}
         <Button onClick={onClose}>Close</Button>
       </DialogActions>
+
+      <CheckoutDialog
+        open={checkoutOpen}
+        onClose={() => {
+          setCheckoutOpen(false);
+          checkoutMutation.reset();
+        }}
+        onSubmit={handleCheckoutSubmit}
+        isSubmitting={checkoutMutation.isPending}
+        error={
+          checkoutMutation.error?.response?.data?.message || checkoutMutation.error?.message || null
+        }
+      />
+
+      <Snackbar
+        open={checkoutSuccess}
+        autoHideDuration={4000}
+        onClose={() => setCheckoutSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setCheckoutSuccess(false)}>
+          Book checked out successfully!
+        </Alert>
+      </Snackbar>
     </Dialog>
   );
 }
