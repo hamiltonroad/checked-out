@@ -1,4 +1,4 @@
-const { Checkout, Patron, Copy } = require('../models');
+const { Checkout, Patron, Copy, Book } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 class CheckoutService {
@@ -34,6 +34,102 @@ class CheckoutService {
     });
 
     return checkout;
+  }
+
+  /**
+   * Get all checkout records with patron and book details
+   * @returns {Promise<Array>} Array of formatted checkout records
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async getAllCheckouts() {
+    const checkouts = await Checkout.findAll({
+      include: [
+        {
+          model: Patron,
+          as: 'patron',
+          attributes: ['first_name', 'last_name'],
+        },
+        {
+          model: Copy,
+          as: 'copy',
+          attributes: ['id'],
+          include: [
+            {
+              model: Book,
+              as: 'book',
+              attributes: ['title'],
+            },
+          ],
+        },
+      ],
+      order: [['created_at', 'DESC']],
+    });
+
+    return checkouts.map((checkout) => ({
+      id: checkout.id,
+      patronName: `${checkout.patron.first_name} ${checkout.patron.last_name}`,
+      bookTitle: checkout.copy.book.title,
+      checkoutDate: checkout.checkout_date,
+      returnDate: checkout.return_date,
+    }));
+  }
+
+  /**
+   * Mark a checkout as returned
+   * @param {number} id - Checkout ID
+   * @returns {Promise<Object>} Updated checkout record
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async returnCheckout(id) {
+    const checkout = await Checkout.findByPk(id, {
+      include: [
+        {
+          model: Patron,
+          as: 'patron',
+          attributes: ['first_name', 'last_name'],
+        },
+        {
+          model: Copy,
+          as: 'copy',
+          attributes: ['id'],
+          include: [
+            {
+              model: Book,
+              as: 'book',
+              attributes: ['title'],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!checkout) {
+      throw ApiError.notFound('Checkout not found');
+    }
+
+    if (checkout.return_date) {
+      throw ApiError.conflict('Checkout has already been returned');
+    }
+
+    // Conditional update for concurrency safety
+    const [updatedCount] = await Checkout.update(
+      { return_date: new Date() },
+      { where: { id, return_date: null } }
+    );
+
+    if (updatedCount === 0) {
+      throw ApiError.conflict('Checkout has already been returned');
+    }
+
+    await checkout.reload();
+
+    return {
+      id: checkout.id,
+      patronName: `${checkout.patron.first_name} ${checkout.patron.last_name}`,
+      bookTitle: checkout.copy.book.title,
+      checkoutDate: checkout.checkout_date,
+      returnDate: checkout.return_date,
+    };
   }
 }
 

@@ -1,4 +1,5 @@
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
 import PeopleIcon from '@mui/icons-material/People';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 
@@ -16,6 +17,14 @@ export const NAVIGATION_ITEMS = [
     path: '/',
     disabled: false,
     ariaLabel: 'Navigate to Books',
+  },
+  {
+    id: 'checkouts',
+    label: 'Checkouts',
+    icon: AssignmentReturnIcon,
+    path: '/checkouts',
+    disabled: false,
+    ariaLabel: 'Navigate to Checkouts',
   },
   {
     id: 'patrons',
