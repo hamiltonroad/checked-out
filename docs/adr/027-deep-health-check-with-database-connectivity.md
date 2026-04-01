@@ -1,4 +1,4 @@
-# ADR-025: Deep Health Check with Database Connectivity
+# ADR-027: Deep Health Check with Database Connectivity
 
 **Status:** Accepted
 **Date:** 2026-04-01

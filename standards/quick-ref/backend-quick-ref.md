@@ -176,7 +176,7 @@ const rateLimit = require('express-rate-limit');
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN }));
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '1mb' }));
 ```
 
 ---
