@@ -1,4 +1,5 @@
 const ratingService = require('../services/RatingService');
+const ratingStatsService = require('../services/RatingStatsService');
 const ApiResponse = require('../utils/ApiResponse');
 const ApiError = require('../utils/ApiError');
 
@@ -54,7 +55,7 @@ class RatingController {
   async getBookRatingStats(req, res, next) {
     try {
       const { id: bookId } = req.params;
-      const stats = await ratingService.getBookRatingStats(bookId);
+      const stats = await ratingStatsService.getBookRatingStats(bookId);
 
       res.json(ApiResponse.success(stats));
     } catch (error) {
@@ -133,7 +134,7 @@ class RatingController {
     try {
       const { limit = 20, offset = 0, minRating = null, sortBy = 'average_rating' } = req.query;
 
-      const result = await ratingService.getBooksWithRatings({
+      const result = await ratingStatsService.getBooksWithRatings({
         limit: parseInt(limit, 10),
         offset: parseInt(offset, 10),
         minRating: minRating ? parseFloat(minRating) : null,
