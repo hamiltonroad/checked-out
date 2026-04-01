@@ -30,6 +30,7 @@ This directory contains Architecture Decision Records (ADRs) for the Checked Out
 | [022](022-error-responses-through-apiresponse.md) | Error Responses Through ApiResponse | Accepted |
 | [023](022-default-parameters-over-defaultprops.md) | Default Parameters over defaultProps | Accepted |
 | [024](024-no-console-eslint-enforcement.md) | No-Console ESLint Enforcement | Accepted |
+| [025](025-comprehensive-graceful-shutdown.md) | Comprehensive Graceful Shutdown | Accepted |
 
 ## Format
 
