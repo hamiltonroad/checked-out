@@ -12,6 +12,7 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - Controllers handle HTTP parsing and responses. Services contain all business logic.
 - Models define Sequelize schemas and associations. No raw SQL outside models.
 - Frontend: pages -> components -> hooks -> services (API calls).
+- Services must not import peer services. Orchestration of multiple services belongs in the controller layer.
 - Shared utilities in `backend/src/utils/` and `frontend/src/utils/`.
 
 ## Commands
@@ -31,9 +32,11 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - Do NOT put business logic in controllers. Controllers call services. Period.
 - Do NOT use console.log in production code. Use the structured logger.
 - Do NOT use raw SQL queries. Use Sequelize ORM methods.
+- Do NOT interpolate user-supplied values into `sequelize.literal()`. Use parameterized Sequelize methods instead.
 - Do NOT commit .env files or hardcode credentials.
 - Do NOT skip testing. Run lint + format before marking work complete.
 - Do NOT import frontend services directly in components — use hooks.
+- Source files must not exceed 200 lines (type/config files exempt).
 
 ## Conventions
 
@@ -43,6 +46,7 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - Use Material UI theme tokens — no inline color or spacing values.
 - API responses use `ApiResponse.success()` / `ApiResponse.error()` wrappers.
 - Sequelize models use `underscored: true` and `timestamps: true`.
+- Use JavaScript default parameters instead of `defaultProps` for function components (`defaultProps` is deprecated in React 18.3+).
 - Error handling: try/catch in controllers, throw typed errors from services.
 
 ## Context Guidance
