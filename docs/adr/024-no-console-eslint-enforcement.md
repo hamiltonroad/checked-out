@@ -1,4 +1,4 @@
-# ADR-022: No-Console ESLint Enforcement
+# ADR-024: No-Console ESLint Enforcement
 
 **Status:** Accepted
 **Date:** 2026-04-01

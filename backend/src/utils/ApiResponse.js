@@ -7,11 +7,12 @@ class ApiResponse {
     };
   }
 
-  static error(message = 'Error', statusCode = 500) {
+  static error(message = 'Error', statusCode = 500, extras = {}) {
     return {
       success: false,
       message,
       statusCode,
+      ...extras,
     };
   }
 }

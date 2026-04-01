@@ -27,7 +27,7 @@ const labels = {
 /**
  * Input component for submitting book ratings and reviews
  */
-function RatingInput({ bookId, bookTitle, existingRating, onSubmit, onClose }) {
+function RatingInput({ bookId, bookTitle, existingRating = null, onSubmit, onClose }) {
   const [rating, setRating] = useState(existingRating?.rating || 0);
   const [hover, setHover] = useState(-1);
   const [reviewText, setReviewText] = useState(existingRating?.review_text || '');
@@ -144,10 +144,6 @@ RatingInput.propTypes = {
   }),
   onSubmit: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
-};
-
-RatingInput.defaultProps = {
-  existingRating: null,
 };
 
 export default RatingInput;
