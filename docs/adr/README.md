@@ -31,6 +31,8 @@ This directory contains Architecture Decision Records (ADRs) for the Checked Out
 | [023](022-default-parameters-over-defaultprops.md) | Default Parameters over defaultProps | Accepted |
 | [024](024-no-console-eslint-enforcement.md) | No-Console ESLint Enforcement | Accepted |
 | [025](025-comprehensive-graceful-shutdown.md) | Comprehensive Graceful Shutdown | Accepted |
+| [026](025-lower-request-body-size-limit.md) | Lower Request Body Size Limit | Accepted |
+| [027](027-deep-health-check-with-database-connectivity.md) | Deep Health Check with Database Connectivity | Accepted |
 
 ## Format
 
