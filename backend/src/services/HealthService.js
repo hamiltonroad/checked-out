@@ -16,11 +16,16 @@ class HealthService {
   async checkDatabase(timeoutMs = DEFAULT_TIMEOUT_MS) {
     const start = Date.now();
 
+    let timeoutHandle;
+
     try {
       await Promise.race([
         sequelize.authenticate(),
         new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Database health check timed out')), timeoutMs);
+          timeoutHandle = setTimeout(
+            () => reject(new Error('Database health check timed out')),
+            timeoutMs
+          );
         }),
       ]);
 
@@ -38,8 +43,9 @@ class HealthService {
       return {
         connected: false,
         responseTimeMs,
-        error: error.message,
       };
+    } finally {
+      clearTimeout(timeoutHandle);
     }
   }
 }
