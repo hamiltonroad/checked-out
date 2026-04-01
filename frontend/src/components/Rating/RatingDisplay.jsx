@@ -7,7 +7,7 @@ import StarIcon from '@mui/icons-material/Star';
  * Display component for book ratings
  * Shows star rating and optional review count
  */
-function RatingDisplay({ rating, totalRatings, size = 'medium', showCount = true }) {
+function RatingDisplay({ rating = 0, totalRatings = 0, size = 'medium', showCount = true }) {
   const displayRating = parseFloat(rating) || 0;
 
   return (
@@ -38,13 +38,6 @@ RatingDisplay.propTypes = {
   totalRatings: PropTypes.number,
   size: PropTypes.oneOf(['small', 'medium', 'large']),
   showCount: PropTypes.bool,
-};
-
-RatingDisplay.defaultProps = {
-  rating: 0,
-  totalRatings: 0,
-  size: 'medium',
-  showCount: true,
 };
 
 export default RatingDisplay;

@@ -18,7 +18,13 @@ import { formatDistanceToNow } from 'date-fns';
 /**
  * Component to display a list of reviews for a book
  */
-function ReviewsList({ reviews, isLoading, totalReviews, currentPage, onPageChange }) {
+function ReviewsList({
+  reviews = [],
+  isLoading = false,
+  totalReviews = 0,
+  currentPage = 1,
+  onPageChange = () => {},
+}) {
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
@@ -111,14 +117,6 @@ ReviewsList.propTypes = {
   totalReviews: PropTypes.number,
   currentPage: PropTypes.number,
   onPageChange: PropTypes.func,
-};
-
-ReviewsList.defaultProps = {
-  reviews: [],
-  isLoading: false,
-  totalReviews: 0,
-  currentPage: 1,
-  onPageChange: () => {},
 };
 
 export default ReviewsList;
