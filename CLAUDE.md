@@ -42,7 +42,7 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 
 - Backend: camelCase variables/functions, PascalCase classes, UPPER_SNAKE_CASE constants.
 - Frontend: PascalCase components/files, camelCase props, handle* event handlers, use* hooks.
-- All React components must define PropTypes.
+- All React components must define PropTypes — including zero-prop components (use empty `{}`). Use `shape()` for objects and `arrayOf(shape())` for arrays — never raw `object` or `array`.
 - Use Material UI theme tokens — no inline color or spacing values.
 - API responses use `ApiResponse.success()` / `ApiResponse.error()` wrappers.
 - Sequelize models use `underscored: true` and `timestamps: true`.
@@ -58,5 +58,17 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - Testing guide: [testing-guide.md](standards/quick-ref/testing-guide.md)
 - Code review standard: [code-review.md](standards/code-review.md)
 - Config: `backend/.env` (DB creds), `frontend/.env` (API URL), `backend/src/config/database.js`
+- Tech stack reference: [tech-stack-quick-ref.md](standards/quick-ref/tech-stack-quick-ref.md)
+- Enterprise patterns: [enterprise-patterns-quick-ref.md](standards/quick-ref/enterprise-patterns-quick-ref.md)
+- Full standards: `standards/full/` (detailed versions of the quick-ref guides)
+- Agent definitions: `.claude/agents/` (agent configurations for the harness workflow)
+- Knowledge base: `knowledge/` (deep-dive references on architecture, context management, sub-agents, and more)
 - Slash commands: `.claude/commands/` — use `/story-runner <number>` for agent-based workflow
 - Verification docs: `.claude/temp/VERIFICATION-<number>-REMOVE.md`
+
+## Session Guidance
+
+- **Context compaction:** Before compaction, persist important state to `.claude/temp/` files so it survives context resets. See [context-management-kit.md](knowledge/context-management-kit.md).
+- **Sub-agent scoping:** Sub-agents should read CLAUDE.md and only the standards relevant to their task. Pass focused instructions, not the entire knowledge base. See [subagents-kit.md](knowledge/subagents-kit.md).
+- **Cross-agent handoff:** Use `.claude/temp/` files (e.g., `PLAN-<number>-REMOVE.md`, `VERIFICATION-<number>-REMOVE.md`) to pass context between agents in a workflow.
+- **Agent operations:** See [agent-operations-kit.md](knowledge/agent-operations-kit.md) for lifecycle, error handling, and reporting patterns.
