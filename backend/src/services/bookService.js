@@ -1,5 +1,6 @@
 const { Book, Author, Copy, Checkout, Rating, sequelize } = require('../models');
 const ApiError = require('../utils/ApiError');
+const logger = require('../config/logger');
 
 /**
  * Book Service - Business logic for book operations
@@ -53,7 +54,7 @@ class BookService {
       return hasAvailableCopy ? 'available' : 'checked_out';
     } catch (error) {
       // Log error and return safe default
-      console.error('Error calculating book status:', error);
+      logger.error('Error calculating book status:', error);
       return 'available'; // Fail open - show as available if error
     }
   }

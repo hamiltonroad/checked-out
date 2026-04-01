@@ -28,6 +28,8 @@ This directory contains Architecture Decision Records (ADRs) for the Checked Out
 | [020](020-sequelize-migrations-with-timestamp-naming.md) | Sequelize Migrations with Timestamp Naming | Accepted |
 | [021](021-middleware-ordering.md) | Middleware Ordering | Accepted |
 | [022](022-error-responses-through-apiresponse.md) | Error Responses Through ApiResponse | Accepted |
+| [023](022-default-parameters-over-defaultprops.md) | Default Parameters over defaultProps | Accepted |
+| [024](024-no-console-eslint-enforcement.md) | No-Console ESLint Enforcement | Accepted |
 
 ## Format
 

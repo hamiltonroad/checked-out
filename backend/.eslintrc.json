@@ -5,7 +5,7 @@
     "jest": true
   },
   "rules": {
-    "no-console": "off",
+    "no-console": "error",
     "consistent-return": "off",
     "no-underscore-dangle": ["error", { "allow": ["_id"] }]
   }
