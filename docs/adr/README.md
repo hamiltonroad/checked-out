@@ -27,6 +27,7 @@ This directory contains Architecture Decision Records (ADRs) for the Checked Out
 | [019](019-environment-based-database-configuration.md) | Environment-Based Database Configuration | Accepted |
 | [020](020-sequelize-migrations-with-timestamp-naming.md) | Sequelize Migrations with Timestamp Naming | Accepted |
 | [021](021-middleware-ordering.md) | Middleware Ordering | Accepted |
+| [022](022-error-responses-through-apiresponse.md) | Error Responses Through ApiResponse | Accepted |
 
 ## Format
 
