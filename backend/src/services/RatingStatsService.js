@@ -36,8 +36,8 @@ class RatingStatsService {
     });
 
     return {
-      average_rating: parseFloat(stats?.average_rating || 0).toFixed(1),
-      total_ratings: parseInt(stats?.total_ratings || 0, 10),
+      average_rating: parseFloat((stats && stats.average_rating) || 0).toFixed(1),
+      total_ratings: parseInt((stats && stats.total_ratings) || 0, 10),
       distribution: distributionMap,
     };
   }
@@ -79,7 +79,13 @@ class RatingStatsService {
           through: { attributes: [] },
         },
       ],
-      having: minRating ? sequelize.literal(`average_rating >= ${minRating}`) : undefined,
+      having: minRating
+        ? sequelize.where(
+            sequelize.literal(`(SELECT AVG(rating) FROM ratings WHERE ratings.book_id = Book.id)`),
+            '>=',
+            parseFloat(minRating)
+          )
+        : undefined,
       order:
         sortBy === 'average_rating'
           ? [[sequelize.literal('average_rating'), 'DESC NULLS LAST']]

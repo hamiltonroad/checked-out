@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   Container,
   Typography,
@@ -59,12 +59,12 @@ function BooksPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const handleClearAll = () => {
+  const handleClearAll = useCallback(() => {
     setSearchTerm('');
     setDebouncedSearchTerm('');
     setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
     setHideProfanity(false);
-  };
+  }, []);
 
   const handleClearSearch = () => {
     setSearchTerm('');
@@ -82,7 +82,7 @@ function BooksPage() {
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [handleClearAll]);
 
   // Get books and filter by search term
   const books = data?.data || [];
@@ -163,7 +163,7 @@ function BooksPage() {
             availabilityFilter={availabilityFilter}
             onAvailabilityChange={setAvailabilityFilter}
             hideProfanity={hideProfanity}
-            onHideProfanityChange={(e) => setHideProfanity(e.target.checked)}
+            onHideProfanityChange={setHideProfanity}
             onClearAll={handleClearAll}
             filteredCount={filteredBooks.length}
             totalCount={books.length}

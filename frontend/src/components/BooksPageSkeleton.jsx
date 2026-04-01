@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import {
   Container,
   Box,
@@ -14,6 +15,10 @@ import {
 
 /**
  * BooksPageSkeleton displays a loading placeholder for the BooksPage
+ */
+/**
+ * BooksPageSkeleton displays a loading placeholder for the BooksPage.
+ * This component takes no props.
  */
 function BooksPageSkeleton() {
   return (
@@ -74,5 +79,7 @@ function BooksPageSkeleton() {
     </Container>
   );
 }
+
+BooksPageSkeleton.propTypes = {};
 
 export default BooksPageSkeleton;

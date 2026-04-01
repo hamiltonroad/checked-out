@@ -10,7 +10,7 @@ class RatingController {
   async submitRating(req, res, next) {
     try {
       const { bookId, rating, reviewText } = req.body;
-      const patronId = req.patron?.id; // Assuming authentication middleware sets req.patron
+      const patronId = req.patron && req.patron.id; // Assuming authentication middleware sets req.patron
 
       if (!patronId) {
         throw new ApiError(401, 'Authentication required');
@@ -37,13 +37,14 @@ class RatingController {
       const { id: bookId } = req.params;
       const { limit = 10, offset = 0, includeReviews = 'true' } = req.query;
 
-      const result = await ratingService.getBookRatings(bookId, {
+      const ratingsResult = await ratingService.getBookRatings(bookId, {
         limit: parseInt(limit, 10),
         offset: parseInt(offset, 10),
         includeReviews: includeReviews === 'true',
       });
+      const stats = await ratingStatsService.getBookRatingStats(bookId);
 
-      res.json(ApiResponse.success(result));
+      res.json(ApiResponse.success({ ...ratingsResult, stats }));
     } catch (error) {
       next(error);
     }
@@ -68,7 +69,7 @@ class RatingController {
    */
   async getMyRatings(req, res, next) {
     try {
-      const patronId = req.patron?.id;
+      const patronId = req.patron && req.patron.id;
 
       if (!patronId) {
         throw new ApiError(401, 'Authentication required');
@@ -93,7 +94,7 @@ class RatingController {
   async getMyRatingForBook(req, res, next) {
     try {
       const { bookId } = req.params;
-      const patronId = req.patron?.id;
+      const patronId = req.patron && req.patron.id;
 
       if (!patronId) {
         throw new ApiError(401, 'Authentication required');
@@ -113,7 +114,7 @@ class RatingController {
   async deleteRating(req, res, next) {
     try {
       const { bookId } = req.params;
-      const patronId = req.patron?.id;
+      const patronId = req.patron && req.patron.id;
 
       if (!patronId) {
         throw new ApiError(401, 'Authentication required');

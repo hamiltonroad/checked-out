@@ -1,6 +1,5 @@
 const { Rating, Book, Patron } = require('../models');
 const ApiError = require('../utils/ApiError');
-const ratingStatsService = require('./RatingStatsService');
 
 class RatingService {
   /**
@@ -76,16 +75,14 @@ class RatingService {
         : ['id', 'rating', 'created_at'],
     });
 
-    // Calculate statistics
-    const stats = await ratingStatsService.getBookRatingStats(bookId);
+    const totalCount = await Rating.count({ where: { book_id: bookId } });
 
     return {
       ratings,
-      stats,
       pagination: {
         limit,
         offset,
-        total: stats.total_ratings,
+        total: totalCount,
       },
     };
   }

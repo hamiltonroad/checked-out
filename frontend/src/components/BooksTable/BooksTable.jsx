@@ -66,7 +66,19 @@ function BooksTable({ books, onRowClick }) {
 }
 
 BooksTable.propTypes = {
-  books: PropTypes.array.isRequired,
+  books: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      title: PropTypes.string.isRequired,
+      status: PropTypes.string,
+      authors: PropTypes.arrayOf(
+        PropTypes.shape({
+          first_name: PropTypes.string.isRequired,
+          last_name: PropTypes.string.isRequired,
+        }),
+      ).isRequired,
+    }),
+  ).isRequired,
   onRowClick: PropTypes.func.isRequired,
 };
 

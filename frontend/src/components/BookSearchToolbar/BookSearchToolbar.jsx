@@ -95,7 +95,7 @@ function BookSearchToolbar({
       </Box>
       <Box sx={{ mt: 1 }}>
         <FormControlLabel
-          control={<Checkbox checked={hideProfanity} onChange={onHideProfanityChange} />}
+          control={<Checkbox checked={hideProfanity} onChange={(e) => onHideProfanityChange(e.target.checked)} />}
           label="Hide books with profanity"
         />
       </Box>
@@ -133,7 +133,7 @@ function BookSearchToolbar({
           {hideProfanity && (
             <Chip
               label="Hiding profanity"
-              onDelete={() => onHideProfanityChange({ target: { checked: false } })}
+              onDelete={() => onHideProfanityChange(false)}
               size="small"
               variant="outlined"
               aria-label="Remove profanity filter"

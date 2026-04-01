@@ -102,8 +102,27 @@ function BookDetailsTab({ book, statsData }) {
 }
 
 BookDetailsTab.propTypes = {
-  book: PropTypes.object.isRequired,
-  statsData: PropTypes.object,
+  book: PropTypes.shape({
+    title: PropTypes.string.isRequired,
+    has_profanity: PropTypes.bool,
+    average_rating: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    total_ratings: PropTypes.number,
+    authors: PropTypes.arrayOf(
+      PropTypes.shape({
+        first_name: PropTypes.string.isRequired,
+        last_name: PropTypes.string.isRequired,
+      }),
+    ),
+    isbn: PropTypes.string,
+    publisher: PropTypes.string,
+    publication_year: PropTypes.number,
+    genre: PropTypes.string,
+    status: PropTypes.string,
+  }).isRequired,
+  statsData: PropTypes.shape({
+    average_rating: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    total_ratings: PropTypes.number,
+  }),
 };
 
 export default BookDetailsTab;
