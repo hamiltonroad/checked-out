@@ -7,7 +7,6 @@ import {
   DialogActions,
   Button,
   Alert,
-  Typography,
   Box,
   useMediaQuery,
   useTheme,
@@ -15,24 +14,22 @@ import {
   Slide,
   IconButton,
   Divider,
-  Stack,
   Tabs,
   Tab,
   Snackbar,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
 import StarIcon from '@mui/icons-material/Star';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { useBook } from '../../hooks/useBook';
 import { useCheckout } from '../../hooks/useCheckout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import StatusChip from '../StatusChip';
 import SkeletonField from '../SkeletonField';
-import ProfanityWarning from '../ProfanityWarning';
-import { RatingDisplay, RatingInput, ReviewsList, RatingStats } from '../Rating';
+import { RatingInput } from '../Rating';
 import CheckoutDialog from '../CheckoutDialog';
 import ratingService from '../../services/ratingService';
+import BookDetailsTab from './BookDetailsTab';
+import BookReviewsTab from './BookReviewsTab';
 
 /**
  * Transition component for slide-up animation
@@ -40,33 +37,6 @@ import ratingService from '../../services/ratingService';
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-
-/**
- * DetailField displays a labeled field value in the book details
- * @param {Object} props - Component props
- * @param {string} props.label - Field label
- * @param {string|number} [props.value] - Field value (if not using children)
- * @param {React.ReactNode} [props.children] - Custom field content
- */
-function DetailField({ label, value, children }) {
-  // Don't render if no value and no children
-  if (!value && !children) return null;
-
-  return (
-    <Box sx={{ mb: 2 }}>
-      <Typography variant="subtitle2" color="text.secondary">
-        {label}
-      </Typography>
-      {children || <Typography variant="body1">{value}</Typography>}
-    </Box>
-  );
-}
-
-DetailField.propTypes = {
-  label: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  children: PropTypes.node,
-};
 
 /**
  * BookDetailModal displays detailed information about a book in a modal dialog
@@ -77,7 +47,6 @@ function BookDetailModal({ open, onClose, bookId }) {
   const queryClient = useQueryClient();
   const [tabValue, setTabValue] = useState(0);
   const [showRatingInput, setShowRatingInput] = useState(false);
-  const [reviewPage, setReviewPage] = useState(1);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
 
@@ -85,24 +54,7 @@ function BookDetailModal({ open, onClose, bookId }) {
   const checkoutMutation = useCheckout();
   const book = data?.data;
 
-  // Fetch ratings and reviews
-  const {
-    data: ratingsData,
-    isLoading: ratingsLoading,
-    error: ratingsError,
-  } = useQuery({
-    queryKey: ['bookRatings', bookId, reviewPage],
-    queryFn: async () => {
-      const result = await ratingService.getBookRatings(bookId, {
-        limit: 10,
-        offset: (reviewPage - 1) * 10,
-      });
-      return result;
-    },
-    enabled: !!bookId && open && tabValue === 1,
-  });
-
-  // Fetch rating stats
+  // Fetch rating stats (shared between details tab and reviews tab)
   const { data: statsData } = useQuery({
     queryKey: ['bookRatingStats', bookId],
     queryFn: () => ratingService.getBookRatingStats(bookId),
@@ -122,10 +74,6 @@ function BookDetailModal({ open, onClose, bookId }) {
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
-  };
-
-  const handlePageChange = (event, page) => {
-    setReviewPage(page);
   };
 
   const handleCheckoutSubmit = async (checkoutData) => {
@@ -192,95 +140,10 @@ function BookDetailModal({ open, onClose, bookId }) {
         )}
 
         {/* Details Tab */}
-        {tabValue === 0 && book && (
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ pt: 1 }}>
-            <Box
-              sx={{
-                width: { xs: '100%', sm: '33%' },
-                maxWidth: { xs: 200, sm: 'none' },
-                mx: { xs: 'auto', sm: 0 },
-              }}
-            >
-              <Box
-                sx={{
-                  aspectRatio: '2/3',
-                  bgcolor: 'grey.200',
-                  borderRadius: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <MenuBookIcon sx={{ fontSize: 64, color: 'text.disabled' }} />
-              </Box>
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5">{book.title}</Typography>
-                {book.has_profanity && <ProfanityWarning size="medium" />}
-              </Box>
-
-              <DetailField label="Rating">
-                <RatingDisplay
-                  rating={book.average_rating || statsData?.average_rating}
-                  totalRatings={book.total_ratings || statsData?.total_ratings}
-                  size="medium"
-                  showCount
-                />
-              </DetailField>
-
-              <DetailField
-                label="Author(s)"
-                value={
-                  book.authors && book.authors.length > 0
-                    ? book.authors
-                        .map((author) => `${author.first_name} ${author.last_name}`)
-                        .join(', ')
-                    : null
-                }
-              />
-
-              <DetailField label="ISBN" value={book.isbn} />
-
-              <DetailField label="Publisher" value={book.publisher} />
-
-              <DetailField label="Publication Year" value={book.publication_year} />
-
-              <DetailField label="Genre" value={book.genre} />
-
-              <DetailField label="Status">
-                <Box sx={{ mt: 0.5 }}>
-                  <StatusChip status={book.status || 'available'} size="medium" />
-                </Box>
-              </DetailField>
-            </Box>
-          </Stack>
-        )}
+        {tabValue === 0 && book && <BookDetailsTab book={book} statsData={statsData} />}
 
         {/* Reviews Tab */}
-        {tabValue === 1 && book && (
-          <Box sx={{ pt: 2 }}>
-            {ratingsError && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                Error loading reviews: {ratingsError.message || 'Unknown error'}
-              </Alert>
-            )}
-
-            {statsData && (
-              <Box sx={{ mb: 3 }}>
-                <RatingStats stats={statsData} />
-              </Box>
-            )}
-
-            <ReviewsList
-              reviews={ratingsData?.ratings}
-              isLoading={ratingsLoading}
-              totalReviews={ratingsData?.stats?.total_ratings || 0}
-              currentPage={reviewPage}
-              onPageChange={handlePageChange}
-            />
-          </Box>
-        )}
+        {tabValue === 1 && book && <BookReviewsTab bookId={bookId} open={open} />}
 
         {/* Rating Input Dialog */}
         {showRatingInput && book && (
