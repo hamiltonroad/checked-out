@@ -340,7 +340,7 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // Body parsing with size limits
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '1mb' }));
 ```
 
 ---

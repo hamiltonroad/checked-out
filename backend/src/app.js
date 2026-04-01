@@ -41,9 +41,9 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// Body parsing
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Body parsing — 1MB global limit; add route-specific middleware for larger payloads (e.g., file uploads)
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // HTTP request logging
 if (process.env.NODE_ENV !== 'test') {
