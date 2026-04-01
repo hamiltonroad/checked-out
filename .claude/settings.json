@@ -1,0 +1,62 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Bash(npm test*)",
+      "Bash(npm run lint*)",
+      "Bash(npm run format*)",
+      "Bash(npm run build*)",
+      "Bash(npm run dev*)",
+      "Bash(npm run db:*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git branch*)",
+      "Bash(git checkout*)",
+      "Bash(git switch*)",
+      "Bash(gh issue*)",
+      "Bash(gh pr*)",
+      "Bash(ls *)",
+      "Bash(curl http://localhost*)"
+    ],
+    "deny": [
+      "Bash(rm -rf*)",
+      "Bash(npm publish*)",
+      "Bash(docker*)",
+      "Bash(ssh*)",
+      "Read(**/.env*)",
+      "Read(~/.ssh/*)",
+      "Read(~/.aws/*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'BLOCKED=\".env .env.local package-lock.json\"; for f in $BLOCKED; do if [[ \"$CLAUDE_FILE_PATH\" == *\"$f\" ]]; then echo \"BLOCKED: $f is protected.\" >&2; exit 1; fi; done'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if grep -nEi \"(api_key|secret|password|token)\\s*[:=]\\s*[\\x27\\\"][A-Za-z0-9]{8,}\" \"$CLAUDE_FILE_PATH\" 2>/dev/null; then echo \"Possible hardcoded secret.\" >&2; exit 1; fi'"
+          }
+        ]
+      }
+    ]
+  }
+}
