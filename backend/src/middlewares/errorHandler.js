@@ -1,4 +1,5 @@
 const logger = require('../config/logger');
+const ApiResponse = require('../utils/ApiResponse');
 
 // eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
@@ -7,11 +8,9 @@ const errorHandler = (err, req, res, next) => {
 
   logger.error(`${statusCode} - ${message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
 
-  res.status(statusCode).json({
-    success: false,
-    message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-  });
+  const extras = process.env.NODE_ENV === 'development' ? { stack: err.stack } : {};
+
+  res.status(statusCode).json(ApiResponse.error(message, statusCode, extras));
 };
 
 module.exports = errorHandler;
