@@ -1,12 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  Typography,
-  Rating as MuiRating,
-  LinearProgress,
-  Paper,
-} from '@mui/material';
+import { Box, Typography, Rating as MuiRating, LinearProgress, Paper } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 
 /**
