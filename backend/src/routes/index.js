@@ -1,6 +1,7 @@
 const express = require('express');
 const bookRoutes = require('./bookRoutes');
 const ratingRoutes = require('./ratingRoutes');
+const checkoutRoutes = require('./checkoutRoutes');
 
 const router = express.Router();
 
@@ -12,5 +13,6 @@ const router = express.Router();
 // Register routes
 router.use('/books', bookRoutes);
 router.use('/', ratingRoutes);
+router.use('/checkouts', checkoutRoutes);
 
 module.exports = router;
