@@ -1,1 +1,2 @@
-export { default, AVAILABILITY_FILTERS, AVAILABILITY_FILTER_LABELS } from './BookSearchToolbar';
+export { default } from './BookSearchToolbar';
+export { AVAILABILITY_FILTERS, AVAILABILITY_FILTER_LABELS } from './constants';

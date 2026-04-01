@@ -59,24 +59,27 @@ function BooksPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  const handleClearAll = () => {
+    setSearchTerm('');
+    setDebouncedSearchTerm('');
+    setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
+    setHideProfanity(false);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    setDebouncedSearchTerm('');
+  };
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
-      // Cmd+K (Mac) or Ctrl+K (Windows/Linux) to focus search
       if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
         event.preventDefault();
         searchInputRef.current?.focus();
       }
-
-      // Escape to clear search and reset filters
-      if (event.key === 'Escape') {
-        setSearchTerm('');
-        setDebouncedSearchTerm('');
-        setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
-        setHideProfanity(false);
-      }
+      if (event.key === 'Escape') handleClearAll();
     };
-
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
@@ -99,18 +102,6 @@ function BooksPage() {
 
     return filtered;
   }, [searchFiltered, availabilityFilter, hideProfanity]);
-
-  const handleClearAll = () => {
-    setSearchTerm('');
-    setDebouncedSearchTerm('');
-    setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
-    setHideProfanity(false);
-  };
-
-  const handleClearSearch = () => {
-    setSearchTerm('');
-    setDebouncedSearchTerm('');
-  };
 
   if (isLoading) {
     return <BooksPageSkeleton />;

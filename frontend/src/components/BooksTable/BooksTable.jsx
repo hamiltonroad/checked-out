@@ -1,5 +1,13 @@
 import PropTypes from 'prop-types';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from '@mui/material';
 import StatusChip from '../StatusChip';
 
 /**

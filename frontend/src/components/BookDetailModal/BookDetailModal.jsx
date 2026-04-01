@@ -31,16 +31,12 @@ import ratingService from '../../services/ratingService';
 import BookDetailsTab from './BookDetailsTab';
 import BookReviewsTab from './BookReviewsTab';
 
-/**
- * Transition component for slide-up animation
- */
+/** Transition component for slide-up animation */
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-/**
- * BookDetailModal displays detailed information about a book in a modal dialog
- */
+/** BookDetailModal displays detailed information about a book in a modal dialog */
 function BookDetailModal({ open, onClose, bookId }) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -54,14 +50,12 @@ function BookDetailModal({ open, onClose, bookId }) {
   const checkoutMutation = useCheckout();
   const book = data?.data;
 
-  // Fetch rating stats (shared between details tab and reviews tab)
   const { data: statsData } = useQuery({
     queryKey: ['bookRatingStats', bookId],
     queryFn: () => ratingService.getBookRatingStats(bookId),
     enabled: !!bookId && open,
   });
 
-  // Submit rating mutation
   const submitRatingMutation = useMutation({
     mutationFn: ratingService.submitRating,
     onSuccess: () => {
@@ -96,13 +90,7 @@ function BookDetailModal({ open, onClose, bookId }) {
       maxWidth="sm"
       fullWidth
     >
-      <DialogTitle
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         Book Details
         <IconButton
           onClick={onClose}
@@ -138,14 +126,8 @@ function BookDetailModal({ open, onClose, bookId }) {
         {error && (
           <Alert severity="error">Error loading book: {error.message || 'Unknown error'}</Alert>
         )}
-
-        {/* Details Tab */}
         {tabValue === 0 && book && <BookDetailsTab book={book} statsData={statsData} />}
-
-        {/* Reviews Tab */}
         {tabValue === 1 && book && <BookReviewsTab bookId={bookId} open={open} />}
-
-        {/* Rating Input Dialog */}
         {showRatingInput && book && (
           <RatingInput
             bookId={bookId}
@@ -178,7 +160,6 @@ function BookDetailModal({ open, onClose, bookId }) {
         )}
         <Button onClick={onClose}>Close</Button>
       </DialogActions>
-
       <CheckoutDialog
         open={checkoutOpen}
         onClose={() => {
@@ -191,7 +172,6 @@ function BookDetailModal({ open, onClose, bookId }) {
           checkoutMutation.error?.response?.data?.message || checkoutMutation.error?.message || null
         }
       />
-
       <Snackbar
         open={checkoutSuccess}
         autoHideDuration={4000}

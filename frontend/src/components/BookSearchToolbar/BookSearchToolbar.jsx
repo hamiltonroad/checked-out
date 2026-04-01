@@ -16,19 +16,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
-
-// Availability filter constants
-const AVAILABILITY_FILTERS = {
-  ALL: 'all',
-  AVAILABLE: 'available',
-  CHECKED_OUT: 'checked_out',
-};
-
-const AVAILABILITY_FILTER_LABELS = {
-  [AVAILABILITY_FILTERS.ALL]: 'All Books',
-  [AVAILABILITY_FILTERS.AVAILABLE]: 'Available',
-  [AVAILABILITY_FILTERS.CHECKED_OUT]: 'Checked Out',
-};
+import { AVAILABILITY_FILTERS, AVAILABILITY_FILTER_LABELS } from './constants';
 
 /**
  * BookSearchToolbar provides search, availability filtering, profanity filtering,
@@ -152,7 +140,12 @@ function BookSearchToolbar({
             />
           )}
           {hasActiveFilters && (
-            <Button size="small" onClick={onClearAll} sx={{ ml: 0.5 }} aria-label="Clear all filters">
+            <Button
+              size="small"
+              onClick={onClearAll}
+              sx={{ ml: 0.5 }}
+              aria-label="Clear all filters"
+            >
               Clear all filters
             </Button>
           )}
@@ -177,5 +170,4 @@ BookSearchToolbar.propTypes = {
   onClearSearch: PropTypes.func.isRequired,
 };
 
-export { AVAILABILITY_FILTERS, AVAILABILITY_FILTER_LABELS };
 export default BookSearchToolbar;
