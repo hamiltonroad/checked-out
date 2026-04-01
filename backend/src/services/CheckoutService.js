@@ -1,6 +1,44 @@
 const { Checkout, Patron, Copy, Book } = require('../models');
 const ApiError = require('../utils/ApiError');
 
+/**
+ * Shared Sequelize include config for checkout queries with patron and book details
+ */
+const CHECKOUT_INCLUDES = [
+  {
+    model: Patron,
+    as: 'patron',
+    attributes: ['first_name', 'last_name'],
+  },
+  {
+    model: Copy,
+    as: 'copy',
+    attributes: ['id'],
+    include: [
+      {
+        model: Book,
+        as: 'book',
+        attributes: ['title'],
+      },
+    ],
+  },
+];
+
+/**
+ * Format a checkout record for API response
+ * @param {Object} checkout - Sequelize checkout instance
+ * @returns {Object} Formatted checkout object
+ */
+function formatCheckoutResponse(checkout) {
+  return {
+    id: checkout.id,
+    patronName: `${checkout.patron.first_name} ${checkout.patron.last_name}`,
+    bookTitle: checkout.copy.book.title,
+    checkoutDate: checkout.checkout_date,
+    returnDate: checkout.return_date,
+  };
+}
+
 class CheckoutService {
   /**
    * Create a new checkout record
@@ -43,35 +81,11 @@ class CheckoutService {
   // eslint-disable-next-line class-methods-use-this
   async getAllCheckouts() {
     const checkouts = await Checkout.findAll({
-      include: [
-        {
-          model: Patron,
-          as: 'patron',
-          attributes: ['first_name', 'last_name'],
-        },
-        {
-          model: Copy,
-          as: 'copy',
-          attributes: ['id'],
-          include: [
-            {
-              model: Book,
-              as: 'book',
-              attributes: ['title'],
-            },
-          ],
-        },
-      ],
+      include: CHECKOUT_INCLUDES,
       order: [['created_at', 'DESC']],
     });
 
-    return checkouts.map((checkout) => ({
-      id: checkout.id,
-      patronName: `${checkout.patron.first_name} ${checkout.patron.last_name}`,
-      bookTitle: checkout.copy.book.title,
-      checkoutDate: checkout.checkout_date,
-      returnDate: checkout.return_date,
-    }));
+    return checkouts.map(formatCheckoutResponse);
   }
 
   /**
@@ -82,25 +96,7 @@ class CheckoutService {
   // eslint-disable-next-line class-methods-use-this
   async returnCheckout(id) {
     const checkout = await Checkout.findByPk(id, {
-      include: [
-        {
-          model: Patron,
-          as: 'patron',
-          attributes: ['first_name', 'last_name'],
-        },
-        {
-          model: Copy,
-          as: 'copy',
-          attributes: ['id'],
-          include: [
-            {
-              model: Book,
-              as: 'book',
-              attributes: ['title'],
-            },
-          ],
-        },
-      ],
+      include: CHECKOUT_INCLUDES,
     });
 
     if (!checkout) {
@@ -123,13 +119,7 @@ class CheckoutService {
 
     await checkout.reload();
 
-    return {
-      id: checkout.id,
-      patronName: `${checkout.patron.first_name} ${checkout.patron.last_name}`,
-      bookTitle: checkout.copy.book.title,
-      checkoutDate: checkout.checkout_date,
-      returnDate: checkout.return_date,
-    };
+    return formatCheckoutResponse(checkout);
   }
 }
 

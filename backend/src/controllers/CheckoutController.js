@@ -44,7 +44,7 @@ class CheckoutController {
   // eslint-disable-next-line class-methods-use-this
   async returnCheckout(req, res, next) {
     try {
-      const { id } = req.params;
+      const id = parseInt(req.params.id, 10);
 
       const checkout = await checkoutService.returnCheckout(id);
 
