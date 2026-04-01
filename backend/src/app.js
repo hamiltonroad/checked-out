@@ -6,6 +6,7 @@ const morgan = require('morgan');
 require('dotenv').config();
 
 const errorHandler = require('./middlewares/errorHandler');
+const healthRoutes = require('./routes/healthRoutes');
 const logger = require('./config/logger');
 
 const app = express();
@@ -50,10 +51,8 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
 }
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+// Health check routes: /health, /health/live, /health/ready
+app.use('/health', healthRoutes);
 
 // API routes
 const routes = require('./routes');
