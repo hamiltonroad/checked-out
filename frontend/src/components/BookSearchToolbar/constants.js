@@ -1,0 +1,14 @@
+// Availability filter constants
+const AVAILABILITY_FILTERS = {
+  ALL: 'all',
+  AVAILABLE: 'available',
+  CHECKED_OUT: 'checked_out',
+};
+
+const AVAILABILITY_FILTER_LABELS = {
+  [AVAILABILITY_FILTERS.ALL]: 'All Books',
+  [AVAILABILITY_FILTERS.AVAILABLE]: 'Available',
+  [AVAILABILITY_FILTERS.CHECKED_OUT]: 'Checked Out',
+};
+
+export { AVAILABILITY_FILTERS, AVAILABILITY_FILTER_LABELS };

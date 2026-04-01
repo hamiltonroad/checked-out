@@ -1,58 +1,29 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import PropTypes from 'prop-types';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   Container,
   Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Paper,
   Alert,
   Box,
-  TextField,
-  InputAdornment,
-  IconButton,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Skeleton,
-  Chip,
-  Button,
   Fade,
   Stack,
   useMediaQuery,
   useTheme,
-  FormControlLabel,
-  Checkbox,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
 import SearchOffIcon from '@mui/icons-material/SearchOff';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 import { useBooks } from '../hooks/useBooks';
 import { useBookSearch } from '../hooks/useBookSearch';
 import BookDetailModal from '../components/BookDetailModal';
-import StatusChip from '../components/StatusChip';
 import EmptyState from '../components/EmptyState';
 import BookCard from '../components/BookCard';
-
-// Availability filter constants
-const AVAILABILITY_FILTERS = {
-  ALL: 'all',
-  AVAILABLE: 'available',
-  CHECKED_OUT: 'checked_out',
-};
-
-const AVAILABILITY_FILTER_LABELS = {
-  [AVAILABILITY_FILTERS.ALL]: 'All Books',
-  [AVAILABILITY_FILTERS.AVAILABLE]: 'Available',
-  [AVAILABILITY_FILTERS.CHECKED_OUT]: 'Checked Out',
-};
+import BooksPageSkeleton from '../components/BooksPageSkeleton';
+import BookSearchToolbar, {
+  AVAILABILITY_FILTERS,
+  AVAILABILITY_FILTER_LABELS,
+} from '../components/BookSearchToolbar';
+import BooksTable from '../components/BooksTable';
 
 /**
  * BooksPage displays a list of all books in a table format with search and availability filtering
@@ -88,27 +59,30 @@ function BooksPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  const handleClearAll = useCallback(() => {
+    setSearchTerm('');
+    setDebouncedSearchTerm('');
+    setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
+    setHideProfanity(false);
+  }, []);
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    setDebouncedSearchTerm('');
+  };
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
-      // Cmd+K (Mac) or Ctrl+K (Windows/Linux) to focus search
       if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
         event.preventDefault();
         searchInputRef.current?.focus();
       }
-
-      // Escape to clear search and reset filters
-      if (event.key === 'Escape') {
-        setSearchTerm('');
-        setDebouncedSearchTerm('');
-        setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
-        setHideProfanity(false);
-      }
+      if (event.key === 'Escape') handleClearAll();
     };
-
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [handleClearAll]);
 
   // Get books and filter by search term
   const books = data?.data || [];
@@ -118,12 +92,10 @@ function BooksPage() {
   const filteredBooks = useMemo(() => {
     let filtered = searchFiltered;
 
-    // Filter by availability
     if (availabilityFilter !== AVAILABILITY_FILTERS.ALL) {
       filtered = filtered.filter((book) => book.status === availabilityFilter);
     }
 
-    // Filter by profanity
     if (hideProfanity) {
       filtered = filtered.filter((book) => !book.has_profanity);
     }
@@ -132,68 +104,43 @@ function BooksPage() {
   }, [searchFiltered, availabilityFilter, hideProfanity]);
 
   if (isLoading) {
-    return (
-      <Container>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h4" component="h1" sx={{ color: 'primary.main', fontWeight: 600 }}>
-            Books
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Browse and search our library collection
-          </Typography>
-        </Box>
-        <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: 2,
-              alignItems: 'flex-start',
-              mb: 1.5,
-            }}
-          >
-            <Skeleton
-              variant="rounded"
-              height={56}
-              sx={{ flexGrow: 1, width: { xs: '100%', sm: 'auto' } }}
-            />
-            <Skeleton variant="rounded" height={56} sx={{ width: { xs: '100%', sm: 200 } }} />
-          </Box>
-          <Skeleton variant="text" width={150} />
-        </Paper>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Title</TableCell>
-                <TableCell>Author(s)</TableCell>
-                <TableCell>Availability</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {[...Array(6)].map((_, index) => (
-                <TableRow key={index}>
-                  <TableCell>
-                    <Skeleton variant="text" width="60%" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton variant="text" width="40%" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton variant="rounded" width={100} height={24} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Container>
-    );
+    return <BooksPageSkeleton />;
   }
 
   if (error) {
     return <Alert severity="error">Error loading books: {error.message || 'Unknown error'}</Alert>;
   }
+
+  // Determine empty state content
+  const renderEmptyState = () => {
+    let icon, title, message;
+
+    if (debouncedSearchTerm && availabilityFilter !== AVAILABILITY_FILTERS.ALL) {
+      icon = <SearchOffIcon sx={{ fontSize: 'inherit' }} />;
+      title = 'No matching books found';
+      message = `No ${AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase()} books found matching "${debouncedSearchTerm}"`;
+    } else if (debouncedSearchTerm) {
+      icon = <SearchOffIcon sx={{ fontSize: 'inherit' }} />;
+      title = 'No matching books found';
+      message = `No books found matching "${debouncedSearchTerm}"`;
+    } else if (availabilityFilter !== AVAILABILITY_FILTERS.ALL) {
+      icon = <FilterListOffIcon sx={{ fontSize: 'inherit' }} />;
+      title = 'No books available';
+      message = `No ${AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase()} books`;
+    } else {
+      icon = <MenuBookIcon sx={{ fontSize: 'inherit' }} />;
+      title = 'No books in the library yet';
+      message = 'The library is empty. Books will appear here once they are added.';
+    }
+
+    return (
+      <Fade in={!isLoading} timeout={500}>
+        <div>
+          <EmptyState icon={icon} title={title} message={message} />
+        </div>
+      </Fade>
+    );
+  };
 
   return (
     <Container>
@@ -209,219 +156,28 @@ function BooksPage() {
       </Fade>
       <Fade in={!isLoading} timeout={400}>
         <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: 2,
-              alignItems: 'flex-start',
-              mb: 1.5,
-            }}
-          >
-            <TextField
-              fullWidth
-              label="Search Books"
-              placeholder="Search by title or author... (⌘K or Ctrl+K)"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              inputRef={searchInputRef}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: searchTerm && (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setSearchTerm('')} aria-label="Clear search">
-                      <ClearIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
-              <InputLabel id="availability-filter-label">Availability</InputLabel>
-              <Select
-                labelId="availability-filter-label"
-                id="availability-filter"
-                value={availabilityFilter}
-                label="Availability"
-                onChange={(e) => setAvailabilityFilter(e.target.value)}
-              >
-                <MenuItem value={AVAILABILITY_FILTERS.ALL}>
-                  {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.ALL]}
-                </MenuItem>
-                <MenuItem value={AVAILABILITY_FILTERS.AVAILABLE}>
-                  {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE]}
-                </MenuItem>
-                <MenuItem value={AVAILABILITY_FILTERS.CHECKED_OUT}>
-                  {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT]}
-                </MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-          <Box sx={{ mt: 1 }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={hideProfanity}
-                  onChange={(e) => setHideProfanity(e.target.checked)}
-                />
-              }
-              label="Hide books with profanity"
-            />
-          </Box>
-          <Typography variant="body2" color="text.secondary">
-            Showing {filteredBooks.length} of {books.length} books
-          </Typography>
-          {(debouncedSearchTerm ||
-            availabilityFilter !== AVAILABILITY_FILTERS.ALL ||
-            hideProfanity) && (
-            <Box
-              sx={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 1,
-                mt: 2,
-                alignItems: 'center',
-              }}
-            >
-              {debouncedSearchTerm && (
-                <Chip
-                  label={`Search: "${debouncedSearchTerm}"`}
-                  onDelete={() => {
-                    setSearchTerm('');
-                    setDebouncedSearchTerm('');
-                  }}
-                  size="small"
-                  variant="outlined"
-                  aria-label={`Remove search filter: ${debouncedSearchTerm}`}
-                />
-              )}
-              {availabilityFilter !== AVAILABILITY_FILTERS.ALL && (
-                <Chip
-                  label={`Availability: ${AVAILABILITY_FILTER_LABELS[availabilityFilter]}`}
-                  onDelete={() => setAvailabilityFilter(AVAILABILITY_FILTERS.ALL)}
-                  size="small"
-                  variant="outlined"
-                  aria-label={`Remove availability filter: ${AVAILABILITY_FILTER_LABELS[availabilityFilter]}`}
-                />
-              )}
-              {hideProfanity && (
-                <Chip
-                  label="Hiding profanity"
-                  onDelete={() => setHideProfanity(false)}
-                  size="small"
-                  variant="outlined"
-                  aria-label="Remove profanity filter"
-                />
-              )}
-              {(debouncedSearchTerm ||
-                availabilityFilter !== AVAILABILITY_FILTERS.ALL ||
-                hideProfanity) && (
-                <Button
-                  size="small"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setDebouncedSearchTerm('');
-                    setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
-                    setHideProfanity(false);
-                  }}
-                  sx={{ ml: 0.5 }}
-                  aria-label="Clear all filters"
-                >
-                  Clear all filters
-                </Button>
-              )}
-            </Box>
-          )}
+          <BookSearchToolbar
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            searchInputRef={searchInputRef}
+            availabilityFilter={availabilityFilter}
+            onAvailabilityChange={setAvailabilityFilter}
+            hideProfanity={hideProfanity}
+            onHideProfanityChange={setHideProfanity}
+            onClearAll={handleClearAll}
+            filteredCount={filteredBooks.length}
+            totalCount={books.length}
+            debouncedSearchTerm={debouncedSearchTerm}
+            onClearSearch={handleClearSearch}
+          />
         </Paper>
       </Fade>
-      {filteredBooks.length === 0 &&
-        (() => {
-          // Determine which icon and message to show based on current state
-          let icon, title, message;
-
-          if (debouncedSearchTerm && availabilityFilter !== AVAILABILITY_FILTERS.ALL) {
-            // Search + Filter active
-            icon = <SearchOffIcon sx={{ fontSize: 'inherit' }} />;
-            title = 'No matching books found';
-            message = `No ${AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase()} books found matching "${debouncedSearchTerm}"`;
-          } else if (debouncedSearchTerm) {
-            // Search only
-            icon = <SearchOffIcon sx={{ fontSize: 'inherit' }} />;
-            title = 'No matching books found';
-            message = `No books found matching "${debouncedSearchTerm}"`;
-          } else if (availabilityFilter !== AVAILABILITY_FILTERS.ALL) {
-            // Filter only
-            icon = <FilterListOffIcon sx={{ fontSize: 'inherit' }} />;
-            title = 'No books available';
-            message = `No ${AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase()} books`;
-          } else {
-            // Empty library
-            icon = <MenuBookIcon sx={{ fontSize: 'inherit' }} />;
-            title = 'No books in the library yet';
-            message = 'The library is empty. Books will appear here once they are added.';
-          }
-
-          return (
-            <Fade in={!isLoading} timeout={500}>
-              <div>
-                <EmptyState icon={icon} title={title} message={message} />
-              </div>
-            </Fade>
-          );
-        })()}
+      {filteredBooks.length === 0 && renderEmptyState()}
       {filteredBooks.length > 0 && !isMobile && (
         <Fade in={!isLoading} timeout={500}>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'action.hover' }}>
-                  <TableCell sx={{ fontWeight: 600 }}>Title</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Author(s)</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Availability</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredBooks.map((book, index) => {
-                  const authors = book.authors
-                    .map((author) => `${author.first_name} ${author.last_name}`)
-                    .join(', ');
-                  const isLastRow = index === filteredBooks.length - 1;
-                  const tableCellSx = {
-                    borderBottom: isLastRow ? 'none' : '1px solid',
-                    borderColor: 'divider',
-                  };
-
-                  return (
-                    <TableRow
-                      key={book.id}
-                      onClick={() => handleRowClick(book.id)}
-                      sx={{
-                        cursor: 'pointer',
-                        transition: (theme) =>
-                          theme.transitions.create(['background-color'], {
-                            duration: theme.transitions.duration.short,
-                          }),
-                        '@media (prefers-reduced-motion: reduce)': {
-                          transition: 'none',
-                        },
-                        '&:hover': { bgcolor: 'action.hover' },
-                      }}
-                    >
-                      <TableCell sx={tableCellSx}>{book.title}</TableCell>
-                      <TableCell sx={tableCellSx}>{authors}</TableCell>
-                      <TableCell sx={tableCellSx}>
-                        <StatusChip status={book.status} />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <div>
+            <BooksTable books={filteredBooks} onRowClick={handleRowClick} />
+          </div>
         </Fade>
       )}
       {filteredBooks.length > 0 && isMobile && (
