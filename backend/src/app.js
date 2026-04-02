@@ -8,31 +8,15 @@ require('dotenv').config();
 const errorHandler = require('./middlewares/errorHandler');
 const healthRoutes = require('./routes/healthRoutes');
 const logger = require('./config/logger');
+const corsOptions = require('./config/cors');
 
 const app = express();
 
 // Security middleware
 app.use(helmet());
 
-// CORS
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      const allowedOrigins = [
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://localhost:5175',
-      ];
-      // Allow requests with no origin (like from Postman or curl)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-  })
-);
+// CORS — origins configured via CORS_ORIGINS env var (see config/cors.js)
+app.use(cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
