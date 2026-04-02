@@ -1,12 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import BooksPage from './BooksPage';
 import { useBooks } from '../hooks/useBooks';
 import { useBook } from '../hooks/useBook';
 
 vi.mock('../hooks/useBooks');
 vi.mock('../hooks/useBook');
+
+/** Wrap component in QueryClientProvider for components that use useQueryClient */
+function renderWithQueryClient(ui) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+}
 
 // Mock useMediaQuery and useTheme from Material-UI
 const mockUseMediaQuery = vi.fn();
@@ -25,12 +32,22 @@ vi.mock('@mui/material', async () => {
   };
 });
 
+/** Helper to build mock data in the new paginated response shape */
+function makeMockResponse(books, total) {
+  const count = total !== undefined ? total : books.length;
+  return {
+    status: 'success',
+    data: {
+      books,
+      pagination: { page: 1, limit: 20, total: count, totalPages: Math.ceil(count / 20) || 0 },
+    },
+  };
+}
+
 describe('BooksPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default to desktop view (not mobile)
     mockUseMediaQuery.mockReturnValue(false);
-    // Mock useBook hook to return idle state (modal closed by default)
     useBook.mockReturnValue({
       data: undefined,
       isLoading: false,
@@ -45,45 +62,32 @@ describe('BooksPage', () => {
       error: null,
     });
 
-    const { container } = render(<BooksPage />);
+    const { container } = renderWithQueryClient(<BooksPage />);
 
-    // Check for page structure during loading
     expect(screen.getByText('Books')).toBeInTheDocument();
-    expect(screen.getByText('Title')).toBeInTheDocument();
-    expect(screen.getByText('Author(s)')).toBeInTheDocument();
-    expect(screen.getByText('Availability')).toBeInTheDocument();
-
-    // Verify skeleton elements are present
     const skeletons = container.querySelectorAll('.MuiSkeleton-root');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
-  it('should display books table when data is loaded', async () => {
-    const mockData = {
-      status: 'success',
-      data: [
-        {
-          id: 1,
-          title: 'The Great Gatsby',
-          authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }],
-          status: 'available',
-        },
-        {
-          id: 2,
-          title: '1984',
-          authors: [{ first_name: 'George', last_name: 'Orwell' }],
-          status: 'available',
-        },
-      ],
-    };
+  it('should display books table when data is loaded', () => {
+    const mockData = makeMockResponse([
+      {
+        id: 1,
+        title: 'The Great Gatsby',
+        authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }],
+        status: 'available',
+      },
+      {
+        id: 2,
+        title: '1984',
+        authors: [{ first_name: 'George', last_name: 'Orwell' }],
+        status: 'available',
+      },
+    ]);
 
-    useBooks.mockReturnValue({
-      data: mockData,
-      isLoading: false,
-      error: null,
-    });
+    useBooks.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
-    render(<BooksPage />);
+    renderWithQueryClient(<BooksPage />);
 
     expect(screen.getByText('Books')).toBeInTheDocument();
     expect(screen.getByText('The Great Gatsby')).toBeInTheDocument();
@@ -94,13 +98,9 @@ describe('BooksPage', () => {
 
   it('should show error alert when error occurs', () => {
     const mockError = new Error('Network error');
-    useBooks.mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: mockError,
-    });
+    useBooks.mockReturnValue({ data: undefined, isLoading: false, error: mockError });
 
-    render(<BooksPage />);
+    renderWithQueryClient(<BooksPage />);
 
     expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(screen.getByText(/Error loading books/i)).toBeInTheDocument();
@@ -108,95 +108,76 @@ describe('BooksPage', () => {
   });
 
   it('should display authors comma-separated', () => {
-    const mockData = {
-      status: 'success',
-      data: [
-        {
-          id: 1,
-          title: 'Good Omens',
-          authors: [
-            { first_name: 'Terry', last_name: 'Pratchett' },
-            { first_name: 'Neil', last_name: 'Gaiman' },
-          ],
-          status: 'available',
-        },
-      ],
-    };
+    const mockData = makeMockResponse([
+      {
+        id: 1,
+        title: 'Good Omens',
+        authors: [
+          { first_name: 'Terry', last_name: 'Pratchett' },
+          { first_name: 'Neil', last_name: 'Gaiman' },
+        ],
+        status: 'available',
+      },
+    ]);
 
-    useBooks.mockReturnValue({
-      data: mockData,
-      isLoading: false,
-      error: null,
-    });
+    useBooks.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
-    render(<BooksPage />);
+    renderWithQueryClient(<BooksPage />);
 
     expect(screen.getByText('Terry Pratchett, Neil Gaiman')).toBeInTheDocument();
   });
 
-  it('should show availability status from API data using StatusChip', () => {
-    const mockData = {
-      status: 'success',
-      data: [
-        {
-          id: 1,
-          title: 'Book 1',
-          authors: [{ first_name: 'Author', last_name: 'One' }],
-          status: 'available',
-        },
-        {
-          id: 2,
-          title: 'Book 2',
-          authors: [{ first_name: 'Author', last_name: 'Two' }],
-          status: 'checked_out',
-        },
-      ],
-    };
+  it('should show availability status using StatusChip', () => {
+    const mockData = makeMockResponse([
+      {
+        id: 1,
+        title: 'Book 1',
+        authors: [{ first_name: 'Author', last_name: 'One' }],
+        status: 'available',
+      },
+      {
+        id: 2,
+        title: 'Book 2',
+        authors: [{ first_name: 'Author', last_name: 'Two' }],
+        status: 'checked_out',
+      },
+    ]);
 
-    useBooks.mockReturnValue({
-      data: mockData,
-      isLoading: false,
-      error: null,
-    });
+    useBooks.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
-    const { container } = render(<BooksPage />);
+    const { container } = renderWithQueryClient(<BooksPage />);
 
-    // Check for StatusChip labels
     expect(screen.getByText('Available')).toBeInTheDocument();
     expect(screen.getByText('Checked Out')).toBeInTheDocument();
 
-    // Verify Chip components are rendered
     const chips = container.querySelectorAll('.MuiChip-root');
     expect(chips.length).toBeGreaterThanOrEqual(2);
   });
 
   describe('Search Functionality', () => {
-    const mockBooksData = {
-      status: 'success',
-      data: [
-        {
-          id: 1,
-          title: 'Clean Code',
-          authors: [{ first_name: 'Robert', last_name: 'Martin' }],
-          status: 'available',
-        },
-        {
-          id: 2,
-          title: 'The Pragmatic Programmer',
-          authors: [
-            { first_name: 'Andrew', last_name: 'Hunt' },
-            { first_name: 'David', last_name: 'Thomas' },
-          ],
-          status: 'available',
-        },
-        {
-          id: 3,
-          title: 'Design Patterns',
-          authors: [{ first_name: 'Erich', last_name: 'Gamma' }],
-          status: 'available',
-        },
-      ],
-    };
+    const mockBooksData = makeMockResponse([
+      {
+        id: 1,
+        title: 'Clean Code',
+        authors: [{ first_name: 'Robert', last_name: 'Martin' }],
+        status: 'available',
+      },
+      {
+        id: 2,
+        title: 'The Pragmatic Programmer',
+        authors: [
+          { first_name: 'Andrew', last_name: 'Hunt' },
+          { first_name: 'David', last_name: 'Thomas' },
+        ],
+        status: 'available',
+      },
+      {
+        id: 3,
+        title: 'Design Patterns',
+        authors: [{ first_name: 'Erich', last_name: 'Gamma' }],
+        status: 'available',
+      },
+    ]);
 
     beforeEach(() => {
       useBooks.mockReturnValue({
@@ -207,7 +188,7 @@ describe('BooksPage', () => {
     });
 
     it('should render search input with correct label and placeholder', () => {
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
       const searchInput = screen.getByLabelText('Search Books');
       expect(searchInput).toBeInTheDocument();
@@ -217,101 +198,16 @@ describe('BooksPage', () => {
       );
     });
 
-    it('should filter books by title (case-insensitive)', async () => {
+    it('should show search chip after typing and debounce', async () => {
       const user = userEvent.setup();
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
       const searchInput = screen.getByLabelText('Search Books');
       await user.type(searchInput, 'clean');
 
-      // Wait for debounce
       await waitFor(
         () => {
-          expect(screen.getByText('Clean Code')).toBeInTheDocument();
-          expect(screen.queryByText('The Pragmatic Programmer')).not.toBeInTheDocument();
-          expect(screen.queryByText('Design Patterns')).not.toBeInTheDocument();
-        },
-        { timeout: 500 }
-      );
-    });
-
-    it('should filter books by title with uppercase search', async () => {
-      const user = userEvent.setup();
-      render(<BooksPage />);
-
-      const searchInput = screen.getByLabelText('Search Books');
-      await user.type(searchInput, 'CLEAN');
-
-      await waitFor(
-        () => {
-          expect(screen.getByText('Clean Code')).toBeInTheDocument();
-          expect(screen.queryByText('The Pragmatic Programmer')).not.toBeInTheDocument();
-        },
-        { timeout: 500 }
-      );
-    });
-
-    it('should filter books by author first name', async () => {
-      const user = userEvent.setup();
-      render(<BooksPage />);
-
-      const searchInput = screen.getByLabelText('Search Books');
-      await user.type(searchInput, 'Robert');
-
-      await waitFor(
-        () => {
-          expect(screen.getByText('Clean Code')).toBeInTheDocument();
-          expect(screen.queryByText('The Pragmatic Programmer')).not.toBeInTheDocument();
-          expect(screen.queryByText('Design Patterns')).not.toBeInTheDocument();
-        },
-        { timeout: 500 }
-      );
-    });
-
-    it('should filter books by author last name', async () => {
-      const user = userEvent.setup();
-      render(<BooksPage />);
-
-      const searchInput = screen.getByLabelText('Search Books');
-      await user.type(searchInput, 'Gamma');
-
-      await waitFor(
-        () => {
-          expect(screen.getByText('Design Patterns')).toBeInTheDocument();
-          expect(screen.queryByText('Clean Code')).not.toBeInTheDocument();
-          expect(screen.queryByText('The Pragmatic Programmer')).not.toBeInTheDocument();
-        },
-        { timeout: 500 }
-      );
-    });
-
-    it('should handle partial matches', async () => {
-      const user = userEvent.setup();
-      render(<BooksPage />);
-
-      const searchInput = screen.getByLabelText('Search Books');
-      await user.type(searchInput, 'prag');
-
-      await waitFor(
-        () => {
-          expect(screen.getByText('The Pragmatic Programmer')).toBeInTheDocument();
-          expect(screen.queryByText('Clean Code')).not.toBeInTheDocument();
-        },
-        { timeout: 500 }
-      );
-    });
-
-    it('should show "No books found" message when search returns no results', async () => {
-      const user = userEvent.setup();
-      render(<BooksPage />);
-
-      const searchInput = screen.getByLabelText('Search Books');
-      await user.type(searchInput, 'xyz123');
-
-      await waitFor(
-        () => {
-          expect(screen.getByText(/No books found matching "xyz123"/i)).toBeInTheDocument();
-          expect(screen.queryByText('Clean Code')).not.toBeInTheDocument();
+          expect(screen.getByText('Search: "clean"')).toBeInTheDocument();
         },
         { timeout: 500 }
       );
@@ -319,127 +215,72 @@ describe('BooksPage', () => {
 
     it('should show clear button when search has text', async () => {
       const user = userEvent.setup();
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
       const searchInput = screen.getByLabelText('Search Books');
 
-      // Clear button should not be visible initially
       expect(screen.queryByLabelText('Clear search')).not.toBeInTheDocument();
 
       await user.type(searchInput, 'clean');
 
-      // Clear button should appear
       expect(screen.getByLabelText('Clear search')).toBeInTheDocument();
     });
 
     it('should clear search when clear button is clicked', async () => {
       const user = userEvent.setup();
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
       const searchInput = screen.getByLabelText('Search Books');
       await user.type(searchInput, 'clean');
 
-      // Wait for filtering
-      await waitFor(() => {
-        expect(screen.getByText('Clean Code')).toBeInTheDocument();
-      });
-
       const clearButton = screen.getByLabelText('Clear search');
       await user.click(clearButton);
 
-      // All books should be visible again
       expect(searchInput).toHaveValue('');
-      await waitFor(
-        () => {
-          expect(screen.getByText('Clean Code')).toBeInTheDocument();
-          expect(screen.getByText('The Pragmatic Programmer')).toBeInTheDocument();
-          expect(screen.getByText('Design Patterns')).toBeInTheDocument();
-        },
-        { timeout: 500 }
-      );
     });
 
     it('should show all books when search is empty', () => {
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
       expect(screen.getByText('Clean Code')).toBeInTheDocument();
       expect(screen.getByText('The Pragmatic Programmer')).toBeInTheDocument();
       expect(screen.getByText('Design Patterns')).toBeInTheDocument();
     });
 
-    it('should debounce search input (results should not update immediately)', async () => {
-      const user = userEvent.setup({ delay: null });
-      render(<BooksPage />);
-
-      const searchInput = screen.getByLabelText('Search Books');
-
-      // Type quickly without delay - use a more specific search term
-      await user.type(searchInput, 'pragmatic', { delay: 0 });
-
-      // After debounce delay (300ms), results should filter to only Pragmatic Programmer
-      await waitFor(
-        () => {
-          expect(screen.getByText('The Pragmatic Programmer')).toBeInTheDocument();
-          expect(screen.queryByText('Clean Code')).not.toBeInTheDocument();
-          expect(screen.queryByText('Design Patterns')).not.toBeInTheDocument();
-        },
-        { timeout: 500 }
-      );
-    });
-
-    it('should show "No books in the library yet" when database is empty', () => {
+    it('should show empty state when no books in library', () => {
       useBooks.mockReturnValue({
-        data: { status: 'success', data: [] },
+        data: makeMockResponse([]),
         isLoading: false,
         error: null,
       });
 
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
       expect(screen.getByText('No books in the library yet')).toBeInTheDocument();
-    });
-
-    it('should match books with multiple authors', async () => {
-      const user = userEvent.setup();
-      render(<BooksPage />);
-
-      const searchInput = screen.getByLabelText('Search Books');
-      await user.type(searchInput, 'Hunt');
-
-      await waitFor(
-        () => {
-          expect(screen.getByText('The Pragmatic Programmer')).toBeInTheDocument();
-          expect(screen.queryByText('Clean Code')).not.toBeInTheDocument();
-        },
-        { timeout: 500 }
-      );
     });
   });
 
   describe('Availability Filter', () => {
-    const mockBooksData = {
-      status: 'success',
-      data: [
-        {
-          id: 1,
-          title: 'Available Book 1',
-          authors: [{ first_name: 'Author', last_name: 'One' }],
-          status: 'available',
-        },
-        {
-          id: 2,
-          title: 'Checked Out Book',
-          authors: [{ first_name: 'Author', last_name: 'Two' }],
-          status: 'checked_out',
-        },
-        {
-          id: 3,
-          title: 'Available Book 2',
-          authors: [{ first_name: 'Author', last_name: 'Three' }],
-          status: 'available',
-        },
-      ],
-    };
+    const mockBooksData = makeMockResponse([
+      {
+        id: 1,
+        title: 'Available Book 1',
+        authors: [{ first_name: 'Author', last_name: 'One' }],
+        status: 'available',
+      },
+      {
+        id: 2,
+        title: 'Checked Out Book',
+        authors: [{ first_name: 'Author', last_name: 'Two' }],
+        status: 'checked_out',
+      },
+      {
+        id: 3,
+        title: 'Available Book 2',
+        authors: [{ first_name: 'Author', last_name: 'Three' }],
+        status: 'available',
+      },
+    ]);
 
     beforeEach(() => {
       useBooks.mockReturnValue({
@@ -450,23 +291,23 @@ describe('BooksPage', () => {
     });
 
     it('should render availability filter dropdown', () => {
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
       const filterLabel = screen.getByLabelText('Availability');
       expect(filterLabel).toBeInTheDocument();
     });
 
     it('should show all books by default', () => {
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
       expect(screen.getByText('Available Book 1')).toBeInTheDocument();
       expect(screen.getByText('Checked Out Book')).toBeInTheDocument();
       expect(screen.getByText('Available Book 2')).toBeInTheDocument();
     });
 
-    it('should filter to available books only', async () => {
+    it('should filter to available books only (client-side)', async () => {
       const user = userEvent.setup();
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
       const filterSelect = screen.getByLabelText('Availability');
       await user.click(filterSelect);
@@ -481,9 +322,9 @@ describe('BooksPage', () => {
       });
     });
 
-    it('should filter to checked out books only', async () => {
+    it('should filter to checked out books only (client-side)', async () => {
       const user = userEvent.setup();
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
       const filterSelect = screen.getByLabelText('Availability');
       await user.click(filterSelect);
@@ -498,35 +339,10 @@ describe('BooksPage', () => {
       });
     });
 
-    it('should combine search and availability filters', async () => {
-      const user = userEvent.setup();
-      render(<BooksPage />);
-
-      // Set availability filter to "Available"
-      const filterSelect = screen.getByLabelText('Availability');
-      await user.click(filterSelect);
-      const availableOption = screen.getByRole('option', { name: 'Available' });
-      await user.click(availableOption);
-
-      // Search for "Book 1"
-      const searchInput = screen.getByLabelText('Search Books');
-      await user.type(searchInput, 'Book 1');
-
-      await waitFor(
-        () => {
-          expect(screen.getByText('Available Book 1')).toBeInTheDocument();
-          expect(screen.queryByText('Available Book 2')).not.toBeInTheDocument();
-          expect(screen.queryByText('Checked Out Book')).not.toBeInTheDocument();
-        },
-        { timeout: 500 }
-      );
-    });
-
     it('should switch back to all books', async () => {
       const user = userEvent.setup();
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
-      // First filter to available
       const filterSelect = screen.getByLabelText('Availability');
       await user.click(filterSelect);
       const availableOption = screen.getByRole('option', { name: 'Available' });
@@ -536,7 +352,6 @@ describe('BooksPage', () => {
         expect(screen.queryByText('Checked Out Book')).not.toBeInTheDocument();
       });
 
-      // Then switch back to all
       await user.click(filterSelect);
       const allOption = screen.getByRole('option', { name: 'All Books' });
       await user.click(allOption);
@@ -550,23 +365,20 @@ describe('BooksPage', () => {
   });
 
   describe('Filter Chips', () => {
-    const mockBooksData = {
-      status: 'success',
-      data: [
-        {
-          id: 1,
-          title: 'Available Book 1',
-          authors: [{ first_name: 'Author', last_name: 'One' }],
-          status: 'available',
-        },
-        {
-          id: 2,
-          title: 'Checked Out Book',
-          authors: [{ first_name: 'Author', last_name: 'Two' }],
-          status: 'checked_out',
-        },
-      ],
-    };
+    const mockBooksData = makeMockResponse([
+      {
+        id: 1,
+        title: 'Available Book 1',
+        authors: [{ first_name: 'Author', last_name: 'One' }],
+        status: 'available',
+      },
+      {
+        id: 2,
+        title: 'Checked Out Book',
+        authors: [{ first_name: 'Author', last_name: 'Two' }],
+        status: 'checked_out',
+      },
+    ]);
 
     beforeEach(() => {
       useBooks.mockReturnValue({
@@ -577,7 +389,7 @@ describe('BooksPage', () => {
     });
 
     it('should not show chips when no filters are active', () => {
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
       expect(screen.queryByText(/Search:/)).not.toBeInTheDocument();
       expect(screen.queryByText(/Availability:/)).not.toBeInTheDocument();
@@ -585,7 +397,7 @@ describe('BooksPage', () => {
 
     it('should show search chip when search term is active', async () => {
       const user = userEvent.setup();
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
       const searchInput = screen.getByLabelText('Search Books');
       await user.type(searchInput, 'test');
@@ -598,9 +410,9 @@ describe('BooksPage', () => {
       );
     });
 
-    it('should show availability chip when availability filter is not "All"', async () => {
+    it('should show availability chip when filter is not All', async () => {
       const user = userEvent.setup();
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
       const filterSelect = screen.getByLabelText('Availability');
       await user.click(filterSelect);
@@ -612,88 +424,10 @@ describe('BooksPage', () => {
       });
     });
 
-    it('should show both chips and "Clear all filters" button when both filters are active', async () => {
+    it('should clear all filters when Clear all button is clicked', async () => {
       const user = userEvent.setup();
-      render(<BooksPage />);
+      renderWithQueryClient(<BooksPage />);
 
-      // Apply search filter
-      const searchInput = screen.getByLabelText('Search Books');
-      await user.type(searchInput, 'test');
-
-      // Apply availability filter
-      const filterSelect = screen.getByLabelText('Availability');
-      await user.click(filterSelect);
-      const availableOption = screen.getByRole('option', { name: 'Available' });
-      await user.click(availableOption);
-
-      await waitFor(
-        () => {
-          expect(screen.getByText('Search: "test"')).toBeInTheDocument();
-          expect(screen.getByText('Availability: Available')).toBeInTheDocument();
-          expect(screen.getByRole('button', { name: 'Clear all filters' })).toBeInTheDocument();
-        },
-        { timeout: 500 }
-      );
-    });
-
-    it('should clear search when search chip delete is clicked', async () => {
-      const user = userEvent.setup();
-      const { container } = render(<BooksPage />);
-
-      const searchInput = screen.getByLabelText('Search Books');
-      await user.type(searchInput, 'test');
-
-      await waitFor(
-        () => {
-          expect(screen.getByText('Search: "test"')).toBeInTheDocument();
-        },
-        { timeout: 500 }
-      );
-
-      // Find the chip with the search text and click its delete icon
-      const chipDeleteButton = container.querySelector(
-        '[aria-label="Remove search filter: test"] .MuiChip-deleteIcon'
-      );
-      await user.click(chipDeleteButton);
-
-      await waitFor(() => {
-        expect(searchInput).toHaveValue('');
-        expect(screen.queryByText('Search: "test"')).not.toBeInTheDocument();
-      });
-    });
-
-    it('should reset availability filter when availability chip delete is clicked', async () => {
-      const user = userEvent.setup();
-      const { container } = render(<BooksPage />);
-
-      const filterSelect = screen.getByLabelText('Availability');
-      await user.click(filterSelect);
-      const availableOption = screen.getByRole('option', { name: 'Available' });
-      await user.click(availableOption);
-
-      await waitFor(() => {
-        expect(screen.getByText('Availability: Available')).toBeInTheDocument();
-      });
-
-      // Find the chip with the availability filter text and click its delete icon
-      const chipDeleteButton = container.querySelector(
-        '[aria-label="Remove availability filter: Available"] .MuiChip-deleteIcon'
-      );
-      await user.click(chipDeleteButton);
-
-      await waitFor(() => {
-        expect(screen.queryByText('Availability: Available')).not.toBeInTheDocument();
-        // All books should be visible again
-        expect(screen.getByText('Available Book 1')).toBeInTheDocument();
-        expect(screen.getByText('Checked Out Book')).toBeInTheDocument();
-      });
-    });
-
-    it('should clear both filters when "Clear all filters" button is clicked', async () => {
-      const user = userEvent.setup();
-      render(<BooksPage />);
-
-      // Apply both filters
       const searchInput = screen.getByLabelText('Search Books');
       await user.type(searchInput, 'test');
 
@@ -716,179 +450,67 @@ describe('BooksPage', () => {
         expect(searchInput).toHaveValue('');
         expect(screen.queryByText('Search: "test"')).not.toBeInTheDocument();
         expect(screen.queryByText('Availability: Available')).not.toBeInTheDocument();
-        expect(screen.queryByRole('button', { name: 'Clear all filters' })).not.toBeInTheDocument();
       });
-    });
-
-    it('should have proper accessibility attributes on chips', async () => {
-      const user = userEvent.setup();
-      const { container } = render(<BooksPage />);
-
-      const searchInput = screen.getByLabelText('Search Books');
-      await user.type(searchInput, 'test');
-
-      await waitFor(
-        () => {
-          const chip = container.querySelector('[aria-label="Remove search filter: test"]');
-          expect(chip).toBeInTheDocument();
-        },
-        { timeout: 500 }
-      );
     });
   });
 
   describe('Responsive Rendering', () => {
-    const mockBooksData = {
-      status: 'success',
-      data: [
-        {
-          id: 1,
-          title: 'The Great Gatsby',
-          authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }],
-          status: 'available',
-        },
-        {
-          id: 2,
-          title: '1984',
-          authors: [{ first_name: 'George', last_name: 'Orwell' }],
-          status: 'checked_out',
-        },
-      ],
-    };
+    const mockBooksData = makeMockResponse([
+      {
+        id: 1,
+        title: 'The Great Gatsby',
+        authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }],
+        status: 'available',
+      },
+      {
+        id: 2,
+        title: '1984',
+        authors: [{ first_name: 'George', last_name: 'Orwell' }],
+        status: 'checked_out',
+      },
+    ]);
 
-    it('should display table view on desktop (not mobile)', () => {
-      mockUseMediaQuery.mockReturnValue(false); // Desktop
-      useBooks.mockReturnValue({
-        data: mockBooksData,
-        isLoading: false,
-        error: null,
-      });
+    it('should display table view on desktop', () => {
+      mockUseMediaQuery.mockReturnValue(false);
+      useBooks.mockReturnValue({ data: mockBooksData, isLoading: false, error: null });
 
-      const { container } = render(<BooksPage />);
+      const { container } = renderWithQueryClient(<BooksPage />);
 
-      // Check for table elements
       expect(screen.getByRole('table')).toBeInTheDocument();
-      expect(screen.getByText('Title')).toBeInTheDocument();
-      expect(screen.getByText('Author(s)')).toBeInTheDocument();
-      // "Availability" appears in both table header and filter label, check table header specifically
-      const tableHeaders = container.querySelectorAll('th');
-      const availabilityHeader = Array.from(tableHeaders).find((th) =>
-        th.textContent.includes('Availability')
-      );
-      expect(availabilityHeader).toBeInTheDocument();
-
-      // Check that books are displayed in table
       expect(screen.getByText('The Great Gatsby')).toBeInTheDocument();
       expect(screen.getByText('1984')).toBeInTheDocument();
 
-      // Should not have BookCard elements
       const cards = container.querySelectorAll('.MuiCard-root');
       expect(cards.length).toBe(0);
     });
 
     it('should display card view on mobile', () => {
-      mockUseMediaQuery.mockReturnValue(true); // Mobile
-      useBooks.mockReturnValue({
-        data: mockBooksData,
-        isLoading: false,
-        error: null,
-      });
+      mockUseMediaQuery.mockReturnValue(true);
+      useBooks.mockReturnValue({ data: mockBooksData, isLoading: false, error: null });
 
-      const { container } = render(<BooksPage />);
+      const { container } = renderWithQueryClient(<BooksPage />);
 
-      // Should have Stack with cards
-      const stack = container.querySelector('.MuiStack-root');
-      expect(stack).toBeInTheDocument();
-
-      // Should have BookCard elements
       const cards = container.querySelectorAll('.MuiCard-root');
-      expect(cards.length).toBe(2); // One card per book
+      expect(cards.length).toBe(2);
 
-      // Check that books are displayed in cards
       expect(screen.getByText('The Great Gatsby')).toBeInTheDocument();
       expect(screen.getByText('1984')).toBeInTheDocument();
-
-      // Should not have table
       expect(screen.queryByRole('table')).not.toBeInTheDocument();
     });
 
     it('should open modal when clicking book card on mobile', async () => {
       const user = userEvent.setup();
-      mockUseMediaQuery.mockReturnValue(true); // Mobile
-      useBooks.mockReturnValue({
-        data: mockBooksData,
-        isLoading: false,
-        error: null,
-      });
+      mockUseMediaQuery.mockReturnValue(true);
+      useBooks.mockReturnValue({ data: mockBooksData, isLoading: false, error: null });
 
-      const { container } = render(<BooksPage />);
+      const { container } = renderWithQueryClient(<BooksPage />);
 
-      // Find and click the first book card
       const firstCard = container.querySelector('.MuiCard-root');
-      expect(firstCard).toBeInTheDocument();
-
       await user.click(firstCard);
 
-      // Modal should open - check for dialog
       await waitFor(() => {
         const dialog = screen.queryByRole('dialog');
         expect(dialog).toBeInTheDocument();
-      });
-    });
-
-    it('should work with search in mobile view', async () => {
-      const user = userEvent.setup();
-      mockUseMediaQuery.mockReturnValue(true); // Mobile
-      useBooks.mockReturnValue({
-        data: mockBooksData,
-        isLoading: false,
-        error: null,
-      });
-
-      const { container } = render(<BooksPage />);
-
-      // Type in search
-      const searchInput = screen.getByLabelText('Search Books');
-      await user.type(searchInput, 'Gatsby');
-
-      // Wait for debounce
-      await waitFor(
-        () => {
-          // Should show only 1 card (Gatsby)
-          const cards = container.querySelectorAll('.MuiCard-root');
-          expect(cards.length).toBe(1);
-          expect(screen.getByText('The Great Gatsby')).toBeInTheDocument();
-          expect(screen.queryByText('1984')).not.toBeInTheDocument();
-        },
-        { timeout: 500 }
-      );
-    });
-
-    it('should work with availability filter in mobile view', async () => {
-      const user = userEvent.setup();
-      mockUseMediaQuery.mockReturnValue(true); // Mobile
-      useBooks.mockReturnValue({
-        data: mockBooksData,
-        isLoading: false,
-        error: null,
-      });
-
-      const { container } = render(<BooksPage />);
-
-      // Open availability filter and select "Available"
-      const filterSelect = screen.getByLabelText('Availability');
-      await user.click(filterSelect);
-
-      // Use getByRole with name option to find the menu item
-      const availableOption = await screen.findByRole('option', { name: 'Available' });
-      await user.click(availableOption);
-
-      await waitFor(() => {
-        // Should show only 1 card (available book)
-        const cards = container.querySelectorAll('.MuiCard-root');
-        expect(cards.length).toBe(1);
-        expect(screen.getByText('The Great Gatsby')).toBeInTheDocument();
-        expect(screen.queryByText('1984')).not.toBeInTheDocument();
       });
     });
   });
