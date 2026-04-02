@@ -181,20 +181,22 @@ checked-out/
    mysql -u root -p < database/init.sql
    ```
 
-3. **Set up the backend**
+3. **Install all dependencies**
    ```bash
-   cd backend
-   cp .env.example .env
-   # Edit .env with your database credentials
    npm install
+   ```
+   This uses npm workspaces to install both backend and frontend dependencies from the project root.
+
+4. **Set up the backend**
+   ```bash
+   cp backend/.env.example backend/.env
+   # Edit backend/.env with your database credentials
    npm run db:migrate
    ```
 
-4. **Set up the frontend**
+5. **Set up the frontend**
    ```bash
-   cd frontend
-   cp .env.example .env
-   npm install
+   cp frontend/.env.example frontend/.env
    ```
 
 ### Running the Application
