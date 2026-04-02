@@ -2,6 +2,7 @@ const express = require('express');
 const bookController = require('../controllers/bookController');
 const bookValidator = require('../validators/bookValidator');
 const validateRequest = require('../middlewares/validateRequest');
+const { standardLimiter } = require('../middlewares/rateLimiter');
 
 const router = express.Router();
 
@@ -11,9 +12,14 @@ const router = express.Router();
  */
 
 // GET /api/v1/books - Get all books with authors
-router.get('/', validateRequest(bookValidator.getAll), bookController.getAllBooks);
+router.get('/', standardLimiter, validateRequest(bookValidator.getAll), bookController.getAllBooks);
 
 // GET /api/v1/books/:id - Get a single book by ID with authors
-router.get('/:id', validateRequest(bookValidator.getById), bookController.getBookById);
+router.get(
+  '/:id',
+  standardLimiter,
+  validateRequest(bookValidator.getById),
+  bookController.getBookById
+);
 
 module.exports = router;

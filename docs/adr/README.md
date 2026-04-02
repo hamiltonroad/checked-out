@@ -34,6 +34,9 @@ This directory contains Architecture Decision Records (ADRs) for the Checked Out
 | [026](025-lower-request-body-size-limit.md) | Lower Request Body Size Limit | Accepted |
 | [027](027-deep-health-check-with-database-connectivity.md) | Deep Health Check with Database Connectivity | Accepted |
 | [028](028-standardized-validation-error-format.md) | Standardized Validation Error Format | Accepted |
+| [029](028-joi-startup-environment-validation.md) | Joi Startup Environment Validation | Accepted |
+| [030](030-cors-environment-configuration.md) | CORS Environment Configuration | Accepted |
+| [031](031-tiered-rate-limiting.md) | Tiered Rate Limiting | Accepted |
 
 ## Format
 
