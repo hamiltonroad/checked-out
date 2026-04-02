@@ -16,9 +16,11 @@
     "build": "npm run build --workspace=frontend",
     "db:migrate": "npm run db:migrate --workspace=backend",
     "db:seed": "npm run db:seed --workspace=backend",
+    "test:smoke": "npx playwright test",
     "prepare": "husky"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
     "prettier": "^3.6.2"
