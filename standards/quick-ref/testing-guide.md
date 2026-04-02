@@ -48,6 +48,30 @@ cd frontend && timeout 5 npm run dev || true
 cd frontend && npm run build 2>&1 | head -20
 ```
 
+## Smoke Testing (E2E)
+
+**Purpose:** Verify the app starts and renders without errors in a real browser. Catches dependency mismatches, build failures, and runtime errors that unit tests and lint cannot detect.
+
+**Run smoke test:**
+```bash
+npm run test:smoke
+```
+
+**What it checks:**
+- Frontend serves HTTP 200 on localhost:5173
+- Backend health endpoint responds on localhost:3000
+- App renders in a real browser (Chromium via Playwright)
+- No console errors (401 auth errors are expected and excluded)
+
+**When to run:**
+- Before starting work on an issue (pre-flight check)
+- After implementation, before code review (post-flight check)
+- The `/story-runner` and `/batch-runner` commands run smoke tests automatically at both gates
+
+**Smoke test location:** `frontend/smoke/`
+
+**Note:** Smoke tests require both frontend and backend servers to be running. Use `./scripts/start-all.sh` first, or let the smoke test handle startup itself.
+
 ## Code Quality
 
 **Always run before creating verification:**

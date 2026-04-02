@@ -45,13 +45,15 @@ Agent tool invocation:
 
 ### Step 3: Display Results and Next Steps
 
-Show the full review summary from the agent, then prompt:
+Show the full review summary from the agent, including the Suggested E2E Tests section, then prompt:
 
 ```
 Next steps:
 1. Fix Critical and High findings before merging
 2. Consider fixing Medium findings
 3. Low findings can be deferred
+4. Review suggested e2e tests — implement before or after merge as appropriate
 
 To apply fixes automatically, ask me to fix the Critical/High findings.
+To write the suggested e2e tests, ask me to implement them.
 ```

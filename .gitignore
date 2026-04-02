@@ -43,6 +43,12 @@ coverage/
 *.tmp
 .temp/
 
+# Playwright
+.playwright-mcp/
+playwright-report/
+test-results/
+blob-report/
+
 # --- harness-kit ---
 .harness-kit.lock
 # --- /harness-kit ---

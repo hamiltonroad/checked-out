@@ -39,3 +39,13 @@ When moving content between files, verify the target file contains the moved con
 ## Prefer Native Builtins
 
 Prefer native language and platform built-ins over custom reimplementations. Before writing a utility function, search docs for an existing API that serves the same purpose. Custom utilities are justified only when the native API has an ergonomic gap that affects multiple call sites.
+
+## Boy Scout Rule (Scoped)
+
+Leave every file you touch better than you found it. If you encounter standards violations, architecture rule breaks, or code quality issues in a file you are already modifying for the current task — fix them. Do not go hunting through unrelated files.
+
+**Scope:** Only files you are already editing for the current issue. If you see a violation in a file you are not otherwise changing, note it but do not touch it.
+
+**Commits:** Preexisting fixes go in their own commit, separate from feature work. Use a clear message like `fix: address preexisting violations in <file>`. This keeps PRs reviewable and changes independently revertable.
+
+**"Preexisting" is not an excuse.** If code is in your diff, it is in scope for review and correction. The fact that a violation existed before does not mean it should ship again.
