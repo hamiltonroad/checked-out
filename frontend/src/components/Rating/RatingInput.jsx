@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -17,7 +18,7 @@ import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import { formatApiError } from '../../utils/errorUtils';
 
-const labels = {
+const RATING_LABELS = {
   1: 'Poor',
   2: 'Fair',
   3: 'Good',
@@ -25,43 +26,51 @@ const labels = {
   5: 'Excellent',
 };
 
+const REVIEW_MAX_LENGTH = 2000;
+
 /**
  * Input component for submitting book ratings and reviews
  */
 function RatingInput({ bookId, bookTitle, existingRating = null, onSubmit, onClose }) {
-  const [rating, setRating] = useState(existingRating?.rating || 0);
   const [hover, setHover] = useState(-1);
-  const [reviewText, setReviewText] = useState(existingRating?.review_text || '');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      rating: existingRating?.rating || 0,
+      reviewText: existingRating?.review_text || '',
+    },
+  });
+
+  const ratingValue = watch('rating');
+  const reviewTextValue = watch('reviewText');
 
   useEffect(() => {
     if (existingRating) {
-      setRating(existingRating.rating);
-      setReviewText(existingRating.review_text || '');
+      reset({
+        rating: existingRating.rating,
+        reviewText: existingRating.review_text || '',
+      });
     }
-  }, [existingRating]);
+  }, [existingRating, reset]);
 
-  const handleSubmit = async () => {
-    if (rating === 0) {
-      setError('Please select a rating');
-      return;
-    }
-
-    setIsSubmitting(true);
-    setError(null);
-
+  const onFormSubmit = async (data) => {
     try {
       await onSubmit({
         bookId,
-        rating,
-        reviewText: reviewText.trim(),
+        rating: data.rating,
+        reviewText: data.reviewText.trim(),
       });
       onClose();
     } catch (err) {
-      setError(formatApiError(err, 'Failed to submit rating'));
-    } finally {
-      setIsSubmitting(false);
+      setError('root', { message: formatApiError(err, 'Failed to submit rating') });
     }
   };
 
@@ -74,9 +83,9 @@ function RatingInput({ bookId, bookTitle, existingRating = null, onSubmit, onClo
         </Typography>
       </DialogTitle>
       <DialogContent>
-        {error && (
+        {errors.root && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
+            {errors.root.message}
           </Alert>
         )}
 
@@ -85,22 +94,32 @@ function RatingInput({ bookId, bookTitle, existingRating = null, onSubmit, onClo
             <Typography component="legend" gutterBottom>
               Your Rating *
             </Typography>
+            {errors.rating && (
+              <Typography variant="caption" color="error">
+                {errors.rating.message}
+              </Typography>
+            )}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <MuiRating
-                value={rating}
-                size="large"
-                onChange={(event, newValue) => {
-                  setRating(newValue);
+              <Controller
+                name="rating"
+                control={control}
+                rules={{
+                  validate: (value) => (value > 0 ? true : 'Please select a rating'),
                 }}
-                onChangeActive={(event, newHover) => {
-                  setHover(newHover);
-                }}
-                emptyIcon={<StarBorderIcon fontSize="inherit" />}
-                icon={<StarIcon fontSize="inherit" />}
+                render={({ field: { onChange, value } }) => (
+                  <MuiRating
+                    value={value}
+                    size="large"
+                    onChange={(event, newValue) => onChange(newValue)}
+                    onChangeActive={(event, newHover) => setHover(newHover)}
+                    emptyIcon={<StarBorderIcon fontSize="inherit" />}
+                    icon={<StarIcon fontSize="inherit" />}
+                  />
+                )}
               />
-              {rating !== null && (
+              {ratingValue !== null && (
                 <Typography variant="body2" sx={{ ml: 2 }}>
-                  {labels[hover !== -1 ? hover : rating]}
+                  {RATING_LABELS[hover !== -1 ? hover : ratingValue]}
                 </Typography>
               )}
             </Box>
@@ -110,12 +129,11 @@ function RatingInput({ bookId, bookTitle, existingRating = null, onSubmit, onClo
             label="Your Review (Optional)"
             multiline
             rows={4}
-            value={reviewText}
-            onChange={(e) => setReviewText(e.target.value)}
             placeholder="Share your thoughts about this book..."
-            inputProps={{ maxLength: 2000 }}
-            helperText={`${reviewText.length}/2000 characters`}
+            inputProps={{ maxLength: REVIEW_MAX_LENGTH }}
+            helperText={`${reviewTextValue.length}/${REVIEW_MAX_LENGTH} characters`}
             fullWidth
+            {...register('reviewText')}
           />
         </Box>
       </DialogContent>
@@ -124,9 +142,9 @@ function RatingInput({ bookId, bookTitle, existingRating = null, onSubmit, onClo
           Cancel
         </Button>
         <Button
-          onClick={handleSubmit}
+          onClick={handleSubmit(onFormSubmit)}
           variant="contained"
-          disabled={isSubmitting || rating === 0}
+          disabled={isSubmitting || ratingValue === 0}
           startIcon={isSubmitting && <CircularProgress size={20} />}
         >
           {existingRating ? 'Update Rating' : 'Submit Rating'}
