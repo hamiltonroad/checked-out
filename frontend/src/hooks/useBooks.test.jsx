@@ -24,10 +24,13 @@ describe('useBooks', () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 
-  it('should call bookService.getAll', async () => {
+  it('should call bookService.getAll with default empty params', async () => {
     const mockData = {
       status: 'success',
-      data: [{ id: 1, title: 'Test Book', authors: [] }],
+      data: {
+        books: [{ id: 1, title: 'Test Book', authors: [] }],
+        pagination: { page: 1, limit: 20, total: 1, totalPages: 1 },
+      },
     };
     bookService.getAll.mockResolvedValue(mockData);
 
@@ -35,6 +38,25 @@ describe('useBooks', () => {
 
     await waitFor(() => {
       expect(bookService.getAll).toHaveBeenCalledTimes(1);
+      expect(bookService.getAll).toHaveBeenCalledWith({});
+    });
+  });
+
+  it('should pass query params to bookService.getAll', async () => {
+    const mockData = {
+      status: 'success',
+      data: {
+        books: [],
+        pagination: { page: 2, limit: 10, total: 0, totalPages: 0 },
+      },
+    };
+    bookService.getAll.mockResolvedValue(mockData);
+
+    const params = { search: 'gatsby', page: 2, limit: 10 };
+    renderHook(() => useBooks(params), { wrapper });
+
+    await waitFor(() => {
+      expect(bookService.getAll).toHaveBeenCalledWith(params);
     });
   });
 
@@ -52,7 +74,10 @@ describe('useBooks', () => {
   it('should return data on success', async () => {
     const mockData = {
       status: 'success',
-      data: [{ id: 1, title: 'Test Book', authors: [] }],
+      data: {
+        books: [{ id: 1, title: 'Test Book', authors: [] }],
+        pagination: { page: 1, limit: 20, total: 1, totalPages: 1 },
+      },
     };
     bookService.getAll.mockResolvedValue(mockData);
 
