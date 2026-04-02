@@ -43,7 +43,7 @@ function CheckoutDialog({ open, onClose, onSubmit, isSubmitting = false, error =
     }
   }, [open, reset]);
 
-  const onFormSubmit = (data) => {
+  const handleFormSubmit = (data) => {
     const parsedPatronId = parseInt(data.patronId, 10);
     const parsedCopyId = parseInt(data.copyId, 10);
     onSubmit({ patron_id: parsedPatronId, copy_id: parsedCopyId });
@@ -108,7 +108,7 @@ function CheckoutDialog({ open, onClose, onSubmit, isSubmitting = false, error =
           Cancel
         </Button>
         <Button
-          onClick={handleSubmit(onFormSubmit)}
+          onClick={handleSubmit(handleFormSubmit)}
           variant="contained"
           disabled={isSubmitting}
           startIcon={isSubmitting ? <CircularProgress size={16} /> : null}

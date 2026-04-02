@@ -61,7 +61,7 @@ function RatingInput({ bookId, bookTitle, existingRating = null, onSubmit, onClo
     }
   }, [existingRating, reset]);
 
-  const onFormSubmit = async (data) => {
+  const handleFormSubmit = async (data) => {
     try {
       await onSubmit({
         bookId,
@@ -142,7 +142,7 @@ function RatingInput({ bookId, bookTitle, existingRating = null, onSubmit, onClo
           Cancel
         </Button>
         <Button
-          onClick={handleSubmit(onFormSubmit)}
+          onClick={handleSubmit(handleFormSubmit)}
           variant="contained"
           disabled={isSubmitting || ratingValue === 0}
           startIcon={isSubmitting && <CircularProgress size={20} />}
