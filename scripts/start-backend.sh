@@ -58,10 +58,11 @@ if [ ! -d "$BACKEND_DIR" ]; then
   exit 1
 fi
 
-# Check if node_modules exists
-if [ ! -d "$BACKEND_DIR/node_modules" ]; then
-  echo -e "${YELLOW}⚠${NC} node_modules not found. Running npm install..."
-  cd "$BACKEND_DIR" || exit 1
+# Check if node_modules exists (install from project root for workspaces)
+PROJECT_ROOT="$SCRIPT_DIR/.."
+if [ ! -d "$PROJECT_ROOT/node_modules" ]; then
+  echo -e "${YELLOW}⚠${NC} node_modules not found. Running npm install from project root..."
+  cd "$PROJECT_ROOT" || exit 1
   npm install
   if [ $? -ne 0 ]; then
     echo -e "${RED}✗${NC} npm install failed"

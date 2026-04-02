@@ -255,13 +255,36 @@ FIX: Run `git init` and set up remote
 ACTION: Let Claude handle `git init`? (y/n) (Remote setup is manual)
 ```
 
-### Step 7: Assess Existing Commands and Agents
+### Step 7: Assess Kit File References in CLAUDE.md
+
+**If CLAUDE.md exists and kit files have been synced to the project** (check for files with `-kit` in `.claude/agents/`, `.claude/commands/`, `knowledge/`, `standards/`):
+
+Verify that CLAUDE.md's Context Guidance section references the synced kit directories so agents can find them. Check for references to:
+
+- `knowledge/` — kit knowledge docs (agent operations, hooks, context management, etc.)
+- `standards/` — craftsmanship standards, harness standard
+- `.claude/agents/` — agent definitions
+- `standards/quick-ref/craftsmanship-kit.md` — code style principles
+- `knowledge/agent-operations-kit.md` — error protocol, model assignments
+
+If kit files exist in the project but CLAUDE.md does not reference them:
+
+```
+GAP: CLAUDE.md does not reference synced kit files
+IMPACT: Agents cannot find kit knowledge docs, standards, or agent definitions — the synced files are invisible
+FIX: Add Context Guidance entries pointing to kit directories and key files
+ACTION: Let Claude handle this? (y/n)
+```
+
+If the user says yes, add entries to the Context Guidance section following the pattern in `knowledge/claude-md-sample-kit.md`. Do not list every kit file — reference directories and call out the most important individual files.
+
+### Step 8: Assess Existing Commands and Agents
 
 List any files in `.claude/commands/` and `.claude/agents/`.
 
 If they exist, report them — they may be custom commands the team already uses. Do not suggest removing them.
 
-If they do not exist, note that harness-kit commands (like `/story-runner`, `/code-review-pr`, `/harvest-reviews`) are available from the kit and can be referenced or copied.
+If they do not exist, note that harness-kit commands (like `/story-runner`, `/code-review-pr`, `/harvest-reviews-kit`) are available from the kit and can be referenced or copied.
 
 ```
 EXISTING COMMANDS: None found
@@ -269,7 +292,7 @@ NOTE: harness-kit provides commands for story running, code review, and review h
       These work via the kit — no need to copy them into your project.
 ```
 
-### Step 8: Summary and Action Plan
+### Step 9: Summary and Action Plan
 
 Present a final summary table:
 
@@ -293,7 +316,7 @@ Ready to proceed with approved actions.
 
 Then execute only the actions the user approved. After each action, confirm what was done.
 
-### Step 9: Post-Integration Verification
+### Step 10: Post-Integration Verification
 
 After all approved actions are complete, do a quick re-check:
 

@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
-package-lock.json
+backend/package-lock.json
+frontend/package-lock.json
 yarn.lock
 
 # Environment variables
@@ -25,6 +26,7 @@ Thumbs.db
 .vscode/
 .idea/
 .claude/temp/
+.claude/settings.local.json
 *.swp
 *.swo
 *~
@@ -41,6 +43,12 @@ coverage/
 # Temporary files
 *.tmp
 .temp/
+
+# Playwright
+.playwright-mcp/
+playwright-report/
+test-results/
+blob-report/
 
 # --- harness-kit ---
 .harness-kit.lock

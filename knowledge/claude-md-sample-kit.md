@@ -59,8 +59,12 @@ This is a [DESCRIPTION] built with [LANGUAGE/FRAMEWORK]. [KEY TOOLS/SERVICES].
 
 - Architecture rules: [PATH OR TBD]
 - Shared types/interfaces: [PATH OR TBD]
-- Project standards: standards/
-- Kit knowledge: knowledge/
+- Code craftsmanship: standards/quick-ref/craftsmanship-kit.md
+- Code review criteria: standards/code-review.md (project-specific) + .claude/agents/code-review-kit.md (universal)
+- How to write good CLAUDE.md: knowledge/claude-md-kit.md
+- Agent error handling and model assignments: knowledge/agent-operations-kit.md
+- Hook system and verification: knowledge/hooks-kit.md
+- All kit knowledge docs: knowledge/ (agents read these as needed)
 
 ## Git
 <!-- KIT DEFAULT — customize branch naming and commit style to match your team. -->

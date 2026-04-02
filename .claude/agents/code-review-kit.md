@@ -155,6 +155,9 @@ A finding may map to multiple pillars. The primary pillar is the one whose impro
 ### Harness Self-Audit
 Overall: <score>% (<tier>)
 Drift items: <count>
+
+### Suggested E2E Tests
+<list of recommended end-to-end tests based on what the code changes do>
 ```
 
 ### Step 8: Record Findings to code-review-results/
@@ -186,6 +189,13 @@ For each Medium+ finding, ask: **what harness change would prevent this class of
 | SQL injection       | Add a hook or ESLint rule that flags unsanitized string interpolation in query patterns                | Yes — added ESLint rule `no-raw-query-interpolation` |
 | Missing return type | ESLint rule `@typescript-eslint/explicit-function-return-type` should catch this — verify it's enabled | No                                                   |
 | Magic number        | Add a CLAUDE.md constraint: "Extract numeric literals into named constants"                            | No                                                   |
+
+## Suggested E2E Tests
+
+| # | Scenario | Steps | Expected Result | Priority |
+|---|----------|-------|-----------------|----------|
+| 1 | Audit command runs against valid project | Run `audit` on a project with all harness components | Returns score and findings list | High |
+| 2 | Audit handles missing CLAUDE.md | Run `audit` on a project with no CLAUDE.md | Returns failure with clear error message | Medium |
 ```
 
 #### When no findings exist (clean review)
@@ -216,6 +226,10 @@ No issues found.
 ## Harness Improvement Recommendations
 
 No recommendations — all reviewed code met project standards.
+
+## Suggested E2E Tests
+
+<table of recommended e2e tests, or "No e2e tests recommended — changes are internal with no user-facing behavior impact.">
 ```
 
 #### Key principles
@@ -272,6 +286,36 @@ If no issues are found, state: "No harness drift detected. All declared files an
 - List specific drift items as bullet points
 - Do NOT mix self-audit findings with code review findings — they are separate concerns
 
+### Step 8.7: Suggest E2E Tests
+
+Analyze the changed files and the behavior they implement. Based on the nature of the changes, recommend end-to-end tests that would verify the feature works correctly from a user's perspective.
+
+**How to determine suggestions:**
+
+1. Identify what user-facing behavior the changes affect (API endpoints, UI flows, CLI commands, data pipelines, etc.)
+2. For each affected behavior, describe a test scenario that exercises the full path — from input to output, across system boundaries
+3. Include both happy path and key failure scenarios
+4. If the project has existing e2e tests (check for test directories, test config files, or testing commands in `CLAUDE.md`), align suggestions with the existing framework and patterns
+5. If no e2e test infrastructure exists, note that and still describe the scenarios — they can be run manually or used to set up e2e testing later
+
+**Append to the review file** created in Step 8, after the Harness Self-Audit section:
+
+```markdown
+## Suggested E2E Tests
+
+Based on the changes in this review, the following end-to-end tests are recommended:
+
+| # | Scenario | Steps | Expected Result | Priority |
+|---|----------|-------|-----------------|----------|
+| 1 | <descriptive name> | <user-level steps to exercise the feature> | <what success looks like> | High |
+| 2 | <descriptive name> | <steps> | <expected> | Medium |
+
+### Notes
+- <any context about test infrastructure, existing coverage, or dependencies>
+```
+
+**If changes are purely internal** (refactoring, config changes, documentation) with no user-facing behavior impact, state: "No e2e tests recommended — changes are internal with no user-facing behavior impact."
+
 ### Step 9: Return Results
 
 ```
@@ -294,6 +338,7 @@ Recommendation: <Pass / Pass with fixes / Needs revision>
 
 - Focus on actionable feedback with specific file locations
 - Do NOT include positive observations — the signal in code reviews is what can improve the harness. Positive results are noise.
+- **Do NOT dismiss findings as "preexisting."** If code is in the diff, it is in scope. A violation that existed before the current change is still a violation being shipped. Flag it at the appropriate severity regardless of when it was introduced. See `standards/quick-ref/craftsmanship-kit.md` Boy Scout Rule.
 - Universal checks (Step 4) are built into this agent and apply everywhere
 - Project-specific checks (Step 5) come from `CLAUDE.md` — never hardcode them here
 - If invoked with a "fix findings" directive, apply fixes for all and return updated summary

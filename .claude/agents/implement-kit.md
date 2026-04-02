@@ -48,9 +48,10 @@ Extract: all tasks, files to create/modify, success criteria.
 
 1. **Before creating any new function, type, or helper:** Search the codebase for existing implementations. Reuse or extend existing code rather than duplicating. This applies especially to test factories and shared utilities.
 2. Execute following plan instructions exactly
-3. Verify success criteria (lint, build, typecheck pass)
-4. **Commit the completed task** — each task gets its own commit capturing one logical unit of work. Use the commit style and co-author line from `CLAUDE.md`.
-5. Handle failures per the error protocol defined in `CLAUDE.md`
+3. **Boy Scout Rule:** While editing a file, if you encounter preexisting standards violations, architecture rule breaks, or code quality issues — fix them. Only in files you are already modifying. Commit these fixes separately from feature work (see step 4).
+4. Verify success criteria (lint, build, typecheck pass)
+5. **Commit the completed task** — each task gets its own commit capturing one logical unit of work. Use the commit style and co-author line from `CLAUDE.md`. Preexisting fixes get their own commit: `fix: address preexisting violations in <file>`.
+6. Handle failures per the error protocol defined in `CLAUDE.md`
 
 **Commit guidance:** A commit should capture one coherent change. If a task is large, it may warrant multiple commits. If two tasks are trivially small and tightly coupled, they may share a commit. Use judgment — the goal is reviewable, revertable units.
 

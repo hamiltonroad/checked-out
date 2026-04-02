@@ -17,7 +17,7 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 
 ## Commands
 
-- Install: `cd backend && npm install` / `cd frontend && npm install`
+- Install: `npm install` (from project root — installs all workspace dependencies)
 - Dev server (both): `./scripts/start-all.sh`
 - Backend only: `cd backend && npm run dev` (port 3000)
 - Frontend only: `cd frontend && npm run dev` (port 5173)
