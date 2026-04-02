@@ -33,7 +33,7 @@ describe('envValidator', () => {
       expect(value.PORT).toBe(3000);
       expect(value.DB_PORT).toBe(3306);
       expect(value.DB_PASSWORD).toBe('');
-      expect(value.JWT_EXPIRES_IN).toBe('7d');
+      expect(value.JWT_EXPIRES_IN).toBe('15m');
     });
 
     it('should fail when DB_HOST is missing', () => {
