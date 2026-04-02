@@ -28,23 +28,16 @@ describe('BookController', () => {
   });
 
   describe('getAllBooks', () => {
-    it('should return 200 with books data', async () => {
-      const mockBooks = [
-        {
-          id: 1,
-          title: 'Book A',
-          isbn: '1234567890',
-          authors: [{ id: 1, first_name: 'John', last_name: 'Doe' }],
-        },
-        {
-          id: 2,
-          title: 'Book B',
-          isbn: '0987654321',
-          authors: [{ id: 2, first_name: 'Jane', last_name: 'Smith' }],
-        },
-      ];
+    it('should return 200 with books data and pagination', async () => {
+      const mockResult = {
+        books: [
+          { id: 1, title: 'Book A', authors: [] },
+          { id: 2, title: 'Book B', authors: [] },
+        ],
+        pagination: { page: 1, limit: 20, total: 2, totalPages: 1 },
+      };
 
-      bookService.getAllBooks.mockResolvedValue(mockBooks);
+      bookService.getAllBooks.mockResolvedValue(mockResult);
 
       await bookController.getAllBooks(mockReq, mockRes, mockNext);
 
@@ -53,30 +46,49 @@ describe('BookController', () => {
       expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('should call bookService.getAllBooks', async () => {
-      const mockBooks = [];
-      bookService.getAllBooks.mockResolvedValue(mockBooks);
+    it('should pass all query params to bookService.getAllBooks', async () => {
+      mockReq.query = {
+        search: 'gatsby',
+        genre: 'Fiction',
+        profanity: 'false',
+        page: '2',
+        limit: '10',
+        offset: '5',
+      };
+
+      const mockResult = {
+        books: [],
+        pagination: { page: 2, limit: 10, total: 0, totalPages: 0 },
+      };
+      bookService.getAllBooks.mockResolvedValue(mockResult);
 
       await bookController.getAllBooks(mockReq, mockRes, mockNext);
 
-      expect(bookService.getAllBooks).toHaveBeenCalledTimes(1);
       expect(bookService.getAllBooks).toHaveBeenCalledWith({
-        genre: undefined,
-        limit: undefined,
-        offset: undefined,
+        search: 'gatsby',
+        genre: 'Fiction',
+        profanity: 'false',
+        page: '2',
+        limit: '10',
+        offset: '5',
       });
     });
 
-    it('should return ApiResponse.success format', async () => {
-      const mockBooks = [{ id: 1, title: 'Book A', authors: [] }];
-      bookService.getAllBooks.mockResolvedValue(mockBooks);
+    it('should return ApiResponse.success format with books and pagination', async () => {
+      const mockResult = {
+        books: [{ id: 1, title: 'Book A', authors: [] }],
+        pagination: { page: 1, limit: 20, total: 1, totalPages: 1 },
+      };
+      bookService.getAllBooks.mockResolvedValue(mockResult);
 
       await bookController.getAllBooks(mockReq, mockRes, mockNext);
 
-      const expectedResponse = ApiResponse.success(mockBooks, 'Books retrieved successfully');
+      const expectedResponse = ApiResponse.success(
+        { books: mockResult.books, pagination: mockResult.pagination },
+        'Books retrieved successfully'
+      );
       expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
       expect(mockRes.json.mock.calls[0][0]).toHaveProperty('success', true);
-      expect(mockRes.json.mock.calls[0][0]).toHaveProperty('data', mockBooks);
     });
 
     it('should call next(error) on service error', async () => {

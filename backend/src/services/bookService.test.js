@@ -1,13 +1,22 @@
 const bookService = require('./bookService');
-const { Book, Author } = require('../models');
+const { Book } = require('../models');
 
 // Mock the models
 jest.mock('../models', () => ({
   Book: {
     findAll: jest.fn(),
+    findAndCountAll: jest.fn(),
     findByPk: jest.fn(),
   },
-  Author: {},
+  Author: {
+    findAll: jest.fn(),
+  },
+  Copy: {},
+  Checkout: {},
+  Rating: {},
+  sequelize: {
+    literal: jest.fn((sql) => sql),
+  },
 }));
 
 describe('BookService', () => {
@@ -16,77 +25,96 @@ describe('BookService', () => {
   });
 
   describe('getAllBooks', () => {
-    it('should return all books with authors', async () => {
+    it('should return books with pagination metadata', async () => {
       const mockBooks = [
-        {
-          id: 1,
-          title: 'Book A',
-          isbn: '1234567890',
-          authors: [{ id: 1, first_name: 'John', last_name: 'Doe' }],
-        },
-        {
-          id: 2,
-          title: 'Book B',
-          isbn: '0987654321',
-          authors: [{ id: 2, first_name: 'Jane', last_name: 'Smith' }],
-        },
+        { id: 1, title: 'Book A', toJSON: () => ({ id: 1, title: 'Book A', copies: [] }) },
+        { id: 2, title: 'Book B', toJSON: () => ({ id: 2, title: 'Book B', copies: [] }) },
       ];
 
-      Book.findAll.mockResolvedValue(mockBooks);
+      Book.findAndCountAll.mockResolvedValue({ count: 2, rows: mockBooks });
 
       const result = await bookService.getAllBooks();
 
-      expect(result).toEqual(mockBooks);
-      expect(Book.findAll).toHaveBeenCalledTimes(1);
-      expect(Book.findAll).toHaveBeenCalledWith({
-        where: {},
-        limit: 100,
-        offset: 0,
-        include: [
-          {
-            model: Author,
-            as: 'authors',
-            through: { attributes: [] },
-          },
-        ],
-        order: [['title', 'ASC']],
+      expect(result.books).toHaveLength(2);
+      expect(result.pagination).toEqual({
+        page: 1,
+        limit: 20,
+        total: 2,
+        totalPages: 1,
       });
+      expect(Book.findAndCountAll).toHaveBeenCalledTimes(1);
     });
 
-    it('should order books by title ascending', async () => {
-      const mockBooks = [
-        { id: 1, title: 'A Book', authors: [] },
-        { id: 2, title: 'B Book', authors: [] },
-        { id: 3, title: 'C Book', authors: [] },
-      ];
+    it('should apply genre filter', async () => {
+      Book.findAndCountAll.mockResolvedValue({ count: 0, rows: [] });
 
-      Book.findAll.mockResolvedValue(mockBooks);
+      await bookService.getAllBooks({ genre: 'Fiction' });
 
-      const result = await bookService.getAllBooks();
-
-      expect(result).toEqual(mockBooks);
-      expect(Book.findAll).toHaveBeenCalledWith(
+      expect(Book.findAndCountAll).toHaveBeenCalledWith(
         expect.objectContaining({
-          order: [['title', 'ASC']],
+          where: expect.objectContaining({ genre: 'Fiction' }),
+        })
+      );
+    });
+
+    it('should apply profanity filter', async () => {
+      Book.findAndCountAll.mockResolvedValue({ count: 0, rows: [] });
+
+      await bookService.getAllBooks({ profanity: 'false' });
+
+      expect(Book.findAndCountAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ has_profanity: false }),
+        })
+      );
+    });
+
+    it('should calculate pagination from page and limit', async () => {
+      Book.findAndCountAll.mockResolvedValue({ count: 50, rows: [] });
+
+      const result = await bookService.getAllBooks({ page: '3', limit: '10' });
+
+      expect(result.pagination).toEqual({
+        page: 3,
+        limit: 10,
+        total: 50,
+        totalPages: 5,
+      });
+      expect(Book.findAndCountAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          limit: 10,
+          offset: 20,
         })
       );
     });
 
     it('should handle empty results', async () => {
-      Book.findAll.mockResolvedValue([]);
+      Book.findAndCountAll.mockResolvedValue({ count: 0, rows: [] });
 
       const result = await bookService.getAllBooks();
 
-      expect(result).toEqual([]);
-      expect(Book.findAll).toHaveBeenCalledTimes(1);
+      expect(result.books).toEqual([]);
+      expect(result.pagination.total).toBe(0);
+      expect(result.pagination.totalPages).toBe(0);
     });
 
     it('should handle database errors', async () => {
       const dbError = new Error('Database connection failed');
-      Book.findAll.mockRejectedValue(dbError);
+      Book.findAndCountAll.mockRejectedValue(dbError);
 
       await expect(bookService.getAllBooks()).rejects.toThrow('Database connection failed');
-      expect(Book.findAll).toHaveBeenCalledTimes(1);
+    });
+
+    it('should order books by title ascending', async () => {
+      Book.findAndCountAll.mockResolvedValue({ count: 0, rows: [] });
+
+      await bookService.getAllBooks();
+
+      expect(Book.findAndCountAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          order: [['title', 'ASC']],
+        })
+      );
     });
   });
 
@@ -95,31 +123,22 @@ describe('BookService', () => {
       const mockBook = {
         id: 1,
         title: 'Test Book',
-        isbn: '1234567890',
-        publisher: 'Test Publisher',
-        publication_year: 2023,
-        genre: 'Fiction',
-        authors: [
-          { id: 1, first_name: 'John', last_name: 'Doe' },
-          { id: 2, first_name: 'Jane', last_name: 'Smith' },
-        ],
+        toJSON: () => ({
+          id: 1,
+          title: 'Test Book',
+          copies: [],
+          average_rating: null,
+          total_ratings: 0,
+        }),
       };
 
       Book.findByPk.mockResolvedValue(mockBook);
 
       const result = await bookService.getBookById(1);
 
-      expect(result).toEqual(mockBook);
+      expect(result.id).toBe(1);
+      expect(result.title).toBe('Test Book');
       expect(Book.findByPk).toHaveBeenCalledTimes(1);
-      expect(Book.findByPk).toHaveBeenCalledWith(1, {
-        include: [
-          {
-            model: Author,
-            as: 'authors',
-            through: { attributes: [] },
-          },
-        ],
-      });
     });
 
     it('should throw ApiError.notFound when book does not exist', async () => {
@@ -135,6 +154,29 @@ describe('BookService', () => {
 
       await expect(bookService.getBookById(1)).rejects.toThrow('Database connection failed');
       expect(Book.findByPk).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('calculateBookStatus', () => {
+    it('should return available when no copies exist', () => {
+      expect(bookService.calculateBookStatus([])).toBe('available');
+      expect(bookService.calculateBookStatus(null)).toBe('available');
+      expect(bookService.calculateBookStatus(undefined)).toBe('available');
+    });
+
+    it('should return available when copy has no checkouts', () => {
+      const copies = [{ checkouts: [] }];
+      expect(bookService.calculateBookStatus(copies)).toBe('available');
+    });
+
+    it('should return available when all checkouts are returned', () => {
+      const copies = [{ checkouts: [{ return_date: '2024-01-01' }] }];
+      expect(bookService.calculateBookStatus(copies)).toBe('available');
+    });
+
+    it('should return checked_out when all copies have unreturned checkouts', () => {
+      const copies = [{ checkouts: [{ return_date: null }] }];
+      expect(bookService.calculateBookStatus(copies)).toBe('checked_out');
     });
   });
 });

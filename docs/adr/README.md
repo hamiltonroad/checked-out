@@ -37,7 +37,8 @@ This directory contains Architecture Decision Records (ADRs) for the Checked Out
 | [029](028-joi-startup-environment-validation.md) | Joi Startup Environment Validation | Accepted |
 | [030](030-cors-environment-configuration.md) | CORS Environment Configuration | Accepted |
 | [031](031-tiered-rate-limiting.md) | Tiered Rate Limiting | Accepted |
-| [032](032-jwt-authentication-httponly-cookies.md) | JWT Authentication in httpOnly Cookies | Accepted |
+| [032](032-server-side-filtering-and-pagination.md) | Server-Side Filtering and Pagination | Accepted |
+| [033](033-jwt-authentication-httponly-cookies.md) | JWT Authentication in httpOnly Cookies | Accepted |
 
 ## Format
 

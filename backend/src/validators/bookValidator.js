@@ -6,7 +6,10 @@ const Joi = require('joi');
 const bookValidator = {
   getAll: {
     query: Joi.object({
+      search: Joi.string().max(255).allow('').optional(),
       genre: Joi.string().max(100).optional(),
+      profanity: Joi.string().valid('true', 'false').optional(),
+      page: Joi.number().integer().min(1).optional(),
       limit: Joi.number().integer().min(1).max(100).optional(),
       offset: Joi.number().integer().min(0).optional(),
     }),

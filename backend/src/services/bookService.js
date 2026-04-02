@@ -1,6 +1,33 @@
-const { Book, Author, Copy, Checkout, Rating, sequelize } = require('../models');
+const { Op } = require('sequelize');
+const { Book, Author, Copy, Checkout, sequelize } = require('../models');
 const ApiError = require('../utils/ApiError');
 const logger = require('../config/logger');
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 100;
+
+/** Shared rating subquery attributes for book queries */
+const RATING_ATTRIBUTES = [
+  [
+    sequelize.literal(`(
+      SELECT AVG(rating) FROM ratings WHERE ratings.book_id = Book.id
+    )`),
+    'average_rating',
+  ],
+  [
+    sequelize.literal(`(
+      SELECT COUNT(*) FROM ratings WHERE ratings.book_id = Book.id
+    )`),
+    'total_ratings',
+  ],
+];
+
+/** Shared include config for book associations */
+const BOOK_INCLUDES = [
+  { model: Author, as: 'authors', through: { attributes: [] } },
+  { model: Copy, as: 'copies', include: [{ model: Checkout, as: 'checkouts' }] },
+];
 
 /**
  * Book Service - Business logic for book operations
@@ -8,130 +35,143 @@ const logger = require('../config/logger');
 class BookService {
   /**
    * Calculate book availability status based on copies and checkouts
-   *
-   * A book is considered "available" if:
-   * - It has no copies (edge case - shows as available)
-   * - At least one copy has no checkouts
-   * - At least one copy has only returned checkouts (return_date is not null)
-   *
-   * A book is considered "checked_out" if:
-   * - ALL copies have at least one unreturned checkout (return_date is null)
-   *
-   * @param {Array<Object>} copies - Array of copy objects with nested checkouts
-   * @param {Array<Object>} copies[].checkouts - Array of checkout records for each copy
-   * @param {Date|null} copies[].checkouts[].return_date - Return date (null if not returned)
+   * @param {Array<Object>} copies - Copy objects with nested checkouts
    * @returns {string} 'available' or 'checked_out'
    */
   // eslint-disable-next-line class-methods-use-this
   calculateBookStatus(copies) {
     try {
-      // Handle edge cases
       if (!copies || !Array.isArray(copies) || copies.length === 0) {
-        return 'available'; // No copies = available (edge case)
+        return 'available';
       }
 
-      // Check if any copy is available
       const hasAvailableCopy = copies.some((copy) => {
-        // Validate copy object structure
-        if (!copy || typeof copy !== 'object') {
-          return false;
-        }
-
-        // If copy has no checkouts, it's available
+        if (!copy || typeof copy !== 'object') return false;
         if (!copy.checkouts || !Array.isArray(copy.checkouts) || copy.checkouts.length === 0) {
           return true;
         }
-
-        // If all checkouts have return dates, copy is available
-        return copy.checkouts.every((checkout) => {
-          if (!checkout || typeof checkout !== 'object') {
-            return false;
-          }
-          return checkout.return_date !== null;
-        });
+        return copy.checkouts.every(
+          (co) => co && typeof co === 'object' && co.return_date !== null
+        );
       });
 
       return hasAvailableCopy ? 'available' : 'checked_out';
     } catch (error) {
-      // Log error and return safe default
       logger.error('Error calculating book status:', error);
-      return 'available'; // Fail open - show as available if error
+      return 'available';
     }
   }
 
   /**
-   * Get all books with their authors
-   * @param {Object} filters - Query filters (genre, limit, offset, profanity)
-   * @returns {Promise<Array>} List of books with authors and status
+   * Format a raw book record into the API response shape
+   * @param {Object} book - Sequelize book instance
+   * @returns {Object} Formatted book with status and rating fields
+   */
+  formatBook(book) {
+    const bookData = book.toJSON ? book.toJSON() : book;
+    bookData.status = this.calculateBookStatus(bookData.copies);
+    bookData.average_rating = bookData.average_rating
+      ? parseFloat(bookData.average_rating).toFixed(1)
+      : null;
+    bookData.total_ratings = parseInt(bookData.total_ratings || 0, 10);
+    return bookData;
+  }
+
+  /**
+   * Escape LIKE wildcard characters in a search string
+   * @param {string} str - Raw search string
+   * @returns {string} Escaped string safe for LIKE patterns
    */
   // eslint-disable-next-line class-methods-use-this
-  async getAllBooks(filters = {}) {
-    const { genre, limit = 100, offset = 0, profanity } = filters;
-    const where = {};
+  escapeLikeWildcards(str) {
+    return str.replace(/[%_]/g, '\\$&');
+  }
+
+  /**
+   * Build Sequelize where clause from filter params
+   * @param {Object} filters - Query filters
+   * @returns {{ bookWhere: Object, authorWhere: Object|null }}
+   */
+  // eslint-disable-next-line class-methods-use-this
+  buildWhereClause(filters) {
+    const { search, genre, profanity } = filters;
+    const bookWhere = {};
+    let authorWhere = null;
 
     if (genre) {
-      where.genre = genre;
+      bookWhere.genre = genre;
     }
 
-    // Filter by profanity status if specified
-    if (profanity !== undefined) {
-      const profanityBool = profanity === 'true' || profanity === true;
-      where.has_profanity = profanityBool;
+    if (profanity !== undefined && profanity !== '') {
+      bookWhere.has_profanity = profanity === 'true' || profanity === true;
     }
 
-    const books = await Book.findAll({
-      where,
-      limit: parseInt(limit, 10),
-      offset: parseInt(offset, 10),
-      attributes: {
-        include: [
-          [
-            sequelize.literal(`(
-              SELECT AVG(rating)
-              FROM ratings
-              WHERE ratings.book_id = Book.id
-            )`),
-            'average_rating',
-          ],
-          [
-            sequelize.literal(`(
-              SELECT COUNT(*)
-              FROM ratings
-              WHERE ratings.book_id = Book.id
-            )`),
-            'total_ratings',
-          ],
+    if (search) {
+      const escaped = this.escapeLikeWildcards(search);
+      authorWhere = {
+        [Op.or]: [
+          { first_name: { [Op.like]: `%${escaped}%` } },
+          { last_name: { [Op.like]: `%${escaped}%` } },
         ],
-      },
-      include: [
-        {
-          model: Author,
-          as: 'authors',
-          through: { attributes: [] },
-        },
-        {
-          model: Copy,
-          as: 'copies',
-          include: [
-            {
-              model: Checkout,
-              as: 'checkouts',
-            },
-          ],
-        },
-      ],
+      };
+    }
+
+    return { bookWhere, authorWhere };
+  }
+
+  /**
+   * Get all books with filtering, search, and pagination
+   * @param {Object} filters - Query filters
+   * @returns {Promise<Object>} { books, pagination }
+   */
+  async getAllBooks(filters = {}) {
+    const page = Math.max(parseInt(filters.page, 10) || DEFAULT_PAGE, 1);
+    const limit = Math.min(parseInt(filters.limit, 10) || DEFAULT_LIMIT, MAX_LIMIT);
+    const offset = filters.offset !== undefined ? parseInt(filters.offset, 10) : (page - 1) * limit;
+    const { bookWhere, authorWhere } = this.buildWhereClause(filters);
+
+    // When searching, find matching book IDs first (title OR author match)
+    let bookIdFilter = null;
+    if (filters.search) {
+      const escaped = this.escapeLikeWildcards(filters.search);
+
+      const titleMatches = await Book.findAll({
+        where: { title: { [Op.like]: `%${escaped}%` } },
+        attributes: ['id'],
+        raw: true,
+      });
+
+      const authorMatches = await Author.findAll({
+        where: authorWhere,
+        attributes: [],
+        include: [{ model: Book, as: 'books', attributes: ['id'], through: { attributes: [] } }],
+      });
+
+      const authorBookIds = authorMatches.flatMap((a) => a.books.map((b) => b.id));
+      const titleBookIds = titleMatches.map((b) => b.id);
+      const allMatchIds = [...new Set([...titleBookIds, ...authorBookIds])];
+
+      bookIdFilter = { id: { [Op.in]: allMatchIds } };
+    }
+
+    const where = { ...bookWhere, ...bookIdFilter };
+
+    const { count: total, rows: books } = await Book.findAndCountAll({
+      where,
+      limit,
+      offset,
+      attributes: { include: RATING_ATTRIBUTES },
+      include: BOOK_INCLUDES,
       order: [['title', 'ASC']],
+      distinct: true,
     });
 
-    return books.map((book) => {
-      const bookData = book.toJSON();
-      bookData.status = this.calculateBookStatus(bookData.copies);
-      bookData.average_rating = bookData.average_rating
-        ? parseFloat(bookData.average_rating).toFixed(1)
-        : null;
-      bookData.total_ratings = parseInt(bookData.total_ratings || 0, 10);
-      return bookData;
-    });
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      books: books.map((book) => this.formatBook(book)),
+      pagination: { page, limit, total, totalPages },
+    };
   }
 
   /**
@@ -140,59 +180,17 @@ class BookService {
    * @returns {Promise<Object>} Book with authors and status
    * @throws {ApiError} 404 if book not found
    */
-  // eslint-disable-next-line class-methods-use-this
   async getBookById(id) {
     const book = await Book.findByPk(id, {
-      attributes: {
-        include: [
-          [
-            sequelize.literal(`(
-              SELECT AVG(rating)
-              FROM ratings
-              WHERE ratings.book_id = Book.id
-            )`),
-            'average_rating',
-          ],
-          [
-            sequelize.literal(`(
-              SELECT COUNT(*)
-              FROM ratings
-              WHERE ratings.book_id = Book.id
-            )`),
-            'total_ratings',
-          ],
-        ],
-      },
-      include: [
-        {
-          model: Author,
-          as: 'authors',
-          through: { attributes: [] },
-        },
-        {
-          model: Copy,
-          as: 'copies',
-          include: [
-            {
-              model: Checkout,
-              as: 'checkouts',
-            },
-          ],
-        },
-      ],
+      attributes: { include: RATING_ATTRIBUTES },
+      include: BOOK_INCLUDES,
     });
 
     if (!book) {
       throw ApiError.notFound(`Book with ID ${id} not found`);
     }
 
-    const bookData = book.toJSON();
-    bookData.status = this.calculateBookStatus(bookData.copies);
-    bookData.average_rating = bookData.average_rating
-      ? parseFloat(bookData.average_rating).toFixed(1)
-      : null;
-    bookData.total_ratings = parseInt(bookData.total_ratings || 0, 10);
-    return bookData;
+    return this.formatBook(book);
   }
 }
 

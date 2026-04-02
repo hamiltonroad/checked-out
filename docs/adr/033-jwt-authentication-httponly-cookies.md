@@ -1,4 +1,4 @@
-# ADR-032: JWT Authentication in httpOnly Cookies
+# ADR-033: JWT Authentication in httpOnly Cookies
 
 **Status:** Accepted
 **Date:** 2026-04-01

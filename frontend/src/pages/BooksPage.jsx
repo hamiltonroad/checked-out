@@ -14,7 +14,6 @@ import SearchOffIcon from '@mui/icons-material/SearchOff';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 import { useBooks } from '../hooks/useBooks';
-import { useBookSearch } from '../hooks/useBookSearch';
 import BookDetailModal from '../components/BookDetailModal';
 import EmptyState from '../components/EmptyState';
 import BookCard from '../components/BookCard';
@@ -24,21 +23,43 @@ import BookSearchToolbar, {
   AVAILABILITY_FILTER_LABELS,
 } from '../components/BookSearchToolbar';
 import BooksTable from '../components/BooksTable';
+import Pagination from '../components/Pagination';
 
 /**
- * BooksPage displays a list of all books in a table format with search and availability filtering
+ * BooksPage displays a list of books with server-side search, filtering, and pagination
  */
 function BooksPage() {
-  const { data, isLoading, error } = useBooks();
   const [selectedBookId, setSelectedBookId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [availabilityFilter, setAvailabilityFilter] = useState(AVAILABILITY_FILTERS.ALL);
   const [hideProfanity, setHideProfanity] = useState(false);
+  const [page, setPage] = useState(1);
   const searchInputRef = useRef(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const queryParams = useMemo(() => {
+    const params = { page, limit: 20 };
+    if (debouncedSearchTerm) params.search = debouncedSearchTerm;
+    if (hideProfanity) params.profanity = 'false';
+    return params;
+  }, [debouncedSearchTerm, hideProfanity, page]);
+
+  const { data, isLoading, error } = useBooks(queryParams);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [hideProfanity]);
 
   const handleRowClick = (bookId) => {
     setSelectedBookId(bookId);
@@ -50,20 +71,12 @@ function BooksPage() {
     setSelectedBookId(null);
   };
 
-  // Debounce search term with 300ms delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
   const handleClearAll = useCallback(() => {
     setSearchTerm('');
     setDebouncedSearchTerm('');
     setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
     setHideProfanity(false);
+    setPage(1);
   }, []);
 
   const handleClearSearch = () => {
@@ -71,7 +84,6 @@ function BooksPage() {
     setDebouncedSearchTerm('');
   };
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
       if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
@@ -84,34 +96,18 @@ function BooksPage() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleClearAll]);
 
-  // Get books and filter by search term
-  const books = data?.data || [];
-  const searchFiltered = useBookSearch(books, debouncedSearchTerm);
-
-  // Apply availability and profanity filters
+  const pagination = data?.data?.pagination || { page: 1, limit: 20, total: 0, totalPages: 0 };
   const filteredBooks = useMemo(() => {
-    let filtered = searchFiltered;
+    const serverBooks = data?.data?.books || [];
+    if (availabilityFilter === AVAILABILITY_FILTERS.ALL) return serverBooks;
+    return serverBooks.filter((book) => book.status === availabilityFilter);
+  }, [data, availabilityFilter]);
 
-    if (availabilityFilter !== AVAILABILITY_FILTERS.ALL) {
-      filtered = filtered.filter((book) => book.status === availabilityFilter);
-    }
-
-    if (hideProfanity) {
-      filtered = filtered.filter((book) => !book.has_profanity);
-    }
-
-    return filtered;
-  }, [searchFiltered, availabilityFilter, hideProfanity]);
-
-  if (isLoading) {
-    return <BooksPageSkeleton />;
-  }
-
+  if (isLoading) return <BooksPageSkeleton />;
   if (error) {
     return <Alert severity="error">Error loading books: {error.message || 'Unknown error'}</Alert>;
   }
 
-  // Determine empty state content
   const renderEmptyState = () => {
     let icon, title, message;
 
@@ -166,7 +162,7 @@ function BooksPage() {
             onHideProfanityChange={setHideProfanity}
             onClearAll={handleClearAll}
             filteredCount={filteredBooks.length}
-            totalCount={books.length}
+            totalCount={pagination.total}
             debouncedSearchTerm={debouncedSearchTerm}
             onClearSearch={handleClearSearch}
           />
@@ -188,6 +184,13 @@ function BooksPage() {
             ))}
           </Stack>
         </Fade>
+      )}
+      {pagination.totalPages > 1 && (
+        <Pagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          onPageChange={setPage}
+        />
       )}
       <BookDetailModal open={modalOpen} onClose={handleModalClose} bookId={selectedBookId} />
     </Container>
