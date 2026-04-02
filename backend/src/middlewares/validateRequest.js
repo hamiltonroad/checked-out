@@ -1,5 +1,16 @@
 const ApiError = require('../utils/ApiError');
 
+/**
+ * Transform Joi error details into field-level error objects.
+ * @param {Array} details - Joi validation error details
+ * @returns {Array<{field: string, message: string}>} Field-level error objects
+ */
+const mapValidationErrors = (details) =>
+  details.map((detail) => ({
+    field: detail.path.join('.'),
+    message: detail.message,
+  }));
+
 const validateRequest = (schema) => (req, res, next) => {
   const validationOptions = {
     abortEarly: false,
@@ -11,8 +22,8 @@ const validateRequest = (schema) => (req, res, next) => {
   if (schema.query) {
     const { error, value } = schema.query.validate(req.query, validationOptions);
     if (error) {
-      const errorMessage = error.details.map((detail) => detail.message).join(', ');
-      return next(ApiError.badRequest(errorMessage));
+      const errors = mapValidationErrors(error.details);
+      return next(ApiError.badRequest('Validation error', errors));
     }
     req.query = value;
   }
@@ -21,8 +32,8 @@ const validateRequest = (schema) => (req, res, next) => {
   if (schema.body) {
     const { error, value } = schema.body.validate(req.body, validationOptions);
     if (error) {
-      const errorMessage = error.details.map((detail) => detail.message).join(', ');
-      return next(ApiError.badRequest(errorMessage));
+      const errors = mapValidationErrors(error.details);
+      return next(ApiError.badRequest('Validation error', errors));
     }
     req.body = value;
   }
@@ -31,8 +42,8 @@ const validateRequest = (schema) => (req, res, next) => {
   if (schema.params) {
     const { error, value } = schema.params.validate(req.params, validationOptions);
     if (error) {
-      const errorMessage = error.details.map((detail) => detail.message).join(', ');
-      return next(ApiError.badRequest(errorMessage));
+      const errors = mapValidationErrors(error.details);
+      return next(ApiError.badRequest('Validation error', errors));
     }
     req.params = value;
   }

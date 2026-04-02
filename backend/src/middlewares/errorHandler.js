@@ -10,6 +10,10 @@ const errorHandler = (err, req, res, next) => {
 
   const extras = process.env.NODE_ENV === 'development' ? { stack: err.stack } : {};
 
+  if (err.errors && err.errors.length > 0) {
+    extras.errors = err.errors;
+  }
+
   res.status(statusCode).json(ApiResponse.error(message, statusCode, extras));
 };
 
