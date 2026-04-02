@@ -1,4 +1,5 @@
 const express = require('express');
+const authRoutes = require('./authRoutes');
 const bookRoutes = require('./bookRoutes');
 const ratingRoutes = require('./ratingRoutes');
 const checkoutRoutes = require('./checkoutRoutes');
@@ -11,6 +12,7 @@ const router = express.Router();
  */
 
 // Register routes
+router.use('/auth', authRoutes);
 router.use('/books', bookRoutes);
 router.use('/', ratingRoutes);
 router.use('/checkouts', checkoutRoutes);

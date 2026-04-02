@@ -1,69 +1,102 @@
-const { ApiError } = require('../utils/ApiError');
+const ApiError = require('../utils/ApiError');
 const { Patron } = require('../models');
+const authService = require('../services/AuthService');
+const logger = require('../config/logger');
+
+const ACCESS_COOKIE = 'access_token';
+const DEV_HEADER = 'x-patron-id';
 
 /**
- * Simple authentication middleware
- * In production, this would verify JWT tokens or session cookies
- * For now, we'll use a header-based patron ID for development
+ * Try to authenticate via JWT cookie.
+ * @returns {Object|null} Patron instance or null
+ */
+const authenticateViaCookie = async (req) => {
+  const token = req.cookies && req.cookies[ACCESS_COOKIE];
+
+  if (!token) {
+    return null;
+  }
+
+  const payload = authService.verifyAccessToken(token);
+
+  const patron = await Patron.findOne({
+    where: { id: payload.sub, status: 'active' },
+  });
+
+  return patron;
+};
+
+/**
+ * Fallback: authenticate via X-Patron-Id header (development only).
+ * @returns {Object|null} Patron instance or null
+ */
+const authenticateViaHeader = async (req) => {
+  if (process.env.NODE_ENV !== 'development') {
+    return null;
+  }
+
+  const patronId = req.headers[DEV_HEADER];
+
+  if (!patronId) {
+    return null;
+  }
+
+  logger.debug('Dev-mode header auth used', { patronId });
+
+  const patron = await Patron.findOne({
+    where: { id: patronId, status: 'active' },
+  });
+
+  return patron;
+};
+
+/**
+ * Authentication middleware — requires a valid patron.
+ * Checks JWT cookie first, then falls back to X-Patron-Id in dev mode.
  */
 const authenticate = async (req, res, next) => {
   try {
-    // In production, extract patron from JWT token
-    // For development, use X-Patron-Id header
-    const patronId = req.headers['x-patron-id'];
+    let patron = await authenticateViaCookie(req);
 
-    if (!patronId) {
+    if (!patron) {
+      patron = await authenticateViaHeader(req);
+    }
+
+    if (!patron) {
       throw new ApiError(401, 'Authentication required');
     }
 
-    // Verify patron exists and is active
-    const patron = await Patron.findOne({
-      where: {
-        id: patronId,
-        status: 'active',
-      },
-    });
-
-    if (!patron) {
-      throw new ApiError(401, 'Invalid or inactive patron');
-    }
-
-    // Attach patron to request
     req.patron = patron;
     next();
   } catch (error) {
-    next(error);
+    if (error instanceof ApiError) {
+      return next(error);
+    }
+    next(new ApiError(401, 'Authentication required'));
   }
 };
 
 /**
- * Optional authentication - doesn't fail if no auth provided
+ * Optional authentication — attaches patron if credentials are present
+ * but does not fail if absent.
  */
 const optionalAuth = async (req, res, next) => {
   try {
-    const patronId = req.headers['x-patron-id'];
+    let patron = await authenticateViaCookie(req);
 
-    if (patronId) {
-      const patron = await Patron.findOne({
-        where: {
-          id: patronId,
-          status: 'active',
-        },
-      });
+    if (!patron) {
+      patron = await authenticateViaHeader(req);
+    }
 
-      if (patron) {
-        req.patron = patron;
-      }
+    if (patron) {
+      req.patron = patron;
     }
 
     next();
   } catch (error) {
-    // Don't fail on auth errors for optional auth
+    // Swallow auth errors for optional auth
     next();
   }
 };
 
-module.exports = {
-  authenticate,
-  optionalAuth,
-};
+module.exports = { authenticate, optionalAuth };

@@ -21,7 +21,9 @@ const envSchema = Joi.object({
 
   // Authentication
   JWT_SECRET: Joi.string().required(),
-  JWT_EXPIRES_IN: Joi.string().default('7d'),
+  JWT_EXPIRES_IN: Joi.string().default('15m'),
+  JWT_REFRESH_SECRET: Joi.string().optional(),
+  JWT_REFRESH_EXPIRES_IN: Joi.string().default('7d'),
 
   // CORS
   CORS_ORIGIN: Joi.string().optional(),

@@ -54,11 +54,23 @@ module.exports = (sequelize) => {
           isIn: [['active', 'inactive', 'suspended']],
         },
       },
+      password_hash: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
     },
     {
       tableName: 'patrons',
       timestamps: true,
       underscored: true,
+      defaultScope: {
+        attributes: { exclude: ['password_hash'] },
+      },
+      scopes: {
+        withPassword: {
+          attributes: {},
+        },
+      },
       indexes: [{ fields: ['card_number'] }, { fields: ['email'] }, { fields: ['status'] }],
     }
   );
