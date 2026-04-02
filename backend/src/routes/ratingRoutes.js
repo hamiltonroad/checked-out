@@ -16,7 +16,12 @@ router.get('/books/top-rated', standardLimiter, ratingController.getTopRatedBook
 router.use(authenticate); // All routes below require authentication
 
 // Rating management for authenticated patrons
-router.post('/ratings', strictLimiter, validateRequest(ratingValidator.create), ratingController.submitRating);
+router.post(
+  '/ratings',
+  strictLimiter,
+  validateRequest(ratingValidator.create),
+  ratingController.submitRating
+);
 router.get('/ratings/my-ratings', standardLimiter, ratingController.getMyRatings);
 router.get('/ratings/books/:bookId', standardLimiter, ratingController.getMyRatingForBook);
 router.delete('/ratings/books/:bookId', strictLimiter, ratingController.deleteRating);

@@ -2,10 +2,12 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const errorHandler = require('./middlewares/errorHandler');
 const healthRoutes = require('./routes/healthRoutes');
+const { setCsrfCookie, verifyCsrf } = require('./middlewares/csrf');
 const logger = require('./config/logger');
 const corsOptions = require('./config/cors');
 
@@ -20,6 +22,13 @@ app.use(cors(corsOptions));
 // Body parsing — 1MB global limit; add route-specific middleware for larger payloads (e.g., file uploads)
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// Cookie parsing — required for JWT httpOnly cookies and CSRF double-submit
+app.use(cookieParser());
+
+// CSRF protection — set token cookie on all responses, verify on mutations
+app.use(setCsrfCookie);
+app.use(verifyCsrf);
 
 // HTTP request logging
 if (process.env.NODE_ENV !== 'test') {
