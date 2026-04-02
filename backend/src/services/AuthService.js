@@ -26,7 +26,7 @@ class AuthService {
     }
 
     if (!patron.password_hash) {
-      throw ApiError.unauthorized('Account not set up for password login');
+      throw ApiError.unauthorized('Invalid card number or password');
     }
 
     const valid = await bcrypt.compare(password, patron.password_hash);

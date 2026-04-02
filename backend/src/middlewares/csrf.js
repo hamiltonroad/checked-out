@@ -34,6 +34,7 @@ const setCsrfCookie = (req, res, next) => {
 /**
  * Middleware: validate CSRF token on state-changing requests.
  * Compares the X-CSRF-Token header against the _csrf cookie (double-submit pattern).
+ * Uses constant-time comparison to prevent timing attacks.
  */
 const verifyCsrf = (req, res, next) => {
   if (SAFE_METHODS.has(req.method)) {
@@ -44,11 +45,14 @@ const verifyCsrf = (req, res, next) => {
   const headerToken = req.headers[CSRF_HEADER_NAME];
 
   if (!cookieToken || !headerToken) {
-    throw ApiError.forbidden('CSRF token missing');
+    return next(ApiError.forbidden('CSRF token missing'));
   }
 
-  if (cookieToken !== headerToken) {
-    throw ApiError.forbidden('CSRF token mismatch');
+  const cookieBuf = Buffer.from(cookieToken);
+  const headerBuf = Buffer.from(headerToken);
+
+  if (cookieBuf.length !== headerBuf.length || !crypto.timingSafeEqual(cookieBuf, headerBuf)) {
+    return next(ApiError.forbidden('CSRF token mismatch'));
   }
 
   return next();
