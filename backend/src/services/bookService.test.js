@@ -1,10 +1,9 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { createRequire } from 'module';
+import { setupMockRequire } from '../test-utils/mockRequire.js';
 
-// Create a CJS require function to work with the CJS source code
-const require = createRequire(import.meta.url);
+const { require, injectMock } = setupMockRequire(import.meta.url);
 
-// Build mock objects that will be injected into the CJS module cache
+// Build mock objects for the CJS module cache
 const mockBook = {
   findAll: vi.fn(),
   findAndCountAll: vi.fn(),
@@ -20,26 +19,12 @@ const mockModels = {
   sequelize: { literal: vi.fn((sql) => sql) },
 };
 
-// Inject the mock into Node's require cache BEFORE loading the service
-const modelsPath = require.resolve('../models');
-require.cache[modelsPath] = {
-  id: modelsPath,
-  filename: modelsPath,
-  loaded: true,
-  exports: mockModels,
-};
+// Inject mocks BEFORE loading the service
+injectMock('../models', mockModels);
 
-// Also mock sequelize Op for the service's import
-const sequelizePath = require.resolve('sequelize');
 const realSequelize = require('sequelize');
-require.cache[sequelizePath] = {
-  id: sequelizePath,
-  filename: sequelizePath,
-  loaded: true,
-  exports: { ...realSequelize, Op: realSequelize.Op },
-};
+injectMock('sequelize', { ...realSequelize, Op: realSequelize.Op });
 
-// NOW load the service - it will get our mocked models
 const bookService = require('./bookService');
 const { Book } = mockModels;
 
@@ -144,7 +129,7 @@ describe('BookService', () => {
 
   describe('getBookById', () => {
     it('should return a single book with authors', async () => {
-      const mockBook = {
+      const mockBookData = {
         id: 1,
         title: 'Test Book',
         toJSON: () => ({
@@ -156,7 +141,7 @@ describe('BookService', () => {
         }),
       };
 
-      Book.findByPk.mockResolvedValue(mockBook);
+      Book.findByPk.mockResolvedValue(mockBookData);
 
       const result = await bookService.getBookById(1);
 

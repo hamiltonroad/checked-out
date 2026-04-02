@@ -1,7 +1,7 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { createRequire } from 'module';
+import { setupMockRequire } from '../test-utils/mockRequire.js';
 
-const require = createRequire(import.meta.url);
+const { require, injectMock } = setupMockRequire(import.meta.url);
 
 // Build mock objects for the CJS module cache
 const mockCheckout = {
@@ -17,14 +17,8 @@ const mockModels = {
   Book: {},
 };
 
-// Inject mock into Node's require cache before loading the service
-const modelsPath = require.resolve('../models');
-require.cache[modelsPath] = {
-  id: modelsPath,
-  filename: modelsPath,
-  loaded: true,
-  exports: mockModels,
-};
+// Inject mock before loading the service
+injectMock('../models', mockModels);
 
 const checkoutService = require('./CheckoutService');
 const ApiError = require('../utils/ApiError');
