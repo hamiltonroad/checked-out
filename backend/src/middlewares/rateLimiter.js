@@ -1,5 +1,6 @@
 const rateLimit = require('express-rate-limit');
 const logger = require('../config/logger');
+const ApiResponse = require('../utils/ApiResponse');
 
 /**
  * Rate Limit Tier Configurations
@@ -33,10 +34,9 @@ const createRateLimiter = (tierConfig) =>
     legacyHeaders: false,
     handler: (req, res) => {
       logger.warn('Rate limit exceeded: %s %s from %s', req.method, req.originalUrl, req.ip);
-      res.status(429).json({
-        success: false,
-        message: 'Too many requests from this IP, please try again later.',
-      });
+      res
+        .status(429)
+        .json(ApiResponse.error('Too many requests from this IP, please try again later.', 429));
     },
   });
 
