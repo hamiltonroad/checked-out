@@ -2,17 +2,15 @@ import api from './api';
 
 const bookService = {
   getAll: async (params = {}) => {
-    const query = new URLSearchParams();
+    const queryParams = {};
 
-    if (params.search) query.set('search', params.search);
-    if (params.genre) query.set('genre', params.genre);
-    if (params.profanity !== undefined) query.set('profanity', String(params.profanity));
-    if (params.page) query.set('page', String(params.page));
-    if (params.limit) query.set('limit', String(params.limit));
+    if (params.search) queryParams.search = params.search;
+    if (params.genre) queryParams.genre = params.genre;
+    if (params.profanity !== undefined) queryParams.profanity = String(params.profanity);
+    if (params.page) queryParams.page = String(params.page);
+    if (params.limit) queryParams.limit = String(params.limit);
 
-    const queryString = query.toString();
-    const url = queryString ? `/books?${queryString}` : '/books';
-    const response = await api.get(url);
+    const response = await api.get('/books', { params: queryParams });
     return response.data;
   },
   getById: async (id) => {

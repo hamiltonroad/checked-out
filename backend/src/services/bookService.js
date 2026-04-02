@@ -78,6 +78,16 @@ class BookService {
   }
 
   /**
+   * Escape LIKE wildcard characters in a search string
+   * @param {string} str - Raw search string
+   * @returns {string} Escaped string safe for LIKE patterns
+   */
+  // eslint-disable-next-line class-methods-use-this
+  escapeLikeWildcards(str) {
+    return str.replace(/[%_]/g, '\\$&');
+  }
+
+  /**
    * Build Sequelize where clause from filter params
    * @param {Object} filters - Query filters
    * @returns {{ bookWhere: Object, authorWhere: Object|null }}
@@ -97,14 +107,11 @@ class BookService {
     }
 
     if (search) {
-      bookWhere.title = { [Op.like]: `%${search}%` };
-    }
-
-    if (search) {
+      const escaped = this.escapeLikeWildcards(search);
       authorWhere = {
         [Op.or]: [
-          { first_name: { [Op.like]: `%${search}%` } },
-          { last_name: { [Op.like]: `%${search}%` } },
+          { first_name: { [Op.like]: `%${escaped}%` } },
+          { last_name: { [Op.like]: `%${escaped}%` } },
         ],
       };
     }
@@ -126,8 +133,10 @@ class BookService {
     // When searching, find matching book IDs first (title OR author match)
     let bookIdFilter = null;
     if (filters.search) {
+      const escaped = this.escapeLikeWildcards(filters.search);
+
       const titleMatches = await Book.findAll({
-        where: { title: { [Op.like]: `%${filters.search}%` } },
+        where: { title: { [Op.like]: `%${escaped}%` } },
         attributes: ['id'],
         raw: true,
       });
@@ -143,7 +152,6 @@ class BookService {
       const allMatchIds = [...new Set([...titleBookIds, ...authorBookIds])];
 
       bookIdFilter = { id: { [Op.in]: allMatchIds } };
-      delete bookWhere.title; // Remove title filter since we handle it via ID set
     }
 
     const where = { ...bookWhere, ...bookIdFilter };
