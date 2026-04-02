@@ -1,10 +1,22 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { setupMockRequire } from '../test-utils/mockRequire.js';
+
+const { require, injectMock } = setupMockRequire(import.meta.url);
+
+// Build mock bookService for the CJS module cache
+const mockBookService = {
+  getAllBooks: vi.fn(),
+  getBookById: vi.fn(),
+  calculateBookStatus: vi.fn(),
+};
+
+// Inject mock before loading the controller
+injectMock('../services/bookService', mockBookService);
+
 const bookController = require('./bookController');
-const bookService = require('../services/bookService');
+const bookService = mockBookService;
 const ApiResponse = require('../utils/ApiResponse');
 const ApiError = require('../utils/ApiError');
-
-// Mock the service
-jest.mock('../services/bookService');
 
 describe('BookController', () => {
   let mockReq;
@@ -12,7 +24,7 @@ describe('BookController', () => {
   let mockNext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockReq = {
       query: {},
@@ -20,11 +32,11 @@ describe('BookController', () => {
     };
 
     mockRes = {
-      json: jest.fn(),
-      status: jest.fn().mockReturnThis(),
+      json: vi.fn(),
+      status: vi.fn().mockReturnThis(),
     };
 
-    mockNext = jest.fn();
+    mockNext = vi.fn();
   });
 
   describe('getAllBooks', () => {

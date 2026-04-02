@@ -1,27 +1,36 @@
-const bookService = require('./bookService');
-const { Book } = require('../models');
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { setupMockRequire } from '../test-utils/mockRequire.js';
 
-// Mock the models
-jest.mock('../models', () => ({
-  Book: {
-    findAll: jest.fn(),
-    findAndCountAll: jest.fn(),
-    findByPk: jest.fn(),
-  },
-  Author: {
-    findAll: jest.fn(),
-  },
+const { require, injectMock } = setupMockRequire(import.meta.url);
+
+// Build mock objects for the CJS module cache
+const mockBook = {
+  findAll: vi.fn(),
+  findAndCountAll: vi.fn(),
+  findByPk: vi.fn(),
+};
+
+const mockModels = {
+  Book: mockBook,
+  Author: { findAll: vi.fn() },
   Copy: {},
   Checkout: {},
   Rating: {},
-  sequelize: {
-    literal: jest.fn((sql) => sql),
-  },
-}));
+  sequelize: { literal: vi.fn((sql) => sql) },
+};
+
+// Inject mocks BEFORE loading the service
+injectMock('../models', mockModels);
+
+const realSequelize = require('sequelize');
+injectMock('sequelize', { ...realSequelize, Op: realSequelize.Op });
+
+const bookService = require('./bookService');
+const { Book } = mockModels;
 
 describe('BookService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getAllBooks', () => {
@@ -120,7 +129,7 @@ describe('BookService', () => {
 
   describe('getBookById', () => {
     it('should return a single book with authors', async () => {
-      const mockBook = {
+      const mockBookData = {
         id: 1,
         title: 'Test Book',
         toJSON: () => ({
@@ -132,7 +141,7 @@ describe('BookService', () => {
         }),
       };
 
-      Book.findByPk.mockResolvedValue(mockBook);
+      Book.findByPk.mockResolvedValue(mockBookData);
 
       const result = await bookService.getBookById(1);
 

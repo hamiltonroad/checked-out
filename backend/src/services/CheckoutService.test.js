@@ -1,22 +1,32 @@
-const checkoutService = require('./CheckoutService');
-const { Checkout, Patron, Copy } = require('../models');
-const ApiError = require('../utils/ApiError');
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { setupMockRequire } from '../test-utils/mockRequire.js';
 
-// Mock the models
-jest.mock('../models', () => ({
-  Checkout: {
-    findAll: jest.fn(),
-    findByPk: jest.fn(),
-    update: jest.fn(),
-  },
+const { require, injectMock } = setupMockRequire(import.meta.url);
+
+// Build mock objects for the CJS module cache
+const mockCheckout = {
+  findAll: vi.fn(),
+  findByPk: vi.fn(),
+  update: vi.fn(),
+};
+
+const mockModels = {
+  Checkout: mockCheckout,
   Patron: {},
   Copy: {},
   Book: {},
-}));
+};
+
+// Inject mock before loading the service
+injectMock('../models', mockModels);
+
+const checkoutService = require('./CheckoutService');
+const ApiError = require('../utils/ApiError');
+const { Checkout, Patron, Copy } = mockModels;
 
 describe('CheckoutService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getAllCheckouts', () => {
@@ -86,22 +96,22 @@ describe('CheckoutService', () => {
 
   describe('returnCheckout', () => {
     it('should set return_date and return updated record for active checkout', async () => {
-      const mockCheckout = {
+      const mockRecord = {
         id: 1,
         checkout_date: '2026-03-20T14:00:00.000Z',
         return_date: null,
         patron: { first_name: 'Jane', last_name: 'Smith' },
         copy: { book: { title: 'The Great Gatsby' } },
-        reload: jest.fn(),
+        reload: vi.fn(),
       };
 
       // After reload, return_date is set
-      mockCheckout.reload.mockImplementation(() => {
-        mockCheckout.return_date = '2026-04-01T10:30:00.000Z';
+      mockRecord.reload.mockImplementation(() => {
+        mockRecord.return_date = '2026-04-01T10:30:00.000Z';
         return Promise.resolve();
       });
 
-      Checkout.findByPk.mockResolvedValue(mockCheckout);
+      Checkout.findByPk.mockResolvedValue(mockRecord);
       Checkout.update.mockResolvedValue([1]);
 
       const result = await checkoutService.returnCheckout(1);
@@ -133,14 +143,14 @@ describe('CheckoutService', () => {
     });
 
     it('should throw Conflict error when checkout is already returned', async () => {
-      const mockCheckout = {
+      const mockRecord = {
         id: 1,
         return_date: '2026-03-28T09:00:00.000Z',
         patron: { first_name: 'Jane', last_name: 'Smith' },
         copy: { book: { title: 'The Great Gatsby' } },
       };
 
-      Checkout.findByPk.mockResolvedValue(mockCheckout);
+      Checkout.findByPk.mockResolvedValue(mockRecord);
 
       await expect(checkoutService.returnCheckout(1)).rejects.toThrow(
         'Checkout has already been returned'
@@ -155,14 +165,14 @@ describe('CheckoutService', () => {
     });
 
     it('should throw Conflict error on concurrent return (zero rows updated)', async () => {
-      const mockCheckout = {
+      const mockRecord = {
         id: 1,
         return_date: null,
         patron: { first_name: 'Jane', last_name: 'Smith' },
         copy: { book: { title: 'The Great Gatsby' } },
       };
 
-      Checkout.findByPk.mockResolvedValue(mockCheckout);
+      Checkout.findByPk.mockResolvedValue(mockRecord);
       Checkout.update.mockResolvedValue([0]);
 
       await expect(checkoutService.returnCheckout(1)).rejects.toThrow(

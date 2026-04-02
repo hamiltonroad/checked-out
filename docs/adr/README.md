@@ -39,6 +39,7 @@ This directory contains Architecture Decision Records (ADRs) for the Checked Out
 | [031](031-tiered-rate-limiting.md) | Tiered Rate Limiting | Accepted |
 | [032](032-server-side-filtering-and-pagination.md) | Server-Side Filtering and Pagination | Accepted |
 | [033](033-jwt-authentication-httponly-cookies.md) | JWT Authentication in httpOnly Cookies | Accepted |
+| [034](034-standardize-on-vitest.md) | Standardize on Vitest for Backend and Frontend Testing | Accepted |
 
 ## Format
 
