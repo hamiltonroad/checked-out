@@ -1,6 +1,7 @@
 const express = require('express');
 const ratingController = require('../controllers/RatingController');
-const { validateRating } = require('../validators/ratingValidators');
+const ratingValidator = require('../validators/ratingValidators');
+const validateRequest = require('../middlewares/validateRequest');
 const { authenticate } = require('../middlewares/auth');
 const { standardLimiter, strictLimiter } = require('../middlewares/rateLimiter');
 
@@ -15,7 +16,7 @@ router.get('/books/top-rated', standardLimiter, ratingController.getTopRatedBook
 router.use(authenticate); // All routes below require authentication
 
 // Rating management for authenticated patrons
-router.post('/ratings', strictLimiter, validateRating, ratingController.submitRating);
+router.post('/ratings', strictLimiter, validateRequest(ratingValidator.create), ratingController.submitRating);
 router.get('/ratings/my-ratings', standardLimiter, ratingController.getMyRatings);
 router.get('/ratings/books/:bookId', standardLimiter, ratingController.getMyRatingForBook);
 router.delete('/ratings/books/:bookId', strictLimiter, ratingController.deleteRating);

@@ -1,4 +1,4 @@
-# ADR-011: Tiered Rate Limiting
+# ADR-031: Tiered Rate Limiting
 
 **Status:** Accepted
 **Date:** 2026-04-01

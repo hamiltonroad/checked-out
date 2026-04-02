@@ -75,9 +75,9 @@ BooksTable.propTypes = {
         PropTypes.shape({
           first_name: PropTypes.string.isRequired,
           last_name: PropTypes.string.isRequired,
-        }),
+        })
       ).isRequired,
-    }),
+    })
   ).isRequired,
   onRowClick: PropTypes.func.isRequired,
 };
