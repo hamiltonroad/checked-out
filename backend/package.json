@@ -8,9 +8,9 @@
     "dev": "nodemon src/server.js",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.js\"",
-    "test": "jest --testTimeout=5000",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo": "sequelize-cli db:migrate:undo",
     "db:seed": "sequelize-cli db:seed:all",
@@ -43,11 +43,11 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "husky": "^9.1.7",
-    "jest": "^30.2.0",
     "lint-staged": "^16.2.6",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
     "sequelize-cli": "^6.6.3",
-    "supertest": "^7.1.4"
+    "supertest": "^7.1.4",
+    "vitest": "^4.1.2"
   }
 }

@@ -1,12 +1,51 @@
 {
   "extends": ["airbnb-base", "prettier"],
   "env": {
-    "node": true,
-    "jest": true
+    "node": true
   },
   "rules": {
     "no-console": "error",
     "consistent-return": "off",
     "no-underscore-dangle": ["error", { "allow": ["_id"] }]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.js", "**/__tests__/**/*.js"],
+      "parserOptions": {
+        "ecmaVersion": 2022,
+        "sourceType": "module"
+      },
+      "env": {
+        "node": true
+      },
+      "globals": {
+        "describe": "readonly",
+        "it": "readonly",
+        "expect": "readonly",
+        "beforeEach": "readonly",
+        "afterEach": "readonly",
+        "beforeAll": "readonly",
+        "afterAll": "readonly",
+        "vi": "readonly"
+      },
+      "rules": {
+        "import/no-unresolved": "off",
+        "import/extensions": "off",
+        "import/no-extraneous-dependencies": "off",
+        "import/newline-after-import": "off",
+        "no-shadow": "off"
+      }
+    },
+    {
+      "files": ["vitest.config.js"],
+      "parserOptions": {
+        "ecmaVersion": 2022,
+        "sourceType": "module"
+      },
+      "rules": {
+        "import/no-unresolved": "off",
+        "import/no-extraneous-dependencies": "off"
+      }
+    }
+  ]
 }
