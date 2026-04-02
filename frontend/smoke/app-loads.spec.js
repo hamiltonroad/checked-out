@@ -14,6 +14,20 @@ function isExpectedError(message) {
   return EXPECTED_ERROR_PATTERNS.some((pattern) => pattern.test(message));
 }
 
+async function safeGoto(page, path = '/') {
+  try {
+    return await page.goto(path);
+  } catch (error) {
+    if (error.message.includes('ECONNREFUSED') || error.message.includes('ERR_CONNECTION_REFUSED')) {
+      throw new Error(
+        'Could not connect to http://localhost:5173 — are servers running? ' +
+          'Use ./scripts/start-all.sh to start them.'
+      );
+    }
+    throw error;
+  }
+}
+
 test.describe('App smoke test', () => {
   let consoleErrors;
 
@@ -31,36 +45,14 @@ test.describe('App smoke test', () => {
   });
 
   test('app returns HTTP 200', async ({ page }) => {
-    let response;
-
-    try {
-      response = await page.goto('/');
-    } catch (error) {
-      if (error.message.includes('ECONNREFUSED') || error.message.includes('ERR_CONNECTION_REFUSED')) {
-        throw new Error(
-          'Could not connect to http://localhost:5173 — are servers running? ' +
-            'Use ./scripts/start-all.sh to start them.'
-        );
-      }
-      throw error;
-    }
+    const response = await safeGoto(page);
 
     expect(response).not.toBeNull();
     expect(response.status()).toBe(200);
   });
 
   test('app renders visible content', async ({ page }) => {
-    try {
-      await page.goto('/');
-    } catch (error) {
-      if (error.message.includes('ECONNREFUSED') || error.message.includes('ERR_CONNECTION_REFUSED')) {
-        throw new Error(
-          'Could not connect to http://localhost:5173 — are servers running? ' +
-            'Use ./scripts/start-all.sh to start them.'
-        );
-      }
-      throw error;
-    }
+    await safeGoto(page);
 
     const body = page.locator('body');
     await expect(body).not.toBeEmpty();
@@ -69,20 +61,9 @@ test.describe('App smoke test', () => {
   });
 
   test('no unexpected console errors', async ({ page }) => {
-    try {
-      await page.goto('/');
-    } catch (error) {
-      if (error.message.includes('ECONNREFUSED') || error.message.includes('ERR_CONNECTION_REFUSED')) {
-        throw new Error(
-          'Could not connect to http://localhost:5173 — are servers running? ' +
-            'Use ./scripts/start-all.sh to start them.'
-        );
-      }
-      throw error;
-    }
+    await safeGoto(page);
 
-    // Allow time for async errors to surface
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle');
 
     if (consoleErrors.length > 0) {
       throw new Error(

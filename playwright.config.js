@@ -1,5 +1,5 @@
 // @ts-check
-const { defineConfig, devices } = require('@playwright/test');
+import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Playwright configuration for smoke tests.
@@ -9,14 +9,14 @@ const { defineConfig, devices } = require('@playwright/test');
  *
  * @see https://playwright.dev/docs/test-configuration
  */
-module.exports = defineConfig({
+export default defineConfig({
   testDir: './frontend/smoke',
   timeout: 30000,
   retries: 0,
   reporter: 'list',
 
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: process.env.SMOKE_BASE_URL || 'http://localhost:5173',
     headless: true,
     screenshot: 'only-on-failure',
     trace: 'off',

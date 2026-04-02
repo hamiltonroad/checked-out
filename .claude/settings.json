@@ -38,15 +38,6 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash -c 'if [[ \"$CLAUDE_BASH_COMMAND\" == ls* ]]; then exit 0; fi'"
-          }
-        ]
-      },
-      {
         "matcher": "Write",
         "hooks": [
           {
