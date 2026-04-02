@@ -28,6 +28,7 @@ import SkeletonField from '../SkeletonField';
 import { RatingInput } from '../Rating';
 import CheckoutDialog from '../CheckoutDialog';
 import ratingService from '../../services/ratingService';
+import { formatApiError } from '../../utils/errorUtils';
 import BookDetailsTab from './BookDetailsTab';
 import BookReviewsTab from './BookReviewsTab';
 
@@ -168,9 +169,7 @@ function BookDetailModal({ open, onClose, bookId }) {
         }}
         onSubmit={handleCheckoutSubmit}
         isSubmitting={checkoutMutation.isPending}
-        error={
-          checkoutMutation.error?.response?.data?.message || checkoutMutation.error?.message || null
-        }
+        error={checkoutMutation.error ? formatApiError(checkoutMutation.error) : null}
       />
       <Snackbar
         open={checkoutSuccess}

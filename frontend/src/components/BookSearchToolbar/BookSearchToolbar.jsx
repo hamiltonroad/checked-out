@@ -95,7 +95,12 @@ function BookSearchToolbar({
       </Box>
       <Box sx={{ mt: 1 }}>
         <FormControlLabel
-          control={<Checkbox checked={hideProfanity} onChange={(e) => onHideProfanityChange(e.target.checked)} />}
+          control={
+            <Checkbox
+              checked={hideProfanity}
+              onChange={(e) => onHideProfanityChange(e.target.checked)}
+            />
+          }
           label="Hide books with profanity"
         />
       </Box>

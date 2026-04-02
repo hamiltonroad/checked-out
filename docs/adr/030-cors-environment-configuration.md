@@ -1,4 +1,4 @@
-# ADR-028: CORS Environment Configuration
+# ADR-030: CORS Environment Configuration
 
 **Status:** Accepted
 **Date:** 2026-04-01

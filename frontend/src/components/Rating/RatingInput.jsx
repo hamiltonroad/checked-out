@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
+import { formatApiError } from '../../utils/errorUtils';
 
 const labels = {
   1: 'Poor',
@@ -58,7 +59,7 @@ function RatingInput({ bookId, bookTitle, existingRating = null, onSubmit, onClo
       });
       onClose();
     } catch (err) {
-      setError(err.message || 'Failed to submit rating');
+      setError(formatApiError(err, 'Failed to submit rating'));
     } finally {
       setIsSubmitting(false);
     }

@@ -44,5 +44,4 @@ coverage/
 
 # --- harness-kit ---
 .harness-kit.lock
-code-review-results/
 # --- /harness-kit ---
