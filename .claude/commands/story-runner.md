@@ -1,0 +1,159 @@
+# Story Runner (with Smoke Test Gates)
+
+**Purpose:** Run complete issue workflow via agents with smoke test pre-flight and post-flight gates.
+
+**Usage:** `/story-runner <issue-number>`
+
+---
+
+## Overview
+
+This command wraps `/story-runner-kit` with Playwright smoke test gates to ensure:
+1. The app is healthy BEFORE starting work (pre-flight)
+2. The app is still healthy AFTER work completes (post-flight)
+
+If the pre-flight fails, work does not begin. If the post-flight fails, the PR is flagged as potentially broken.
+
+---
+
+## Execution
+
+### Step 1: Validate Input
+
+Extract issue number from command argument: `$ARGUMENTS`
+
+**If no issue number provided:**
+
+```
+Usage: /story-runner <issue-number>
+
+Example: /story-runner 42
+```
+
+### Step 2: Pre-Flight Smoke Test
+
+**2a. Check if servers are running:**
+
+```bash
+lsof -Pi :5173 -sTCP:LISTEN -t >/dev/null 2>&1 && echo "Frontend running" || echo "Frontend NOT running"
+lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1 && echo "Backend running" || echo "Backend NOT running"
+```
+
+**2b. If servers are NOT running, start them:**
+
+```bash
+./scripts/start-all.sh
+```
+
+Wait a few seconds for startup to complete.
+
+**2c. Run smoke test:**
+
+```bash
+npm run test:smoke
+```
+
+**If smoke test FAILS:**
+
+```
+STORY RUNNER ABORTED: Pre-flight smoke test failed.
+
+The application is not healthy. Fix the issue before running the story runner.
+
+Error details:
+<paste smoke test output>
+
+Suggested actions:
+1. Check server logs: logs/backend.log and logs/frontend.log
+2. Fix the issue manually
+3. Re-run: /story-runner <issue-number>
+```
+
+**If smoke test PASSES:** Continue to Step 3.
+
+### Step 3: Execute Story Runner Kit
+
+Run the existing story-runner-kit workflow:
+
+Invoke `/story-runner-kit <issue-number>`
+
+This orchestrates prep-agent, plan-agent, and implement-agent as usual.
+
+**Wait for completion.** Capture the result (SUCCESS with PR URL, or ABORT with blocker).
+
+**If ABORT:** Display the blocker and stop. Do NOT run post-flight.
+
+### Step 4: Post-Flight Smoke Test
+
+**4a. Run smoke test:**
+
+```bash
+npm run test:smoke
+```
+
+**If smoke test FAILS:**
+
+```
+STORY RUNNER WARNING: Post-flight smoke test FAILED.
+
+The story-runner-kit completed successfully, but the smoke test now fails.
+The implementation may have introduced a runtime error.
+
+PR: <PR URL from Step 3>
+
+Smoke test output:
+<paste smoke test output>
+
+Suggested actions:
+1. Review the PR for breaking changes
+2. Check browser console for errors
+3. Fix the issue on the feature branch
+4. Re-run smoke test: npm run test:smoke
+```
+
+**If smoke test PASSES:** Continue to Step 5.
+
+### Step 5: Display Completion
+
+```
+STORY RUNNER COMPLETE
+
+Issue: #<number>
+Pull Request: <PR URL from story-runner-kit>
+
+Smoke Tests:
+  Pre-flight:  PASS
+  Post-flight: PASS
+
+All phases completed:
+- Pre-flight smoke test: App healthy before work
+- prep-agent: Branch created, issue fetched
+- plan-agent: Implementation plan created
+- implement-agent: Code implemented, tested, PR created
+- Post-flight smoke test: App still healthy after work
+
+Next steps:
+1. Review PR at <PR URL>
+2. Perform any additional manual testing
+3. Approve and merge if satisfied
+4. Clean up: rm .claude/temp/*-<number>-REMOVE.md
+```
+
+---
+
+## Error Handling
+
+- **Servers won't start:** Show start-all.sh output and suggest checking database/ports
+- **Pre-flight fails:** Abort before any work begins (clean abort)
+- **Story-runner-kit fails:** Display blocker, skip post-flight
+- **Post-flight fails:** Report warning but do NOT revert work (PR exists for review)
+
+---
+
+## Related Commands
+
+- `/story-runner-kit <n>` - Inner workflow (no smoke test gates)
+- `/batch-runner <n1> <n2> ...` - Parallel issues with smoke test gates
+- `/prep-issue <n>` - Just prep phase
+- `/plan-issue <n>` - Just planning phase
+- `/implement-issue <n>` - Just implementation phase

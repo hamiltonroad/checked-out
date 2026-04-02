@@ -25,6 +25,7 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - Format: `cd backend && npm run format` / `cd frontend && npm run format`
 - Migrate: `cd backend && npm run db:migrate`
 - Seed: `cd backend && npm run db:seed`
+- Smoke test: `npm run test:smoke` (requires servers running)
 - Stop services: `./scripts/stop-all.sh`
 
 ## Constraints

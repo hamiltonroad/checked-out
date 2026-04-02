@@ -45,4 +45,11 @@ export default defineConfig([
       },
     },
   },
+  // Smoke tests run in Node.js (Playwright)
+  {
+    files: ['smoke/**/*.{js,jsx}'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ])
