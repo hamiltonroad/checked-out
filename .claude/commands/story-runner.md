@@ -32,44 +32,15 @@ Example: /story-runner 42
 
 ### Step 2: Pre-Flight Smoke Test
 
-**2a. Check if servers are running:**
+Run the smoke test script (starts servers if needed):
 
 ```bash
-lsof -Pi :5173 -sTCP:LISTEN -t >/dev/null 2>&1 && echo "Frontend running" || echo "Frontend NOT running"
-lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1 && echo "Backend running" || echo "Backend NOT running"
+./scripts/smoke-test.sh --start-servers
 ```
 
-**2b. If servers are NOT running, start them:**
+**If exit code is non-zero:** Display the output and abort. Do NOT proceed to Step 3.
 
-```bash
-./scripts/start-all.sh
-```
-
-Wait a few seconds for startup to complete.
-
-**2c. Run smoke test:**
-
-```bash
-npm run test:smoke
-```
-
-**If smoke test FAILS:**
-
-```
-STORY RUNNER ABORTED: Pre-flight smoke test failed.
-
-The application is not healthy. Fix the issue before running the story runner.
-
-Error details:
-<paste smoke test output>
-
-Suggested actions:
-1. Check server logs: logs/backend.log and logs/frontend.log
-2. Fix the issue manually
-3. Re-run: /story-runner <issue-number>
-```
-
-**If smoke test PASSES:** Continue to Step 3.
+**If exit code is 0:** Continue to Step 3.
 
 ### Step 3: Execute Story Runner Kit
 
@@ -85,33 +56,15 @@ This orchestrates prep-agent, plan-agent, and implement-agent as usual.
 
 ### Step 4: Post-Flight Smoke Test
 
-**4a. Run smoke test:**
+Run the smoke test script:
 
 ```bash
-npm run test:smoke
+./scripts/smoke-test.sh
 ```
 
-**If smoke test FAILS:**
+**If exit code is non-zero:** Report warning with PR URL but do NOT revert work.
 
-```
-STORY RUNNER WARNING: Post-flight smoke test FAILED.
-
-The story-runner-kit completed successfully, but the smoke test now fails.
-The implementation may have introduced a runtime error.
-
-PR: <PR URL from Step 3>
-
-Smoke test output:
-<paste smoke test output>
-
-Suggested actions:
-1. Review the PR for breaking changes
-2. Check browser console for errors
-3. Fix the issue on the feature branch
-4. Re-run smoke test: npm run test:smoke
-```
-
-**If smoke test PASSES:** Continue to Step 5.
+**If exit code is 0:** Continue to Step 5.
 
 ### Step 5: Display Completion
 

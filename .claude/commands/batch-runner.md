@@ -60,42 +60,15 @@ git branch --show-current
 
 ### Step 3: Pre-Flight Smoke Test
 
-**3a. Check if servers are running:**
+Run the smoke test script (starts servers if needed):
 
 ```bash
-lsof -Pi :5173 -sTCP:LISTEN -t >/dev/null 2>&1 && echo "Frontend running" || echo "Frontend NOT running"
-lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1 && echo "Backend running" || echo "Backend NOT running"
+./scripts/smoke-test.sh --start-servers
 ```
 
-**3b. If servers are NOT running, start them:**
+**If exit code is non-zero:** Display the output and abort. Do NOT proceed to Step 4.
 
-```bash
-./scripts/start-all.sh
-```
-
-**3c. Run smoke test on main branch:**
-
-```bash
-npm run test:smoke
-```
-
-**If smoke test FAILS:**
-
-```
-BATCH RUNNER ABORTED: Pre-flight smoke test failed on main branch.
-
-Main branch is broken. Fix before running batch.
-
-Error details:
-<paste smoke test output>
-
-Suggested actions:
-1. Check server logs: logs/backend.log and logs/frontend.log
-2. Fix the issue on main branch
-3. Re-run: /batch-runner <issue-numbers>
-```
-
-**If smoke test PASSES:** Continue to Step 4.
+**If exit code is 0:** Continue to Step 4.
 
 ### Step 4: Execute Batch Runner Kit
 
@@ -121,24 +94,17 @@ Capture the results: which issues succeeded (with PR URLs) and which failed.
 
 1. Navigate to the worktree directory:
    ```bash
-   # Worktree paths follow the pattern used by batch-runner-kit
    cd <worktree-path>
    ```
 
-2. Start servers from the worktree:
+2. Run smoke test (starts servers automatically):
    ```bash
-   ./scripts/start-all.sh
-   ```
-   Wait for servers to be ready.
-
-3. Run smoke test:
-   ```bash
-   npm run test:smoke
+   ./scripts/smoke-test.sh --start-servers
    ```
 
-4. Record result (PASS or FAIL) for this issue.
+3. Record result (PASS or FAIL based on exit code) for this issue.
 
-5. Stop servers before testing next worktree:
+4. Stop servers before testing next worktree:
    ```bash
    ./scripts/stop-all.sh
    ```
