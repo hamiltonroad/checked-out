@@ -23,6 +23,23 @@ class CheckoutController {
   }
 
   /**
+   * Get current (active) checkouts
+   * GET /api/v1/checkouts/current
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async getCurrentCheckouts(req, res, next) {
+    try {
+      const checkouts = await checkoutService.getCurrentCheckouts();
+
+      res
+        .status(200)
+        .json(ApiResponse.success(checkouts, 'Current checkouts retrieved successfully'));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Get all checkouts
    * GET /api/v1/checkouts
    */

@@ -23,6 +23,14 @@ const checkoutService = {
   },
 
   /**
+   * Get current (active) checkout records with due-date info
+   */
+  async getCurrentCheckouts() {
+    const response = await api.get('/checkouts/current');
+    return response.data;
+  },
+
+  /**
    * Return a checked-out book
    */
   async returnCheckout(id: number) {

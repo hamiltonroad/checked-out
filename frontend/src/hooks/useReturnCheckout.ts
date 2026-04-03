@@ -13,6 +13,7 @@ export function useReturnCheckout() {
     mutationFn: (id: number) => checkoutService.returnCheckout(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['checkouts'] });
+      queryClient.invalidateQueries({ queryKey: ['checkouts', 'current'] });
     },
   });
 }

@@ -29,6 +29,97 @@ describe('CheckoutService', () => {
     vi.clearAllMocks();
   });
 
+  describe('getCurrentCheckouts', () => {
+    it('should return only active checkouts with daysUntilDue', async () => {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 5);
+
+      const mockCheckouts = [
+        {
+          id: 1,
+          checkout_date: '2026-03-20T14:00:00.000Z',
+          due_date: futureDate.toISOString(),
+          return_date: null,
+          patron: { first_name: 'Jane', last_name: 'Smith' },
+          copy: { book: { title: 'The Great Gatsby' } },
+        },
+      ];
+
+      Checkout.findAll.mockResolvedValue(mockCheckouts);
+
+      const result = await checkoutService.getCurrentCheckouts();
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe(1);
+      expect(result[0].patronName).toBe('Jane Smith');
+      expect(result[0].bookTitle).toBe('The Great Gatsby');
+      expect(result[0].daysUntilDue).toBeGreaterThan(0);
+      expect(result[0].returnDate).toBeNull();
+      expect(Checkout.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { return_date: null },
+          order: [['due_date', 'ASC']],
+        })
+      );
+    });
+
+    it('should compute negative daysUntilDue for overdue items', async () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 3);
+
+      const mockCheckouts = [
+        {
+          id: 1,
+          checkout_date: '2026-03-01T14:00:00.000Z',
+          due_date: pastDate.toISOString(),
+          return_date: null,
+          patron: { first_name: 'Jane', last_name: 'Smith' },
+          copy: { book: { title: 'The Great Gatsby' } },
+        },
+      ];
+
+      Checkout.findAll.mockResolvedValue(mockCheckouts);
+
+      const result = await checkoutService.getCurrentCheckouts();
+
+      expect(result[0].daysUntilDue).toBeLessThan(0);
+    });
+
+    it('should return null daysUntilDue when due_date is null', async () => {
+      const mockCheckouts = [
+        {
+          id: 1,
+          checkout_date: '2026-03-20T14:00:00.000Z',
+          due_date: null,
+          return_date: null,
+          patron: { first_name: 'Jane', last_name: 'Smith' },
+          copy: { book: { title: 'The Great Gatsby' } },
+        },
+      ];
+
+      Checkout.findAll.mockResolvedValue(mockCheckouts);
+
+      const result = await checkoutService.getCurrentCheckouts();
+
+      expect(result[0].daysUntilDue).toBeNull();
+      expect(result[0].dueDate).toBeNull();
+    });
+
+    it('should return empty array when no active checkouts exist', async () => {
+      Checkout.findAll.mockResolvedValue([]);
+
+      const result = await checkoutService.getCurrentCheckouts();
+
+      expect(result).toEqual([]);
+    });
+
+    it('should handle database errors', async () => {
+      Checkout.findAll.mockRejectedValue(new Error('Database error'));
+
+      await expect(checkoutService.getCurrentCheckouts()).rejects.toThrow('Database error');
+    });
+  });
+
   describe('getAllCheckouts', () => {
     it('should return all checkouts with patron name and book title', async () => {
       const mockCheckouts = [

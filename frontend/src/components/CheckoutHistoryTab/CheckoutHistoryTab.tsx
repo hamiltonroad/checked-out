@@ -6,28 +6,32 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Button,
+  Skeleton,
 } from '@mui/material';
-import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
+import HistoryIcon from '@mui/icons-material/History';
 import EmptyState from '../EmptyState';
 import { formatDate } from '../../utils/checkoutUtils';
 import type { Checkout } from '../../types';
 
-interface CheckoutTableProps {
+interface CheckoutHistoryTabProps {
   checkouts: Checkout[];
-  onReturn: (id: number) => void;
+  isLoading: boolean;
 }
 
 /**
- * CheckoutTable displays a table of checkout records with return functionality
+ * CheckoutHistoryTab displays returned checkout records
  */
-function CheckoutTable({ checkouts, onReturn }: CheckoutTableProps) {
+function CheckoutHistoryTab({ checkouts, isLoading }: CheckoutHistoryTabProps) {
+  if (isLoading) {
+    return <Skeleton variant="rounded" height={300} />;
+  }
+
   if (checkouts.length === 0) {
     return (
       <EmptyState
-        icon={<AssignmentReturnIcon sx={{ fontSize: 'inherit' }} />}
-        title="No checkouts found"
-        message="There are no checkout records to display."
+        icon={<HistoryIcon sx={{ fontSize: 'inherit' }} />}
+        title="No checkout history"
+        message="No checkout history yet."
       />
     );
   }
@@ -37,16 +41,14 @@ function CheckoutTable({ checkouts, onReturn }: CheckoutTableProps) {
       <Table>
         <TableHead>
           <TableRow sx={{ bgcolor: 'action.hover' }}>
-            <TableCell sx={{ fontWeight: 600 }}>Patron Name</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Book Title</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Patron Name</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Checkout Date</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Return Date</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {checkouts.map((checkout, index) => {
-            const isActive = !checkout.returnDate;
             const isLastRow = index === checkouts.length - 1;
             const tableCellSx = {
               borderBottom: isLastRow ? 'none' : '1px solid',
@@ -55,22 +57,10 @@ function CheckoutTable({ checkouts, onReturn }: CheckoutTableProps) {
 
             return (
               <TableRow key={checkout.id}>
-                <TableCell sx={tableCellSx}>{checkout.patronName}</TableCell>
                 <TableCell sx={tableCellSx}>{checkout.bookTitle}</TableCell>
+                <TableCell sx={tableCellSx}>{checkout.patronName}</TableCell>
                 <TableCell sx={tableCellSx}>{formatDate(checkout.checkoutDate)}</TableCell>
                 <TableCell sx={tableCellSx}>{formatDate(checkout.returnDate)}</TableCell>
-                <TableCell sx={tableCellSx}>
-                  {isActive && (
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => onReturn(checkout.id)}
-                      startIcon={<AssignmentReturnIcon />}
-                    >
-                      Return
-                    </Button>
-                  )}
-                </TableCell>
               </TableRow>
             );
           })}
@@ -80,4 +70,4 @@ function CheckoutTable({ checkouts, onReturn }: CheckoutTableProps) {
   );
 }
 
-export default CheckoutTable;
+export default CheckoutHistoryTab;
