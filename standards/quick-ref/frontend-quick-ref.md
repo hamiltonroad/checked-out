@@ -290,6 +290,7 @@ const handleClick = useCallback(() => {
 - **Memoize** expensive calculations and callbacks
 - **Accessibility** - keyboard nav, ARIA, semantic HTML
 - **Test** user behavior, not implementation
+- **Validate parsed IDs** in form submit handlers before passing to API calls (guard against undefined)
 
 ### DON'T ❌
 - Use class components

@@ -70,6 +70,9 @@ npm run test:smoke
 
 **Smoke test location:** `frontend/smoke/`
 
+**Playwright anti-patterns to avoid:**
+- Never use `page.waitForTimeout()` -- it causes flaky tests and unnecessary slowdown. Use event-based waits instead: `waitForSelector`, `waitForLoadState`, or Locator auto-waiting assertions (e.g., `await expect(locator).toBeVisible()`).
+
 **Note:** Smoke tests require both frontend and backend servers to be running. Use `./scripts/start-all.sh` first, or let the smoke test handle startup itself.
 
 ## Code Quality
