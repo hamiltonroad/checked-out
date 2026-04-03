@@ -1,4 +1,5 @@
 const checkoutService = require('../services/CheckoutService');
+const patronCheckoutService = require('../services/PatronCheckoutService');
 const ApiResponse = require('../utils/ApiResponse');
 
 class CheckoutController {
@@ -66,6 +67,26 @@ class CheckoutController {
       const checkout = await checkoutService.returnCheckout(id);
 
       res.status(200).json(ApiResponse.success(checkout, 'Book returned successfully'));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get checkouts for a specific patron
+   * GET /api/v1/checkouts/patron/:id
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async getCheckoutsByPatron(req, res, next) {
+    try {
+      const patronId = parseInt(req.params.id, 10);
+      const { status } = req.query;
+
+      const checkouts = await patronCheckoutService.getByPatronId(patronId, status || null);
+
+      res
+        .status(200)
+        .json(ApiResponse.success(checkouts, 'Patron checkouts retrieved successfully'));
     } catch (error) {
       next(error);
     }

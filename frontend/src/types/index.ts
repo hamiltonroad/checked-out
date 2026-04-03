@@ -59,8 +59,31 @@ export interface Patron {
   email?: string;
 }
 
+export type PatronStatus = 'active' | 'inactive' | 'suspended';
+
+export interface PatronDetail {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  card_number: string;
+  status: PatronStatus;
+}
+
+export interface PatronCheckout {
+  id: number;
+  bookTitle: string;
+  author: string;
+  checkoutDate: string;
+  dueDate: string;
+  returnedAt: string | null;
+  status: 'checked_out' | 'returned';
+}
+
 export interface Checkout {
   id: number;
+  patronId: number;
   patronName: string;
   bookTitle: string;
   checkoutDate: string;
@@ -69,6 +92,7 @@ export interface Checkout {
 
 export interface CurrentCheckout {
   id: number;
+  patronId: number;
   patronName: string;
   bookTitle: string;
   checkoutDate: string;

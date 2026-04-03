@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -14,19 +13,19 @@ import {
 } from '@mui/material';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
 import EmptyState from '../EmptyState';
-import { formatDate, dueSoonSeverity, formatDueDateText } from '../../utils/checkoutUtils';
-import type { CurrentCheckout } from '../../types';
+import { formatDate } from '../../utils/checkoutUtils';
+import type { PatronCheckout } from '../../types';
 
-interface CurrentCheckoutsTabProps {
-  checkouts: CurrentCheckout[];
+interface PatronCurrentCheckoutsProps {
+  checkouts: PatronCheckout[];
   onReturn: (id: number) => void;
   isLoading: boolean;
 }
 
 /**
- * CurrentCheckoutsTab displays active checkouts with due-date awareness and return actions
+ * PatronCurrentCheckouts displays a patron's active checkouts with return action
  */
-function CurrentCheckoutsTab({ checkouts, onReturn, isLoading }: CurrentCheckoutsTabProps) {
+function PatronCurrentCheckouts({ checkouts, onReturn, isLoading }: PatronCurrentCheckoutsProps) {
   const [returningId, setReturningId] = useState<number | null>(null);
 
   const handleReturn = (id: number) => {
@@ -35,15 +34,15 @@ function CurrentCheckoutsTab({ checkouts, onReturn, isLoading }: CurrentCheckout
   };
 
   if (isLoading) {
-    return <Skeleton variant="rounded" height={300} />;
+    return <Skeleton variant="rounded" height={200} />;
   }
 
   if (checkouts.length === 0) {
     return (
       <EmptyState
         icon={<AssignmentReturnIcon sx={{ fontSize: 'inherit' }} />}
-        title="No current checkouts"
-        message="No books are currently checked out."
+        title="No active checkouts"
+        message="This patron has no books currently checked out."
       />
     );
   }
@@ -54,15 +53,14 @@ function CurrentCheckoutsTab({ checkouts, onReturn, isLoading }: CurrentCheckout
         <TableHead>
           <TableRow sx={{ bgcolor: 'action.hover' }}>
             <TableCell sx={{ fontWeight: 600 }}>Book Title</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Patron Name</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Author</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Checkout Date</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Due Date</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Days Until Due</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {checkouts.map((checkout, index) => {
-            const severity = dueSoonSeverity(checkout.daysUntilDue);
             const isLastRow = index === checkouts.length - 1;
             const tableCellSx = {
               borderBottom: isLastRow ? 'none' : '1px solid',
@@ -72,30 +70,9 @@ function CurrentCheckoutsTab({ checkouts, onReturn, isLoading }: CurrentCheckout
             return (
               <TableRow key={checkout.id}>
                 <TableCell sx={tableCellSx}>{checkout.bookTitle}</TableCell>
-                <TableCell sx={tableCellSx}>
-                  <Link
-                    to={`/patrons/${checkout.patronId}`}
-                    style={{ color: 'inherit', textDecoration: 'underline' }}
-                  >
-                    {checkout.patronName}
-                  </Link>
-                </TableCell>
+                <TableCell sx={tableCellSx}>{checkout.author}</TableCell>
+                <TableCell sx={tableCellSx}>{formatDate(checkout.checkoutDate)}</TableCell>
                 <TableCell sx={tableCellSx}>{formatDate(checkout.dueDate)}</TableCell>
-                <TableCell sx={tableCellSx}>
-                  <Typography
-                    component="span"
-                    color={
-                      severity === 'error'
-                        ? 'error'
-                        : severity === 'warning'
-                          ? 'warning.main'
-                          : 'text.primary'
-                    }
-                    sx={{ fontWeight: severity ? 600 : 400 }}
-                  >
-                    {formatDueDateText(checkout.daysUntilDue, checkout.dueDate)}
-                  </Typography>
-                </TableCell>
                 <TableCell sx={tableCellSx}>
                   <Button
                     variant="contained"
@@ -116,4 +93,4 @@ function CurrentCheckoutsTab({ checkouts, onReturn, isLoading }: CurrentCheckout
   );
 }
 
-export default CurrentCheckoutsTab;
+export default PatronCurrentCheckouts;

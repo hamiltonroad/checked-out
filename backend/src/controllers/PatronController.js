@@ -20,6 +20,22 @@ class PatronController {
       next(error);
     }
   }
+
+  /**
+   * Get a single patron by ID
+   * GET /api/v1/patrons/:id
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async getPatronById(req, res, next) {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const patron = await patronService.getPatronById(id);
+
+      res.json(ApiResponse.success(patron, 'Patron retrieved successfully'));
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new PatronController();

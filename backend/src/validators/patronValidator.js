@@ -9,6 +9,11 @@ const patronValidator = {
       status: Joi.string().valid('active', 'inactive', 'suspended').optional(),
     }),
   },
+  getById: {
+    params: Joi.object({
+      id: Joi.number().integer().positive().required(),
+    }),
+  },
 };
 
 module.exports = patronValidator;

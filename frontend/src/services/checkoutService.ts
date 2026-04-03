@@ -37,6 +37,18 @@ const checkoutService = {
     const response = await api.put(`/checkouts/${id}/return`);
     return response.data;
   },
+
+  /**
+   * Get checkouts for a specific patron, optionally filtered by status
+   */
+  async getByPatron(patronId: number, status?: string) {
+    const params: Record<string, string> = {};
+    if (status) {
+      params.status = status;
+    }
+    const response = await api.get(`/checkouts/patron/${patronId}`, { params });
+    return response.data;
+  },
 };
 
 export default checkoutService;

@@ -15,4 +15,12 @@ router.get(
   patronController.listPatrons
 );
 
+router.get(
+  '/:id',
+  standardLimiter,
+  authenticate,
+  validateRequest(patronValidator.getById),
+  patronController.getPatronById
+);
+
 module.exports = router;
