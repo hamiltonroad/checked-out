@@ -1,13 +1,13 @@
-/* eslint-disable no-unused-vars, no-console */
+/* eslint-disable no-unused-vars */
 const bcrypt = require('bcrypt');
+const { SALT_ROUNDS } = require('../config/auth');
 
 /**
  * Seed password hashes for existing demo patrons.
- * Default password for all dev patrons: "password123"
+ * Default password for all dev patrons: "welcome123"
  */
 
-const SALT_ROUNDS = 12;
-const DEV_PASSWORD = 'password123';
+const DEV_PASSWORD = 'welcome123';
 
 module.exports = {
   /**
@@ -23,7 +23,7 @@ module.exports = {
     );
 
     if (patrons.length === 0) {
-      console.log('No patrons need password hashes.');
+      console.log('No patrons need password hashes.'); // eslint-disable-line no-console
       return;
     }
 
@@ -34,7 +34,7 @@ module.exports = {
       { replacements: { hash, ids } }
     );
 
-    console.log(`Set password hash for ${patrons.length} patron(s). Dev password: ${DEV_PASSWORD}`);
+    console.log(`Set password hash for ${patrons.length} patron(s). Dev password: ${DEV_PASSWORD}`); // eslint-disable-line no-console
   },
 
   /**

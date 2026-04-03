@@ -3,8 +3,7 @@ const bcrypt = require('bcrypt');
 const { Patron } = require('../models');
 const ApiError = require('../utils/ApiError');
 const logger = require('../config/logger');
-
-const SALT_ROUNDS = 12;
+const { SALT_ROUNDS } = require('../config/auth');
 
 /**
  * Authentication service — JWT token management and credential verification
