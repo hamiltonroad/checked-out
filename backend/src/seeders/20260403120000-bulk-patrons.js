@@ -1,5 +1,7 @@
-/* eslint-disable no-unused-vars, no-console */
+/* eslint-disable no-unused-vars */
 const bcrypt = require('bcrypt');
+const { SALT_ROUNDS } = require('../config/auth');
+const { FIRST_NAMES, LAST_NAMES } = require('./data/patron-names');
 
 /**
  * Bulk patron seeder — creates 5,000 realistic patron records for testing.
@@ -8,219 +10,10 @@ const bcrypt = require('bcrypt');
  * Idempotent: skips if bulk patrons already exist.
  */
 
-const SALT_ROUNDS = 12;
 const DEV_PASSWORD = 'welcome123';
 const PATRON_COUNT = 5000;
 const BULK_CARD_PREFIX = 'BULK-';
 const IDEMPOTENCY_THRESHOLD = 100;
-
-// Curated first names (100 entries, diverse backgrounds)
-const FIRST_NAMES = [
-  'James',
-  'Maria',
-  'Robert',
-  'Patricia',
-  'Michael',
-  'Jennifer',
-  'William',
-  'Linda',
-  'David',
-  'Elizabeth',
-  'Richard',
-  'Barbara',
-  'Joseph',
-  'Susan',
-  'Thomas',
-  'Jessica',
-  'Christopher',
-  'Sarah',
-  'Charles',
-  'Karen',
-  'Daniel',
-  'Lisa',
-  'Matthew',
-  'Nancy',
-  'Anthony',
-  'Betty',
-  'Mark',
-  'Margaret',
-  'Donald',
-  'Sandra',
-  'Steven',
-  'Ashley',
-  'Andrew',
-  'Dorothy',
-  'Paul',
-  'Kimberly',
-  'Joshua',
-  'Emily',
-  'Kenneth',
-  'Donna',
-  'Kevin',
-  'Michelle',
-  'Brian',
-  'Carol',
-  'George',
-  'Amanda',
-  'Timothy',
-  'Melissa',
-  'Ronald',
-  'Deborah',
-  'Jason',
-  'Stephanie',
-  'Edward',
-  'Rebecca',
-  'Jeffrey',
-  'Sharon',
-  'Ryan',
-  'Laura',
-  'Jacob',
-  'Cynthia',
-  'Nicholas',
-  'Kathleen',
-  'Gary',
-  'Amy',
-  'Eric',
-  'Angela',
-  'Jonathan',
-  'Shirley',
-  'Stephen',
-  'Brenda',
-  'Larry',
-  'Emma',
-  'Justin',
-  'Anna',
-  'Scott',
-  'Pamela',
-  'Brandon',
-  'Nicole',
-  'Benjamin',
-  'Samantha',
-  'Samuel',
-  'Katherine',
-  'Raymond',
-  'Christine',
-  'Gregory',
-  'Helen',
-  'Frank',
-  'Debra',
-  'Alexander',
-  'Rachel',
-  'Patrick',
-  'Carolyn',
-  'Jack',
-  'Janet',
-  'Dennis',
-  'Catherine',
-  'Jerry',
-  'Heather',
-  'Tyler',
-  'Diane',
-];
-
-// Curated last names (100 entries, diverse backgrounds)
-const LAST_NAMES = [
-  'Smith',
-  'Johnson',
-  'Williams',
-  'Brown',
-  'Jones',
-  'Garcia',
-  'Miller',
-  'Davis',
-  'Rodriguez',
-  'Martinez',
-  'Hernandez',
-  'Lopez',
-  'Gonzalez',
-  'Wilson',
-  'Anderson',
-  'Thomas',
-  'Taylor',
-  'Moore',
-  'Jackson',
-  'Martin',
-  'Lee',
-  'Perez',
-  'Thompson',
-  'White',
-  'Harris',
-  'Sanchez',
-  'Clark',
-  'Ramirez',
-  'Lewis',
-  'Robinson',
-  'Walker',
-  'Young',
-  'Allen',
-  'King',
-  'Wright',
-  'Scott',
-  'Torres',
-  'Nguyen',
-  'Hill',
-  'Flores',
-  'Green',
-  'Adams',
-  'Nelson',
-  'Baker',
-  'Hall',
-  'Rivera',
-  'Campbell',
-  'Mitchell',
-  'Carter',
-  'Roberts',
-  'Gomez',
-  'Phillips',
-  'Evans',
-  'Turner',
-  'Diaz',
-  'Parker',
-  'Cruz',
-  'Edwards',
-  'Collins',
-  'Reyes',
-  'Stewart',
-  'Morris',
-  'Morales',
-  'Murphy',
-  'Cook',
-  'Rogers',
-  'Gutierrez',
-  'Ortiz',
-  'Morgan',
-  'Cooper',
-  'Peterson',
-  'Bailey',
-  'Reed',
-  'Kelly',
-  'Howard',
-  'Ramos',
-  'Kim',
-  'Cox',
-  'Ward',
-  'Richardson',
-  'Watson',
-  'Brooks',
-  'Chavez',
-  'Wood',
-  'James',
-  'Bennett',
-  'Gray',
-  'Mendoza',
-  'Ruiz',
-  'Hughes',
-  'Price',
-  'Alvarez',
-  'Castillo',
-  'Sanders',
-  'Patel',
-  'Myers',
-  'Long',
-  'Ross',
-  'Foster',
-  'Jimenez',
-];
 
 /**
  * Determine patron status using weighted distribution.
@@ -266,11 +59,14 @@ module.exports = {
    */
   async up(queryInterface, Sequelize) {
     // Idempotency check: skip if patrons already exist beyond demo count
-    const [results] = await queryInterface.sequelize.query('SELECT COUNT(*) as count FROM patrons');
+    const results = await queryInterface.sequelize.query('SELECT COUNT(*) as count FROM patrons', {
+      type: Sequelize.QueryTypes.SELECT,
+    });
     const patronCount = parseInt(results[0].count, 10);
 
     if (patronCount > IDEMPOTENCY_THRESHOLD) {
       console.log(
+        // eslint-disable-line no-console
         `Skipping bulk patron seed: ${patronCount} patrons already exist (threshold: ${IDEMPOTENCY_THRESHOLD}).`
       );
       return;
@@ -305,9 +101,10 @@ module.exports = {
     await queryInterface.bulkInsert('patrons', patrons);
 
     console.log(
+      // eslint-disable-line no-console
       `Seeded ${PATRON_COUNT} bulk patrons (card numbers ${BULK_CARD_PREFIX}00001 to ${BULK_CARD_PREFIX}05000).`
     );
-    console.log(`Dev password for all bulk patrons: ${DEV_PASSWORD}`);
+    console.log(`Dev password for all bulk patrons: ${DEV_PASSWORD}`); // eslint-disable-line no-console
   },
 
   /**
@@ -318,6 +115,6 @@ module.exports = {
     await queryInterface.bulkDelete('patrons', {
       card_number: { [Sequelize.Op.like]: `${BULK_CARD_PREFIX}%` },
     });
-    console.log('Removed all bulk patron records.');
+    console.log('Removed all bulk patron records.'); // eslint-disable-line no-console
   },
 };
