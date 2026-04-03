@@ -10,23 +10,12 @@ import {
 } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
 import EmptyState from '../EmptyState';
+import { formatDate } from '../../utils/checkoutUtils';
 import type { Checkout } from '../../types';
 
 interface CheckoutHistoryTabProps {
   checkouts: Checkout[];
   isLoading: boolean;
-}
-
-/**
- * Format a date string for display
- */
-function formatDate(dateString?: string): string {
-  if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
 }
 
 /**

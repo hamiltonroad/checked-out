@@ -13,25 +13,13 @@ import {
 } from '@mui/material';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
 import EmptyState from '../EmptyState';
-import { dueSoonSeverity, formatDueDateText } from '../../utils/checkoutUtils';
+import { formatDate, dueSoonSeverity, formatDueDateText } from '../../utils/checkoutUtils';
 import type { CurrentCheckout } from '../../types';
 
 interface CurrentCheckoutsTabProps {
   checkouts: CurrentCheckout[];
   onReturn: (id: number) => void;
   isLoading: boolean;
-}
-
-/**
- * Format a date string for display
- */
-function formatDate(dateString?: string | null): string {
-  if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
 }
 
 /**

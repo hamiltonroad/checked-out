@@ -1,6 +1,20 @@
 import type { DueSeverity } from '../types';
 
 /**
+ * Format a date string for display in checkout tables.
+ * @param dateString - ISO date string, or null/undefined
+ * @returns Formatted date (e.g., "Mar 20, 2026") or empty string
+ */
+export function formatDate(dateString?: string | null): string {
+  if (!dateString) return '';
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+/**
  * Determine the severity level for a due date based on days until due.
  * @param daysUntilDue - Days until the item is due (negative = overdue), or null
  * @returns 'error' for overdue, 'warning' for due within 3 days, null otherwise

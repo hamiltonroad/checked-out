@@ -1,5 +1,23 @@
 import { describe, it, expect } from 'vitest';
-import { dueSoonSeverity, formatDueDateText } from './checkoutUtils';
+import { formatDate, dueSoonSeverity, formatDueDateText } from './checkoutUtils';
+
+describe('formatDate', () => {
+  it('formats ISO date string to readable format', () => {
+    expect(formatDate('2026-03-20T14:00:00.000Z')).toBe('Mar 20, 2026');
+  });
+
+  it('returns empty string for null', () => {
+    expect(formatDate(null)).toBe('');
+  });
+
+  it('returns empty string for undefined', () => {
+    expect(formatDate(undefined)).toBe('');
+  });
+
+  it('returns empty string for empty string', () => {
+    expect(formatDate('')).toBe('');
+  });
+});
 
 describe('dueSoonSeverity', () => {
   it('returns "error" for negative input (overdue)', () => {
