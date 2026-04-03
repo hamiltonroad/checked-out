@@ -87,6 +87,7 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
       setCheckoutOpen(false);
       setCheckoutSuccess(true);
       queryClient.invalidateQueries({ queryKey: ['books', bookId] });
+      queryClient.invalidateQueries({ queryKey: ['copies', 'available', bookId] });
     } catch {
       // Error is captured by mutation state and displayed in dialog
     }
