@@ -11,6 +11,9 @@ const checkoutValidator = {
     params: Joi.object({
       id: Joi.number().integer().positive().required(),
     }),
+    body: Joi.object({
+      returnDate: Joi.date().iso().optional(),
+    }).optional(),
   },
   getByPatron: {
     params: Joi.object({

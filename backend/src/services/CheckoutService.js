@@ -89,7 +89,7 @@ class CheckoutService {
     const patron = await Patron.findByPk(patronId);
     if (!patron) throw ApiError.notFound(`Patron with id ${patronId} not found`);
 
-    if (patron.status === 'suspended') {
+    if (patron.status !== 'active') {
       throw ApiError.conflict(
         `Patron ${patron.first_name} ${patron.last_name} cannot check out books (status: ${patron.status})`
       );
@@ -171,6 +171,9 @@ class CheckoutService {
     if (checkout.return_date) throw ApiError.conflict('Checkout has already been returned');
 
     const effectiveReturnDate = returnDate ? new Date(returnDate) : new Date();
+    if (returnDate && Number.isNaN(effectiveReturnDate.getTime())) {
+      throw ApiError.badRequest('returnDate is not a valid date');
+    }
     if (effectiveReturnDate < new Date(checkout.checkout_date)) {
       throw ApiError.badRequest('returnDate cannot be before the checkout date', [
         { field: 'returnDate', message: 'returnDate cannot be before the checkout date' },

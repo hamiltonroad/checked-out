@@ -26,6 +26,7 @@ router.post(
 router.put(
   '/:id/return',
   strictLimiter,
+  authenticate,
   validateRequest(checkoutValidator.return),
   checkoutController.returnCheckout
 );
