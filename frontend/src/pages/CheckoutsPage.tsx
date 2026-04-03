@@ -7,13 +7,17 @@ import {
   Snackbar,
   Tabs,
   Tab,
+  Badge,
   type AlertColor,
 } from '@mui/material';
 import { useCheckouts } from '../hooks/useCheckouts';
 import { useCurrentCheckouts } from '../hooks/useCurrentCheckouts';
+import { useOverdueCheckouts } from '../hooks/useOverdueCheckouts';
 import { useReturnCheckout } from '../hooks/useReturnCheckout';
 import CurrentCheckoutsTab from '../components/CurrentCheckoutsTab';
 import CheckoutHistoryTab from '../components/CheckoutHistoryTab';
+import OverdueCheckoutList from '../components/OverdueCheckoutList';
+import type { OverdueCheckout } from '../types';
 
 /**
  * CheckoutsPage displays checkouts in a tabbed interface:
@@ -24,6 +28,7 @@ function CheckoutsPage() {
   const [activeTab, setActiveTab] = useState(0);
   const currentQuery = useCurrentCheckouts();
   const allQuery = useCheckouts();
+  const overdueQuery = useOverdueCheckouts();
   const returnMutation = useReturnCheckout();
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -58,11 +63,13 @@ function CheckoutsPage() {
 
   const currentCheckouts = currentQuery.data?.data || [];
   const allCheckouts = allQuery.data?.data || [];
+  const overdueCheckouts: OverdueCheckout[] = overdueQuery.data?.data || [];
   const historyCheckouts = allCheckouts.filter(
     (c: { returnDate?: string }) => c.returnDate !== null && c.returnDate !== undefined
   );
 
-  const activeError = activeTab === 0 ? currentQuery.error : allQuery.error;
+  const tabErrors = [currentQuery.error, allQuery.error, overdueQuery.error];
+  const activeError = tabErrors[activeTab] || null;
 
   return (
     <Container>
@@ -79,6 +86,15 @@ function CheckoutsPage() {
         <Tabs value={activeTab} onChange={handleTabChange} aria-label="Checkout tabs">
           <Tab label="Current" id="checkout-tab-0" aria-controls="checkout-tabpanel-0" />
           <Tab label="History" id="checkout-tab-1" aria-controls="checkout-tabpanel-1" />
+          <Tab
+            label={
+              <Badge badgeContent={overdueCheckouts.length} color="error">
+                Overdue
+              </Badge>
+            }
+            id="checkout-tab-2"
+            aria-controls="checkout-tabpanel-2"
+          />
         </Tabs>
       </Box>
 
@@ -101,6 +117,16 @@ function CheckoutsPage() {
       <Box role="tabpanel" id="checkout-tabpanel-1" hidden={activeTab !== 1}>
         {activeTab === 1 && (
           <CheckoutHistoryTab checkouts={historyCheckouts} isLoading={allQuery.isLoading} />
+        )}
+      </Box>
+
+      <Box role="tabpanel" id="checkout-tabpanel-2" hidden={activeTab !== 2}>
+        {activeTab === 2 && (
+          <OverdueCheckoutList
+            checkouts={overdueCheckouts}
+            onReturn={handleReturn}
+            isLoading={overdueQuery.isLoading}
+          />
         )}
       </Box>
 
