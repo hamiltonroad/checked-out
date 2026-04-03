@@ -72,6 +72,20 @@ BookCard.propTypes = {
 export default BookCard;
 ```
 
+### Zero-Prop PropTypes
+
+All components must declare PropTypes — even those that accept no props. Use an empty object:
+
+```jsx
+const StatusBar = () => {
+  return <Box sx={{ p: 1 }}>Ready</Box>;
+};
+
+StatusBar.propTypes = {};
+
+export default StatusBar;
+```
+
 ---
 
 ## State Management
