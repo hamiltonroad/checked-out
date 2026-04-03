@@ -14,6 +14,7 @@ export function useReturnCheckout() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['checkouts'] });
       queryClient.invalidateQueries({ queryKey: ['checkouts', 'current'] });
+      queryClient.invalidateQueries({ queryKey: ['patronCheckouts'] });
     },
   });
 }
