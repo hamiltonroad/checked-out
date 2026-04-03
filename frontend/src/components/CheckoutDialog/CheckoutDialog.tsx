@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Dialog,
@@ -15,6 +15,8 @@ import {
 } from '@mui/material';
 import { createFilterOptions } from '@mui/material/Autocomplete';
 import { usePatrons } from '../../hooks/usePatrons';
+import { useAvailableCopies } from '../../hooks/useAvailableCopies';
+import CopyRadioGroup from '../CopyRadioGroup';
 
 const CHECKOUT_DURATION_DAYS = 14;
 
@@ -29,13 +31,13 @@ interface CheckoutDialogProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: { patron_id: number; copy_id: number }) => void;
+  bookId?: number | null;
   isSubmitting?: boolean;
   error?: string | null;
 }
 
 interface CheckoutFormData {
   patronId: Patron | null;
-  copyId: string;
 }
 
 const patronFilter = createFilterOptions<Patron>({
@@ -58,36 +60,50 @@ function CheckoutDialog({
   open,
   onClose,
   onSubmit,
+  bookId = null,
   isSubmitting = false,
   error = null,
 }: CheckoutDialogProps) {
+  const [selectedCopyId, setSelectedCopyId] = useState('');
   const {
-    register,
     handleSubmit,
     reset,
     control,
     formState: { errors },
-  } = useForm<CheckoutFormData>({ defaultValues: { patronId: null, copyId: '' } });
+  } = useForm<CheckoutFormData>({ defaultValues: { patronId: null } });
 
   const {
     data: patronsRes,
     isLoading: loadingPatrons,
     isError: patronsError,
   } = usePatrons({ status: 'active' });
+
+  const { data: copiesRes, isLoading: loadingCopies } = useAvailableCopies(open ? bookId : null);
+
   const patrons: Patron[] = patronsRes?.data || [];
+  const copies = copiesRes?.data?.copies || [];
+  const totalCopies = copiesRes?.data?.totalCopies || 0;
   const dueDate = computeDueDate();
+  const noCopiesAvailable = !loadingCopies && copies.length === 0;
 
   useEffect(() => {
     if (!open) {
       reset();
+      setSelectedCopyId('');
     }
   }, [open, reset]);
 
+  const handleCopyChange = (copyId: string) => {
+    setSelectedCopyId(copyId);
+  };
+
   const handleFormSubmit = (data: CheckoutFormData) => {
-    if (!data.patronId?.id) return;
-    const parsedCopyId = parseInt(data.copyId, 10);
+    if (!data.patronId?.id || !selectedCopyId) return;
+    const parsedCopyId = parseInt(selectedCopyId, 10);
     onSubmit({ patron_id: data.patronId.id, copy_id: parsedCopyId });
   };
+
+  const isSubmitDisabled = isSubmitting || !selectedCopyId || noCopiesAvailable;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -129,24 +145,13 @@ function CheckoutDialog({
             />
           )}
         />
-        <TextField
-          margin="dense"
-          label="Copy ID"
-          type="number"
-          fullWidth
+        <CopyRadioGroup
+          copies={copies}
+          value={selectedCopyId}
+          onChange={handleCopyChange}
           disabled={isSubmitting}
-          inputProps={{ min: 1 }}
-          error={!!errors.copyId}
-          helperText={errors.copyId?.message}
-          {...register('copyId', {
-            required: 'Copy ID is required.',
-            validate: (value) => {
-              const num = parseInt(value, 10);
-              if (Number.isNaN(num)) return 'Copy ID must be a number.';
-              if (num <= 0) return 'Copy ID must be greater than 0.';
-              return true;
-            },
-          })}
+          totalCopies={totalCopies}
+          isLoading={loadingCopies}
         />
         <Box sx={{ mt: 2 }}>
           <Typography variant="body2" color="text.secondary">
@@ -161,7 +166,7 @@ function CheckoutDialog({
         <Button
           onClick={handleSubmit(handleFormSubmit)}
           variant="contained"
-          disabled={isSubmitting}
+          disabled={isSubmitDisabled}
           startIcon={isSubmitting ? <CircularProgress size={16} /> : null}
         >
           {isSubmitting ? 'Processing...' : 'Check Out'}

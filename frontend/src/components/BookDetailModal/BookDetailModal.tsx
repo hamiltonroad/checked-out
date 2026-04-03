@@ -178,6 +178,7 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
           checkoutMutation.reset();
         }}
         onSubmit={handleCheckoutSubmit}
+        bookId={bookId}
         isSubmitting={checkoutMutation.isPending}
         error={checkoutMutation.error ? formatApiError(checkoutMutation.error) : null}
       />

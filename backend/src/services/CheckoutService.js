@@ -59,6 +59,13 @@ class CheckoutService {
       throw new ApiError(404, 'Copy not found');
     }
 
+    const activeCheckout = await Checkout.findOne({
+      where: { copy_id: copyId, return_date: null },
+    });
+    if (activeCheckout) {
+      throw ApiError.conflict('This copy is already checked out');
+    }
+
     const checkoutDate = new Date();
     const dueDate = new Date(checkoutDate);
     dueDate.setDate(dueDate.getDate() + 14);
