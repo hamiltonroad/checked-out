@@ -240,17 +240,53 @@ The "Harness Change Made" column records whether a harness improvement was actua
 
 ### Step 8.5: Run Harness Self-Audit
 
-If the project has a harness audit tool available (e.g., `harness audit`), run it to detect harness drift and internal inconsistencies. This catches problems that code-level review cannot — such as stale references in CLAUDE.md, missing harness components, or structure drift.
+Run the harness audit tool and perform additional inline checks to detect drift and internal inconsistencies. This catches problems that code-level review cannot — such as stale references in CLAUDE.md, missing harness components, or structure drift.
 
-**Execution:**
+**Execution — two-part audit:**
+
+#### Part A: Run harness audit CLI
 
 ```bash
-# Try the project's harness audit command
-# The exact command depends on the project — check CLAUDE.md or package.json
-npx harness audit -f markdown 2>/dev/null || echo "harness audit not available"
+# Run from the project root; use absolute path so it resolves in worktrees
+cd "$(git rev-parse --show-toplevel)" && harness audit --format markdown 2>/dev/null
 ```
 
-**If a harness audit tool is not available**, note the skip in the review file and continue. Not every project will have one — the self-audit is valuable when present but not a blocker.
+If the command succeeds, include its output in the self-audit section. If it fails, note "CLI audit not available" and proceed to Part B — the inline checks are mandatory regardless.
+
+#### Part B: Inline harness checks (always run)
+
+These checks supplement the CLI audit (or substitute for it when unavailable):
+
+1. **Instructions and Knowledge** — Read `CLAUDE.md` and verify:
+   - All file paths referenced in CLAUDE.md exist on disk (use `ls` or glob to confirm)
+   - All standards files referenced in CLAUDE.md exist
+   - Tech stack, architecture, constraints, and conventions sections are present and non-empty
+   - Constraints include concrete "Do NOT" rules (not just vague guidance)
+
+2. **Verification and Back-Pressure** — Check:
+   - Hooks exist and are configured (check `.claude/settings.json` or `.claude/settings.local.json` for hook definitions)
+   - Lint/format commands listed in CLAUDE.md actually work
+   - Test commands listed in CLAUDE.md exist
+
+3. **Constraints and Governance** — Check:
+   - Permission settings are defined
+   - Destructive operations require confirmation
+
+4. **Context Management** — Check:
+   - Knowledge base files referenced from CLAUDE.md exist
+   - Agent definitions in `.claude/agents/` are consistent with commands in `.claude/commands/`
+
+5. **Drift Detection** — Flag any of these:
+   - CLAUDE.md references a file path that does not exist on disk
+   - Standards docs reference missing files or broken links
+   - Agent definitions reference tools or commands that don't exist
+   - Knowledge base files are orphaned (not referenced from anywhere)
+
+**Score each category** as pass/fail per check item. Use the scoring tiers from `knowledge/audit-checklist-kit.md`:
+- 20+ passed: Solid
+- 12-19 passed: Decent
+- 6-11 passed: Gaps
+- Under 6: Absent
 
 **Append to the review file** created in Step 8. Add a `## Harness Self-Audit` section **after** the Harness Improvement Recommendations section.
 
@@ -259,12 +295,14 @@ npx harness audit -f markdown 2>/dev/null || echo "harness audit not available"
 ```markdown
 ## Harness Self-Audit
 
-Self-audit ran harness audit against the project root.
+Audit source: CLI + inline checks (or "inline checks only" if CLI unavailable)
 
 | Category     | Score | Pass | Fail |
 | ------------ | ----: | ---: | ---: |
 | Instructions |   85% |    6 |    1 |
 | Verification |  100% |    4 |    0 |
+| Constraints  |  100% |    2 |    0 |
+| Context      |   75% |    3 |    1 |
 | ...          |   ... |  ... |  ... |
 
 **Overall:** 88% (Decent)
@@ -282,7 +320,7 @@ If no issues are found, state: "No harness drift detected. All declared files an
 **Key rules:**
 
 - Always include the self-audit section, even when the audit passes cleanly
-- Report the overall score and tier from the audit
+- Report the overall score and tier
 - List specific drift items as bullet points
 - Do NOT mix self-audit findings with code review findings — they are separate concerns
 
