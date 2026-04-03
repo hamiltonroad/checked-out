@@ -51,6 +51,9 @@ Customize the criteria below to match your team's priorities.
 - API endpoints documented with request/response examples
 - Migration files have descriptive names
 
+### Harness
+- `.claude/settings.json` hooks must have observable effect -- flag no-op hooks (hooks that exit 0 for all inputs without gating anything)
+
 ## Review Output
 
 Reviews should produce:

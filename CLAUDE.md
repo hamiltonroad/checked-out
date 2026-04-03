@@ -40,6 +40,8 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - Source files must not exceed 200 lines (type/config files exempt).
 - Test files must extract repeated setup/teardown logic into shared helpers when a block appears 3+ times.
 - Every route file MUST include a Joi validator via `validateRequest` middleware. No route may accept query/body params without validation.
+- Do NOT use `page.waitForTimeout()` in Playwright tests. Use event-based waits (`waitForSelector`, `waitForLoadState`, Locator assertions) instead.
+- Endpoints that return patron PII (names, card numbers, emails) MUST use `authenticate` middleware.
 
 ## Conventions
 
