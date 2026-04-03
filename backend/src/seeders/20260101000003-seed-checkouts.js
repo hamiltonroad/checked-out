@@ -71,8 +71,8 @@ module.exports = {
 
     // Idempotency: skip if checkouts for seed patrons already exist
     const existing = await queryInterface.sequelize.query(
-      `SELECT COUNT(*) as count FROM checkouts WHERE patron_id IN (${patronIds.join(',')})`,
-      { type: Sequelize.QueryTypes.SELECT }
+      'SELECT COUNT(*) as count FROM checkouts WHERE patron_id IN (:patronIds)',
+      { replacements: { patronIds }, type: Sequelize.QueryTypes.SELECT }
     );
 
     if (parseInt(existing[0].count, 10) > 0) {
