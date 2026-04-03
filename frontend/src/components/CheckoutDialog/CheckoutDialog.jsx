@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import PropTypes from 'prop-types';
 import {
   Dialog,
@@ -12,31 +12,40 @@ import {
   Typography,
   CircularProgress,
   Box,
+  Autocomplete,
 } from '@mui/material';
+import { createFilterOptions } from '@mui/material/Autocomplete';
+import { usePatrons } from '../../hooks/usePatrons';
 
-/**
- * Compute due date as today + 14 days, formatted for display
- * @returns {string} Formatted due date string
- */
+const patronFilter = createFilterOptions({
+  stringify: (o) => `${o.first_name} ${o.last_name} ${o.card_number}`,
+});
+
+/** Compute due date as today + 14 days, formatted for display */
 function computeDueDate() {
   const due = new Date();
   due.setDate(due.getDate() + 14);
   return due.toLocaleDateString();
 }
 
-/**
- * CheckoutDialog displays a form for checking out a book copy to a patron
- */
+/** CheckoutDialog displays a form for checking out a book copy to a patron */
 function CheckoutDialog({ open, onClose, onSubmit, isSubmitting = false, error = null }) {
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
-  } = useForm({ defaultValues: { patronId: '', copyId: '' } });
+  } = useForm({ defaultValues: { patronId: null, copyId: '' } });
+
+  const {
+    data: patronsRes,
+    isLoading: loadingPatrons,
+    isError: patronsError,
+  } = usePatrons({ status: 'active' });
+  const patrons = patronsRes?.data || [];
   const dueDate = computeDueDate();
 
-  // Reset form when dialog closes
   useEffect(() => {
     if (!open) {
       reset();
@@ -44,7 +53,7 @@ function CheckoutDialog({ open, onClose, onSubmit, isSubmitting = false, error =
   }, [open, reset]);
 
   const handleFormSubmit = (data) => {
-    const parsedPatronId = parseInt(data.patronId, 10);
+    const parsedPatronId = data.patronId?.id;
     const parsedCopyId = parseInt(data.copyId, 10);
     onSubmit({ patron_id: parsedPatronId, copy_id: parsedCopyId });
   };
@@ -58,25 +67,36 @@ function CheckoutDialog({ open, onClose, onSubmit, isSubmitting = false, error =
             {error}
           </Alert>
         )}
-        <TextField
-          autoFocus
-          margin="dense"
-          label="Patron ID"
-          type="number"
-          fullWidth
-          disabled={isSubmitting}
-          inputProps={{ min: 1 }}
-          error={!!errors.patronId}
-          helperText={errors.patronId?.message}
-          {...register('patronId', {
-            required: 'Patron ID is required.',
-            validate: (value) => {
-              const num = parseInt(value, 10);
-              if (Number.isNaN(num)) return 'Patron ID must be a number.';
-              if (num <= 0) return 'Patron ID must be greater than 0.';
-              return true;
-            },
-          })}
+        <Controller
+          name="patronId"
+          control={control}
+          rules={{ required: 'Patron is required.' }}
+          render={({ field }) => (
+            <Autocomplete
+              options={patrons}
+              loading={loadingPatrons}
+              disabled={isSubmitting || patronsError}
+              getOptionLabel={(option) =>
+                `${option.first_name} ${option.last_name} (${option.card_number})`
+              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              filterOptions={patronFilter}
+              noOptionsText="No patrons found"
+              onChange={(_, selected) => field.onChange(selected)}
+              value={field.value || null}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  margin="dense"
+                  label="Patron"
+                  required
+                  fullWidth
+                  error={!!errors.patronId || patronsError}
+                  helperText={patronsError ? 'Failed to load patrons' : errors.patronId?.message}
+                />
+              )}
+            />
+          )}
         />
         <TextField
           margin="dense"
