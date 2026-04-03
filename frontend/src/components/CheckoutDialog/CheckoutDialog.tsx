@@ -16,6 +16,8 @@ import {
 import { createFilterOptions } from '@mui/material/Autocomplete';
 import { usePatrons } from '../../hooks/usePatrons';
 import { useAvailableCopies } from '../../hooks/useAvailableCopies';
+import { getFieldError } from '../../utils/errorUtils';
+import type { FieldError as ApiFieldError } from '../../types';
 import CopyRadioGroup from '../CopyRadioGroup';
 
 const CHECKOUT_DURATION_DAYS = 14;
@@ -34,6 +36,7 @@ interface CheckoutDialogProps {
   bookId?: number | null;
   isSubmitting?: boolean;
   error?: string | null;
+  fieldErrors?: ApiFieldError[];
 }
 
 interface CheckoutFormData {
@@ -63,6 +66,7 @@ function CheckoutDialog({
   bookId = null,
   isSubmitting = false,
   error = null,
+  fieldErrors = [],
 }: CheckoutDialogProps) {
   const [selectedCopyId, setSelectedCopyId] = useState('');
   const {
@@ -138,8 +142,14 @@ function CheckoutDialog({
                   label="Patron"
                   required
                   fullWidth
-                  error={!!errors.patronId || patronsError}
-                  helperText={patronsError ? 'Failed to load patrons' : errors.patronId?.message}
+                  error={
+                    !!errors.patronId || patronsError || !!getFieldError(fieldErrors, 'patron_id')
+                  }
+                  helperText={
+                    patronsError
+                      ? 'Failed to load patrons'
+                      : getFieldError(fieldErrors, 'patron_id') || errors.patronId?.message
+                  }
                 />
               )}
             />

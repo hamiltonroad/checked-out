@@ -1,9 +1,10 @@
 class ApiError extends Error {
-  constructor(statusCode, message, errors = []) {
+  constructor(statusCode, message, errors = [], field = null) {
     super(message);
     this.statusCode = statusCode;
     this.name = 'ApiError';
     this.errors = errors;
+    this.field = field;
   }
 
   static badRequest(message = 'Bad Request', errors = []) {

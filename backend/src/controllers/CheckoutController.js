@@ -1,6 +1,7 @@
 const checkoutService = require('../services/CheckoutService');
 const patronCheckoutService = require('../services/PatronCheckoutService');
 const ApiResponse = require('../utils/ApiResponse');
+const logger = require('../config/logger');
 
 class CheckoutController {
   /**
@@ -19,6 +20,14 @@ class CheckoutController {
 
       res.status(201).json(ApiResponse.success(checkout, 'Checkout created successfully'));
     } catch (error) {
+      if (error.statusCode && error.statusCode < 500) {
+        logger.warn('Checkout validation failure', {
+          statusCode: error.statusCode,
+          message: error.message,
+          method: req.method,
+          url: req.originalUrl,
+        });
+      }
       next(error);
     }
   }
@@ -80,11 +89,20 @@ class CheckoutController {
   async returnCheckout(req, res, next) {
     try {
       const id = parseInt(req.params.id, 10);
+      const { returnDate } = req.body || {};
 
-      const checkout = await checkoutService.returnCheckout(id);
+      const checkout = await checkoutService.returnCheckout(id, returnDate || null);
 
       res.status(200).json(ApiResponse.success(checkout, 'Book returned successfully'));
     } catch (error) {
+      if (error.statusCode && error.statusCode < 500) {
+        logger.warn('Return validation failure', {
+          statusCode: error.statusCode,
+          message: error.message,
+          method: req.method,
+          url: req.originalUrl,
+        });
+      }
       next(error);
     }
   }

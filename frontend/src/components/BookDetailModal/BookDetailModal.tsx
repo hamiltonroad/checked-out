@@ -1,6 +1,5 @@
+import { type ComponentProps, forwardRef, useState } from 'react';
 import type React from 'react';
-import { forwardRef, useState } from 'react';
-import type { ComponentProps } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -29,7 +28,7 @@ import SkeletonField from '../SkeletonField';
 import { RatingInput } from '../Rating';
 import CheckoutDialog from '../CheckoutDialog';
 import ratingService from '../../services/ratingService';
-import { formatApiError } from '../../utils/errorUtils';
+import { formatApiError, parseApiError } from '../../utils/errorUtils';
 import BookDetailsTab from './BookDetailsTab';
 import BookReviewsTab from './BookReviewsTab';
 
@@ -60,6 +59,8 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
   const { data, isLoading, error } = useBook(bookId);
   const checkoutMutation = useCheckout();
   const book = data?.data;
+  const checkoutError = checkoutMutation.error;
+  const parsedCheckoutErrors = checkoutError ? parseApiError(checkoutError).fieldErrors : [];
 
   const { data: statsData } = useQuery({
     queryKey: ['bookRatingStats', bookId],
@@ -77,9 +78,7 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
     },
   });
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => setTabValue(newValue);
 
   const handleCheckoutSubmit = async (checkoutData: { patron_id: number; copy_id: number }) => {
     try {
@@ -181,7 +180,8 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
         onSubmit={handleCheckoutSubmit}
         bookId={bookId}
         isSubmitting={checkoutMutation.isPending}
-        error={checkoutMutation.error ? formatApiError(checkoutMutation.error) : null}
+        error={checkoutError ? formatApiError(checkoutError) : null}
+        fieldErrors={parsedCheckoutErrors}
       />
       <Snackbar
         open={checkoutSuccess}
@@ -196,5 +196,4 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
     </Dialog>
   );
 }
-
 export default BookDetailModal;

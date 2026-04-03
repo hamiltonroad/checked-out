@@ -6,43 +6,23 @@ const MS_PER_DAY = 86400000;
 
 /** Shared Sequelize include config for checkout queries with patron and book details */
 const CHECKOUT_INCLUDES = [
-  {
-    model: Patron,
-    as: 'patron',
-    attributes: ['id', 'first_name', 'last_name'],
-  },
+  { model: Patron, as: 'patron', attributes: ['id', 'first_name', 'last_name'] },
   {
     model: Copy,
     as: 'copy',
     attributes: ['id'],
-    include: [
-      {
-        model: Book,
-        as: 'book',
-        attributes: ['title'],
-      },
-    ],
+    include: [{ model: Book, as: 'book', attributes: ['title'] }],
   },
 ];
 
 /** Sequelize include config for overdue queries — adds patron contact fields */
 const OVERDUE_INCLUDES = [
-  {
-    model: Patron,
-    as: 'patron',
-    attributes: ['id', 'first_name', 'last_name', 'email', 'phone'],
-  },
+  { model: Patron, as: 'patron', attributes: ['id', 'first_name', 'last_name', 'email', 'phone'] },
   {
     model: Copy,
     as: 'copy',
     attributes: ['id'],
-    include: [
-      {
-        model: Book,
-        as: 'book',
-        attributes: ['id', 'title'],
-      },
-    ],
+    include: [{ model: Book, as: 'book', attributes: ['id', 'title'] }],
   },
 ];
 
@@ -107,15 +87,21 @@ class CheckoutService {
   // eslint-disable-next-line class-methods-use-this
   async createCheckout({ patronId, copyId }) {
     const patron = await Patron.findByPk(patronId);
-    if (!patron) throw new ApiError(404, 'Patron not found');
+    if (!patron) throw ApiError.notFound(`Patron with id ${patronId} not found`);
+
+    if (patron.status === 'suspended') {
+      throw ApiError.conflict(
+        `Patron ${patron.first_name} ${patron.last_name} cannot check out books (status: ${patron.status})`
+      );
+    }
 
     const copy = await Copy.findByPk(copyId);
-    if (!copy) throw new ApiError(404, 'Copy not found');
+    if (!copy) throw ApiError.notFound(`Copy with id ${copyId} not found`);
 
     const activeCheckout = await Checkout.findOne({
       where: { copy_id: copyId, return_date: null },
     });
-    if (activeCheckout) throw ApiError.conflict('This copy is already checked out');
+    if (activeCheckout) throw ApiError.conflict(`Copy ${copyId} is already checked out`);
 
     const checkoutDate = new Date();
     const dueDate = new Date(checkoutDate);
@@ -176,7 +162,7 @@ class CheckoutService {
 
   /** Mark a checkout as returned */
   // eslint-disable-next-line class-methods-use-this
-  async returnCheckout(id) {
+  async returnCheckout(id, returnDate = null) {
     const checkout = await Checkout.findByPk(id, {
       include: CHECKOUT_INCLUDES,
     });
@@ -184,9 +170,16 @@ class CheckoutService {
     if (!checkout) throw ApiError.notFound('Checkout not found');
     if (checkout.return_date) throw ApiError.conflict('Checkout has already been returned');
 
+    const effectiveReturnDate = returnDate ? new Date(returnDate) : new Date();
+    if (effectiveReturnDate < new Date(checkout.checkout_date)) {
+      throw ApiError.badRequest('returnDate cannot be before the checkout date', [
+        { field: 'returnDate', message: 'returnDate cannot be before the checkout date' },
+      ]);
+    }
+
     // Conditional update for concurrency safety
     const [updatedCount] = await Checkout.update(
-      { return_date: new Date() },
+      { return_date: effectiveReturnDate },
       { where: { id, return_date: null } }
     );
 

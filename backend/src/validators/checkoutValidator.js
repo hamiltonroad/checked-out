@@ -7,6 +7,11 @@ const checkoutValidator = {
       copy_id: Joi.number().integer().positive().required(),
     }),
   },
+  return: {
+    params: Joi.object({
+      id: Joi.number().integer().positive().required(),
+    }),
+  },
   getByPatron: {
     params: Joi.object({
       id: Joi.number().integer().positive().required(),
