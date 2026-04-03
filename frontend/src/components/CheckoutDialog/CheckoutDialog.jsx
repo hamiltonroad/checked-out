@@ -17,14 +17,16 @@ import {
 import { createFilterOptions } from '@mui/material/Autocomplete';
 import { usePatrons } from '../../hooks/usePatrons';
 
+const CHECKOUT_DURATION_DAYS = 14;
+
 const patronFilter = createFilterOptions({
   stringify: (o) => `${o.first_name} ${o.last_name} ${o.card_number}`,
 });
 
-/** Compute due date as today + 14 days, formatted for display */
+/** Compute due date as today + CHECKOUT_DURATION_DAYS, formatted for display */
 function computeDueDate() {
   const due = new Date();
-  due.setDate(due.getDate() + 14);
+  due.setDate(due.getDate() + CHECKOUT_DURATION_DAYS);
   return due.toLocaleDateString();
 }
 
@@ -53,9 +55,9 @@ function CheckoutDialog({ open, onClose, onSubmit, isSubmitting = false, error =
   }, [open, reset]);
 
   const handleFormSubmit = (data) => {
-    const parsedPatronId = data.patronId?.id;
+    if (!data.patronId?.id) return;
     const parsedCopyId = parseInt(data.copyId, 10);
-    onSubmit({ patron_id: parsedPatronId, copy_id: parsedCopyId });
+    onSubmit({ patron_id: data.patronId.id, copy_id: parsedCopyId });
   };
 
   return (
