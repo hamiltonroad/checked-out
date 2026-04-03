@@ -40,6 +40,23 @@ class CheckoutController {
   }
 
   /**
+   * Get overdue checkouts
+   * GET /api/v1/checkouts/overdue
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async getOverdueCheckouts(req, res, next) {
+    try {
+      const checkouts = await checkoutService.getOverdueCheckouts();
+
+      res
+        .status(200)
+        .json(ApiResponse.success(checkouts, 'Overdue checkouts retrieved successfully'));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Get all checkouts
    * GET /api/v1/checkouts
    */
