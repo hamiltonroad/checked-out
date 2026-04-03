@@ -9,6 +9,7 @@ describe('CheckoutTable', () => {
   const mockCheckouts = [
     {
       id: 1,
+      patronId: 10,
       patronName: 'Jane Smith',
       bookTitle: 'The Great Gatsby',
       checkoutDate: '2026-03-20T14:00:00.000Z',
@@ -16,6 +17,7 @@ describe('CheckoutTable', () => {
     },
     {
       id: 2,
+      patronId: 20,
       patronName: 'John Doe',
       bookTitle: '1984',
       checkoutDate: '2026-03-15T10:00:00.000Z',

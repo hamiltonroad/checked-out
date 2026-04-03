@@ -9,7 +9,7 @@ const CHECKOUT_INCLUDES = [
   {
     model: Patron,
     as: 'patron',
-    attributes: ['first_name', 'last_name'],
+    attributes: ['id', 'first_name', 'last_name'],
   },
   {
     model: Copy,
@@ -70,6 +70,7 @@ function formatOverdueCheckoutResponse(checkout) {
 function formatCheckoutResponse(checkout) {
   return {
     id: checkout.id,
+    patronId: checkout.patron.id,
     patronName: `${checkout.patron.first_name} ${checkout.patron.last_name}`,
     bookTitle: checkout.copy.book.title,
     checkoutDate: checkout.checkout_date,
@@ -91,6 +92,7 @@ function computeDaysUntilDue(dueDate) {
 function formatCurrentCheckoutResponse(checkout) {
   return {
     id: checkout.id,
+    patronId: checkout.patron.id,
     patronName: `${checkout.patron.first_name} ${checkout.patron.last_name}`,
     bookTitle: checkout.copy.book.title,
     checkoutDate: checkout.checkout_date,

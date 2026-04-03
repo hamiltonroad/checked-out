@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -12,19 +11,19 @@ import {
 import HistoryIcon from '@mui/icons-material/History';
 import EmptyState from '../EmptyState';
 import { formatDate } from '../../utils/checkoutUtils';
-import type { Checkout } from '../../types';
+import type { PatronCheckout } from '../../types';
 
-interface CheckoutHistoryTabProps {
-  checkouts: Checkout[];
+interface PatronCheckoutHistoryProps {
+  checkouts: PatronCheckout[];
   isLoading: boolean;
 }
 
 /**
- * CheckoutHistoryTab displays returned checkout records
+ * PatronCheckoutHistory displays a patron's returned checkout records
  */
-function CheckoutHistoryTab({ checkouts, isLoading }: CheckoutHistoryTabProps) {
+function PatronCheckoutHistory({ checkouts, isLoading }: PatronCheckoutHistoryProps) {
   if (isLoading) {
-    return <Skeleton variant="rounded" height={300} />;
+    return <Skeleton variant="rounded" height={200} />;
   }
 
   if (checkouts.length === 0) {
@@ -32,7 +31,7 @@ function CheckoutHistoryTab({ checkouts, isLoading }: CheckoutHistoryTabProps) {
       <EmptyState
         icon={<HistoryIcon sx={{ fontSize: 'inherit' }} />}
         title="No checkout history"
-        message="No checkout history yet."
+        message="This patron has no returned checkouts."
       />
     );
   }
@@ -43,9 +42,9 @@ function CheckoutHistoryTab({ checkouts, isLoading }: CheckoutHistoryTabProps) {
         <TableHead>
           <TableRow sx={{ bgcolor: 'action.hover' }}>
             <TableCell sx={{ fontWeight: 600 }}>Book Title</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Patron Name</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Author</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Checkout Date</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Return Date</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Returned Date</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -59,16 +58,9 @@ function CheckoutHistoryTab({ checkouts, isLoading }: CheckoutHistoryTabProps) {
             return (
               <TableRow key={checkout.id}>
                 <TableCell sx={tableCellSx}>{checkout.bookTitle}</TableCell>
-                <TableCell sx={tableCellSx}>
-                  <Link
-                    to={`/patrons/${checkout.patronId}`}
-                    style={{ color: 'inherit', textDecoration: 'underline' }}
-                  >
-                    {checkout.patronName}
-                  </Link>
-                </TableCell>
+                <TableCell sx={tableCellSx}>{checkout.author}</TableCell>
                 <TableCell sx={tableCellSx}>{formatDate(checkout.checkoutDate)}</TableCell>
-                <TableCell sx={tableCellSx}>{formatDate(checkout.returnDate)}</TableCell>
+                <TableCell sx={tableCellSx}>{formatDate(checkout.returnedAt)}</TableCell>
               </TableRow>
             );
           })}
@@ -78,4 +70,4 @@ function CheckoutHistoryTab({ checkouts, isLoading }: CheckoutHistoryTabProps) {
   );
 }
 
-export default CheckoutHistoryTab;
+export default PatronCheckoutHistory;

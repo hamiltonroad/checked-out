@@ -11,6 +11,16 @@ const patronService = {
     const response = await api.get('/patrons', { params: { status } });
     return response.data;
   },
+
+  /**
+   * Fetch a single patron by ID
+   * @param {number} id - Patron ID
+   * @returns {Promise<Object>} API response with patron detail data
+   */
+  async getById(id) {
+    const response = await api.get(`/patrons/${id}`);
+    return response.data;
+  },
 };
 
 export default patronService;

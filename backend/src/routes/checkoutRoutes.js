@@ -8,6 +8,13 @@ const { authenticate } = require('../middlewares/auth');
 const router = express.Router();
 
 router.get('/current', standardLimiter, authenticate, checkoutController.getCurrentCheckouts);
+router.get(
+  '/patron/:id',
+  standardLimiter,
+  authenticate,
+  validateRequest(checkoutValidator.getByPatron),
+  checkoutController.getCheckoutsByPatron
+);
 router.get('/overdue', standardLimiter, authenticate, checkoutController.getOverdueCheckouts);
 router.get('/', standardLimiter, checkoutController.getAllCheckouts);
 router.post(

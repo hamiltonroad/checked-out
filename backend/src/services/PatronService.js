@@ -1,4 +1,5 @@
 const { Patron } = require('../models');
+const ApiError = require('../utils/ApiError');
 
 /**
  * Service for patron-related business logic
@@ -25,6 +26,25 @@ class PatronService {
         ['first_name', 'ASC'],
       ],
     });
+  }
+
+  /**
+   * Retrieve a single patron by ID
+   * @param {number} id - Patron ID
+   * @returns {Promise<Object>} Patron object with all public fields
+   * @throws {ApiError} 404 if patron not found
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async getPatronById(id) {
+    const patron = await Patron.findByPk(id, {
+      attributes: ['id', 'first_name', 'last_name', 'email', 'phone', 'card_number', 'status'],
+    });
+
+    if (!patron) {
+      throw ApiError.notFound('Patron not found');
+    }
+
+    return patron;
   }
 }
 
