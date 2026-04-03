@@ -31,6 +31,14 @@ const checkoutService = {
   },
 
   /**
+   * Get overdue checkout records
+   */
+  async getOverdueCheckouts() {
+    const response = await api.get('/checkouts/overdue');
+    return response.data;
+  },
+
+  /**
    * Return a checked-out book
    */
   async returnCheckout(id: number) {

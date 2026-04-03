@@ -15,6 +15,7 @@ router.get(
   validateRequest(checkoutValidator.getByPatron),
   checkoutController.getCheckoutsByPatron
 );
+router.get('/overdue', standardLimiter, authenticate, checkoutController.getOverdueCheckouts);
 router.get('/', standardLimiter, checkoutController.getAllCheckouts);
 router.post(
   '/',

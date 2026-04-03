@@ -101,6 +101,23 @@ export interface CurrentCheckout {
   returnDate: null;
 }
 
+export interface OverdueCheckout {
+  id: number;
+  daysOverdue: number;
+  dueDate: string;
+  returnDate: null;
+  book: {
+    id: number;
+    title: string;
+  };
+  patron: {
+    id: number;
+    name: string;
+    email?: string | null;
+    phone?: string | null;
+  };
+}
+
 export type DueSeverity = 'error' | 'warning' | null;
 
 export interface Rating {
