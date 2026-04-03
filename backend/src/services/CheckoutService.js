@@ -1,6 +1,8 @@
 const { Checkout, Patron, Copy, Book } = require('../models');
 const ApiError = require('../utils/ApiError');
 
+const MS_PER_DAY = 86400000;
+
 /**
  * Shared Sequelize include config for checkout queries with patron and book details
  */
@@ -39,6 +41,37 @@ function formatCheckoutResponse(checkout) {
   };
 }
 
+/**
+ * Compute days until due from a due date
+ * @param {Date|string|null} dueDate - The due date
+ * @returns {number|null} Days until due (negative = overdue), or null
+ */
+function computeDaysUntilDue(dueDate) {
+  if (!dueDate) return null;
+  const due = new Date(dueDate);
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  due.setUTCHours(0, 0, 0, 0);
+  return Math.ceil((due - today) / MS_PER_DAY);
+}
+
+/**
+ * Format a current checkout record for API response
+ * @param {Object} checkout - Sequelize checkout instance
+ * @returns {Object} Formatted current checkout object with daysUntilDue
+ */
+function formatCurrentCheckoutResponse(checkout) {
+  return {
+    id: checkout.id,
+    patronName: `${checkout.patron.first_name} ${checkout.patron.last_name}`,
+    bookTitle: checkout.copy.book.title,
+    checkoutDate: checkout.checkout_date,
+    dueDate: checkout.due_date,
+    daysUntilDue: computeDaysUntilDue(checkout.due_date),
+    returnDate: checkout.return_date,
+  };
+}
+
 class CheckoutService {
   /**
    * Create a new checkout record
@@ -72,6 +105,21 @@ class CheckoutService {
     });
 
     return checkout;
+  }
+
+  /**
+   * Get only currently active checkouts (not yet returned) with due-date info
+   * @returns {Promise<Array>} Array of formatted current checkout records
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async getCurrentCheckouts() {
+    const checkouts = await Checkout.findAll({
+      where: { return_date: null },
+      include: CHECKOUT_INCLUDES,
+      order: [['due_date', 'ASC']],
+    });
+
+    return checkouts.map(formatCurrentCheckoutResponse);
   }
 
   /**

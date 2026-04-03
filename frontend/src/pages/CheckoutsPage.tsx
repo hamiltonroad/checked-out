@@ -5,25 +5,25 @@ import {
   Box,
   Alert,
   Snackbar,
-  Skeleton,
+  Tabs,
+  Tab,
   type AlertColor,
 } from '@mui/material';
 import { useCheckouts } from '../hooks/useCheckouts';
+import { useCurrentCheckouts } from '../hooks/useCurrentCheckouts';
 import { useReturnCheckout } from '../hooks/useReturnCheckout';
-import CheckoutTable from '../components/CheckoutTable';
+import CurrentCheckoutsTab from '../components/CurrentCheckoutsTab';
+import CheckoutHistoryTab from '../components/CheckoutHistoryTab';
 
 /**
- * CheckoutsPage displays all checkout records and allows returning active checkouts
- *
- * Features:
- * - Table of all checkout records with patron name, book title, dates
- * - Return button for active checkouts (no return_date)
- * - Success/error notifications via Snackbar
- * - Loading and error states
- * - Empty state when no checkouts exist
+ * CheckoutsPage displays checkouts in a tabbed interface:
+ * - Current tab: active checkouts with due-date awareness and return actions
+ * - History tab: returned checkout records
  */
 function CheckoutsPage() {
-  const { data, isLoading, error } = useCheckouts();
+  const [activeTab, setActiveTab] = useState(0);
+  const currentQuery = useCurrentCheckouts();
+  const allQuery = useCheckouts();
   const returnMutation = useReturnCheckout();
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -52,36 +52,17 @@ function CheckoutsPage() {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  if (isLoading) {
-    return (
-      <Container>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h4" component="h1" sx={{ color: 'primary.main', fontWeight: 600 }}>
-            Checkouts
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Manage library checkouts and returns
-          </Typography>
-        </Box>
-        <Skeleton variant="rounded" height={300} />
-      </Container>
-    );
-  }
+  const handleTabChange = (_event: unknown, newValue: number) => {
+    setActiveTab(newValue);
+  };
 
-  if (error) {
-    return (
-      <Container>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h4" component="h1" sx={{ color: 'primary.main', fontWeight: 600 }}>
-            Checkouts
-          </Typography>
-        </Box>
-        <Alert severity="error">Error loading checkouts: {error.message || 'Unknown error'}</Alert>
-      </Container>
-    );
-  }
+  const currentCheckouts = currentQuery.data?.data || [];
+  const allCheckouts = allQuery.data?.data || [];
+  const historyCheckouts = allCheckouts.filter(
+    (c: { returnDate?: string }) => c.returnDate !== null && c.returnDate !== undefined
+  );
 
-  const checkouts = data?.data || [];
+  const activeError = activeTab === 0 ? currentQuery.error : allQuery.error;
 
   return (
     <Container>
@@ -94,7 +75,34 @@ function CheckoutsPage() {
         </Typography>
       </Box>
 
-      <CheckoutTable checkouts={checkouts} onReturn={handleReturn} />
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+        <Tabs value={activeTab} onChange={handleTabChange} aria-label="Checkout tabs">
+          <Tab label="Current" id="checkout-tab-0" aria-controls="checkout-tabpanel-0" />
+          <Tab label="History" id="checkout-tab-1" aria-controls="checkout-tabpanel-1" />
+        </Tabs>
+      </Box>
+
+      {activeError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Error loading checkouts: {activeError.message || 'Unknown error'}
+        </Alert>
+      )}
+
+      <Box role="tabpanel" id="checkout-tabpanel-0" hidden={activeTab !== 0}>
+        {activeTab === 0 && (
+          <CurrentCheckoutsTab
+            checkouts={currentCheckouts}
+            onReturn={handleReturn}
+            isLoading={currentQuery.isLoading}
+          />
+        )}
+      </Box>
+
+      <Box role="tabpanel" id="checkout-tabpanel-1" hidden={activeTab !== 1}>
+        {activeTab === 1 && (
+          <CheckoutHistoryTab checkouts={historyCheckouts} isLoading={allQuery.isLoading} />
+        )}
+      </Box>
 
       <Snackbar
         open={snackbar.open}

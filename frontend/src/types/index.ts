@@ -64,8 +64,20 @@ export interface Checkout {
   patronName: string;
   bookTitle: string;
   checkoutDate: string;
-  returnDate?: string;
+  returnDate?: string | null;
 }
+
+export interface CurrentCheckout {
+  id: number;
+  patronName: string;
+  bookTitle: string;
+  checkoutDate: string;
+  dueDate: string | null;
+  daysUntilDue: number | null;
+  returnDate: null;
+}
+
+export type DueSeverity = 'error' | 'warning' | null;
 
 export interface Rating {
   id: number;

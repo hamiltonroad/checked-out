@@ -3,9 +3,11 @@ const checkoutController = require('../controllers/CheckoutController');
 const validateRequest = require('../middlewares/validateRequest');
 const checkoutValidator = require('../validators/checkoutValidator');
 const { standardLimiter, strictLimiter } = require('../middlewares/rateLimiter');
+const { authenticate } = require('../middlewares/auth');
 
 const router = express.Router();
 
+router.get('/current', standardLimiter, authenticate, checkoutController.getCurrentCheckouts);
 router.get('/', standardLimiter, checkoutController.getAllCheckouts);
 router.post(
   '/',
