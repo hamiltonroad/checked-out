@@ -87,6 +87,7 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
       setCheckoutOpen(false);
       setCheckoutSuccess(true);
       queryClient.invalidateQueries({ queryKey: ['books', bookId] });
+      queryClient.invalidateQueries({ queryKey: ['copies', 'available', bookId] });
     } catch {
       // Error is captured by mutation state and displayed in dialog
     }
@@ -178,6 +179,7 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
           checkoutMutation.reset();
         }}
         onSubmit={handleCheckoutSubmit}
+        bookId={bookId}
         isSubmitting={checkoutMutation.isPending}
         error={checkoutMutation.error ? formatApiError(checkoutMutation.error) : null}
       />

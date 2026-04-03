@@ -3,6 +3,7 @@ const authRoutes = require('./authRoutes');
 const bookRoutes = require('./bookRoutes');
 const ratingRoutes = require('./ratingRoutes');
 const checkoutRoutes = require('./checkoutRoutes');
+const copyRoutes = require('./copyRoutes');
 const patronRoutes = require('./patronRoutes');
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.use('/auth', authRoutes);
 router.use('/books', bookRoutes);
 router.use('/', ratingRoutes);
 router.use('/checkouts', checkoutRoutes);
+router.use('/copies', copyRoutes);
 router.use('/patrons', patronRoutes);
 
 module.exports = router;
