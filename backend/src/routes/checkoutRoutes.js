@@ -23,6 +23,12 @@ router.post(
   validateRequest(checkoutValidator.create),
   checkoutController.createCheckout
 );
-router.put('/:id/return', strictLimiter, checkoutController.returnCheckout);
+router.put(
+  '/:id/return',
+  strictLimiter,
+  authenticate,
+  validateRequest(checkoutValidator.return),
+  checkoutController.returnCheckout
+);
 
 module.exports = router;
