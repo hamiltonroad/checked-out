@@ -38,6 +38,8 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - Do NOT skip testing. Run lint + format before marking work complete.
 - Do NOT import frontend services directly in components — use hooks.
 - Source files must not exceed 200 lines (type/config files exempt).
+- Test files must extract repeated setup/teardown logic into shared helpers when a block appears 3+ times.
+- Every route file MUST include a Joi validator via `validateRequest` middleware. No route may accept query/body params without validation.
 
 ## Conventions
 
