@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import {
   Dialog,
   DialogTitle,
@@ -11,7 +11,19 @@ import {
   Typography,
   CircularProgress,
   Box,
+  Autocomplete,
 } from '@mui/material';
+import { createFilterOptions } from '@mui/material/Autocomplete';
+import { usePatrons } from '../../hooks/usePatrons';
+
+const CHECKOUT_DURATION_DAYS = 14;
+
+interface Patron {
+  id: number;
+  first_name: string;
+  last_name: string;
+  card_number: string;
+}
 
 interface CheckoutDialogProps {
   open: boolean;
@@ -22,16 +34,20 @@ interface CheckoutDialogProps {
 }
 
 interface CheckoutFormData {
-  patronId: string;
+  patronId: Patron | null;
   copyId: string;
 }
 
+const patronFilter = createFilterOptions<Patron>({
+  stringify: (o) => `${o.first_name} ${o.last_name} ${o.card_number}`,
+});
+
 /**
- * Compute due date as today + 14 days, formatted for display
+ * Compute due date as today + CHECKOUT_DURATION_DAYS, formatted for display
  */
 function computeDueDate(): string {
   const due = new Date();
-  due.setDate(due.getDate() + 14);
+  due.setDate(due.getDate() + CHECKOUT_DURATION_DAYS);
   return due.toLocaleDateString();
 }
 
@@ -49,11 +65,18 @@ function CheckoutDialog({
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
-  } = useForm<CheckoutFormData>({ defaultValues: { patronId: '', copyId: '' } });
+  } = useForm<CheckoutFormData>({ defaultValues: { patronId: null, copyId: '' } });
+
+  const {
+    data: patronsRes,
+    isLoading: loadingPatrons,
+    isError: patronsError,
+  } = usePatrons({ status: 'active' });
+  const patrons: Patron[] = patronsRes?.data || [];
   const dueDate = computeDueDate();
 
-  // Reset form when dialog closes
   useEffect(() => {
     if (!open) {
       reset();
@@ -61,9 +84,9 @@ function CheckoutDialog({
   }, [open, reset]);
 
   const handleFormSubmit = (data: CheckoutFormData) => {
-    const parsedPatronId = parseInt(data.patronId, 10);
+    if (!data.patronId?.id) return;
     const parsedCopyId = parseInt(data.copyId, 10);
-    onSubmit({ patron_id: parsedPatronId, copy_id: parsedCopyId });
+    onSubmit({ patron_id: data.patronId.id, copy_id: parsedCopyId });
   };
 
   return (
@@ -75,25 +98,36 @@ function CheckoutDialog({
             {error}
           </Alert>
         )}
-        <TextField
-          autoFocus
-          margin="dense"
-          label="Patron ID"
-          type="number"
-          fullWidth
-          disabled={isSubmitting}
-          inputProps={{ min: 1 }}
-          error={!!errors.patronId}
-          helperText={errors.patronId?.message}
-          {...register('patronId', {
-            required: 'Patron ID is required.',
-            validate: (value) => {
-              const num = parseInt(value, 10);
-              if (Number.isNaN(num)) return 'Patron ID must be a number.';
-              if (num <= 0) return 'Patron ID must be greater than 0.';
-              return true;
-            },
-          })}
+        <Controller
+          name="patronId"
+          control={control}
+          rules={{ required: 'Patron is required.' }}
+          render={({ field }) => (
+            <Autocomplete
+              options={patrons}
+              loading={loadingPatrons}
+              disabled={isSubmitting || patronsError}
+              getOptionLabel={(option) =>
+                `${option.first_name} ${option.last_name} (${option.card_number})`
+              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              filterOptions={patronFilter}
+              noOptionsText="No patrons found"
+              onChange={(_, selected) => field.onChange(selected)}
+              value={field.value || null}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  margin="dense"
+                  label="Patron"
+                  required
+                  fullWidth
+                  error={!!errors.patronId || patronsError}
+                  helperText={patronsError ? 'Failed to load patrons' : errors.patronId?.message}
+                />
+              )}
+            />
+          )}
         />
         <TextField
           margin="dense"
