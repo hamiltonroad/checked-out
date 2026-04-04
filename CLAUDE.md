@@ -65,11 +65,7 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - Config: `backend/.env` (DB creds), `frontend/.env` (API URL), `backend/src/config/database.js`
 - Tech stack reference: [tech-stack-quick-ref.md](standards/quick-ref/tech-stack-quick-ref.md)
 - Enterprise patterns: [enterprise-patterns-quick-ref.md](standards/quick-ref/enterprise-patterns-quick-ref.md)
-- Full standards: `standards/full/` (detailed versions of the quick-ref guides)
-- Agent definitions: `.claude/agents/` (agent configurations for the harness workflow)
-- Knowledge base: `knowledge/` (deep-dive references on architecture, context management, sub-agents, and more)
-- Slash commands: `.claude/commands/` — use `/story-runner <number>` for agent-based workflow
-- Verification docs: `.claude/temp/VERIFICATION-<number>-REMOVE.md`
+- Harness infrastructure: [harness.md](harness.md) (agents, commands, knowledge base, full standards, verification docs)
 
 ## Session Guidance
 
