@@ -10,9 +10,10 @@ Authoritative index of all harness files that support agent workflows, standards
 
 | File | Purpose | Consult when... |
 |------|---------|-----------------|
-| `prep-agent.md` | Fetches and formats GitHub issue data | Running prep stage of a story |
-| `plan-agent.md` | Creates implementation plans from issue data | Running plan stage of a story |
+| `prep-agent.md` | Creates branch and fetches GitHub issue data (lightweight pre-flight) | Running prep stage of a story |
+| `plan-agent.md` | Creates tactical edit plans from refined issue data | Running plan stage of a story |
 | `implement-agent.md` | Executes plans, tests, commits, and creates PRs | Running implement stage of a story |
+| `refine-kit.md` *(kit)* | Enriches issues with ADRs, OpenAPI changes, affected files, dependency maps, UI specs | Running `/refine-issue` to prepare issues for implementation |
 | `prep-kit.md` *(kit)* | External template for prep agent | Comparing project prep-agent to upstream |
 | `plan-kit.md` *(kit)* | External template for plan agent | Comparing project plan-agent to upstream |
 | `implement-kit.md` *(kit)* | External template for implement agent | Comparing project implement-agent to upstream |
@@ -24,8 +25,10 @@ Authoritative index of all harness files that support agent workflows, standards
 
 | File | Purpose | Consult when... |
 |------|---------|-----------------|
-| `story-runner.md` | Orchestrates prep -> plan -> implement for one issue | Using `/story-runner <number>` |
-| `batch-runner.md` | Orchestrates multiple issues in sequence | Using `/batch-runner` |
+| `generate-issue-kit.md` *(kit)* | Creates GitHub issues from one-line value statements with scope options | Using `/generate-issue` to author new issues |
+| `refine-issue-kit.md` *(kit)* | Enriches issues with ADRs, OpenAPI changes, affected files, UI specs | Using `/refine-issue` before implementation |
+| `story-runner.md` | Orchestrates prep -> plan -> implement for one issue (with smoke test gates) | Using `/story-runner <number>` |
+| `batch-runner.md` | Orchestrates multiple issues in parallel (with smoke test gates) | Using `/batch-runner` |
 | `resolve-smoke-failure.md` | Diagnoses and fixes smoke test failures | Smoke tests fail during implementation |
 | `EXAMPLE-VERIFICATION-FORMAT.md` | Template for verification documents | Creating verification docs |
 | `story-runner-kit.md` *(kit)* | External template for story-runner | Comparing to upstream |
@@ -132,7 +135,7 @@ Split by resource for maintainability. Load `openapi.yaml` in Swagger Editor or 
 
 - **Quick-ref** files summarize their **full** counterparts in `standards/full/`.
 - **Agent definitions** (`.claude/agents/`) are invoked by **slash commands** (`.claude/commands/`).
-- **Slash commands** orchestrate agents in workflows: `story-runner` calls `prep-agent` -> `plan-agent` -> `implement-agent`.
+- **Slash commands** orchestrate agents in workflows: `generate-issue` and `refine-issue` prepare issues; `story-runner` calls `prep-agent` -> `plan-agent` -> `implement-agent`.
 - **Knowledge files** provide deep-dive reference material that agents consult as needed.
 - **Kit files** are external imports from the harness template project. **Non-kit files** with similar names are project-specific customizations (e.g., `prep-agent.md` customizes `prep-kit.md`).
 - **Code review results** are produced by review workflows and feed back into future implementation decisions.

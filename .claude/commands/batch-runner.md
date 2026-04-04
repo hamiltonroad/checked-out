@@ -16,6 +16,8 @@ This command wraps `/batch-runner-kit` with Playwright smoke test gates:
 
 If the pre-flight fails, no workers are spawned. Post-flight results are reported per-issue.
 
+**Recommended workflow:** Run `/refine-issue <n1> <n2> ...` before invoking this command. Refinement enriches each issue with ADRs, affected files, and UI specs, which downstream agents consume. When refining multiple issues together, cross-issue dependencies are also mapped.
+
 ---
 
 ## Execution
@@ -138,7 +140,7 @@ Issue #5: <title>
 Issue #6: <title>
   Status:      SUCCESS
   PR:          <PR URL>
-  Smoke test:  FAIL — app broken after implementation
+  Smoke test:  FAIL -- app broken after implementation
   Report:      .claude/temp/BATCH-REPORT-6-REMOVE.md
 
 Issue #7: <title>
@@ -151,14 +153,14 @@ Issue #7: <title>
 Smoke test summary:
   Pre-flight (main): PASS
   Issue #5:          PASS
-  Issue #6:          FAIL — review PR for breaking changes
+  Issue #6:          FAIL -- review PR for breaking changes
   Issue #7:          SKIPPED
 
 Next steps:
 1. Review PRs (smoke test passing):
    - <PR URL for #5>
 2. Investigate PRs (smoke test failing):
-   - <PR URL for #6> — app broken, check console errors
+   - <PR URL for #6> -- app broken, check console errors
 3. Read failure reports:
    cat .claude/temp/BATCH-REPORT-7-REMOVE.md
 4. Perform manual testing per PR descriptions
@@ -204,13 +206,16 @@ Show all failure details, report paths, and recovery options.
 - Pre-flight tests main branch health before any work begins
 - Post-flight tests each worktree individually (sequential, not parallel)
 - Port conflicts are managed by stopping servers between worktree tests
-- Smoke test failures in post-flight do NOT revert work — PRs exist for review
-- Issues MUST be independent — if issues touch the same files, use `/story-runner` sequentially
+- Smoke test failures in post-flight do NOT revert work -- PRs exist for review
+- Issues MUST be independent -- if issues touch the same files, use `/story-runner` sequentially
+- Issues should be refined via `/refine-issue` before batch processing for best results
 
 ---
 
 ## Related Commands
 
+- `/generate-issue <statement>` - Create a new issue from a value statement
+- `/refine-issue <n1> <n2> ...` - Enrich issues with ADRs, affected files, UI specs
 - `/batch-runner-kit <n1> <n2> ...` - Inner workflow (no smoke test gates)
 - `/story-runner <n>` - Single issue with smoke test gates
 - `/code-review-pr <n>` - Review a PR against standards
