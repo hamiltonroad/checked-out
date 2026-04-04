@@ -28,6 +28,7 @@ Customize the criteria below to match your team's priorities.
 - SOLID: Single responsibility per file/function
 - Error handling: All async operations have try/catch or .catch()
 - No console.log in production code (use structured logger)
+- No unused function parameters or class properties (dead code)
 
 ### Testing
 - New features have corresponding test coverage
@@ -39,6 +40,7 @@ Customize the criteria below to match your team's priorities.
 - SQL injection protected (use parameterized queries / Sequelize ORM)
 - Input validation on all user-facing endpoints
 - No XSS vulnerabilities in frontend (sanitize user content)
+- Every route returning patron PII (names, emails, card numbers) has `authenticate` middleware
 
 ### Frontend
 - PropTypes defined for all components

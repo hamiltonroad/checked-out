@@ -39,20 +39,28 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - Do NOT import frontend services directly in components — use hooks.
 - Source files must not exceed 200 lines (type/config files exempt).
 - Test files must extract repeated setup/teardown logic into shared helpers when a block appears 3+ times.
-- Every route file MUST include a Joi validator via `validateRequest` middleware. No route may accept query/body params without validation.
+- Every route file MUST include a Joi validator via `validateRequest` middleware. Every route reading from `req.body` MUST have a Joi `body` schema. Every route reading from `req.query` MUST have a Joi `query` schema. Every route reading from `req.params` MUST have a Joi `params` schema.
 - Do NOT use `page.waitForTimeout()` in Playwright tests. Use event-based waits (`waitForSelector`, `waitForLoadState`, Locator assertions) instead.
 - Endpoints that return patron PII (names, card numbers, emails) MUST use `authenticate` middleware.
+- PRs with unresolved Critical or High code review findings MUST NOT be merged.
+- Status and permission checks MUST test for the expected positive state (e.g., `=== 'active'`), not enumerate negative states. New statuses are denied by default.
+- Auth constants (SALT_ROUNDS, token expiry) MUST be imported from `backend/src/config/auth.js` — never redefined locally.
+- Do NOT add function parameters or class properties that have no consumer. If reserved for future use, add a comment referencing the planned consumer.
+- Seeder files with large data arrays MUST extract arrays to `backend/src/seeders/data/` when the seeder would otherwise exceed 200 lines.
+- All dev/seed passwords MUST use the same value from a single shared location.
+- When a mutation hook succeeds, it MUST invalidate all query keys displaying affected data. Use React Query prefix matching.
 
 ## Conventions
 
 - Backend: camelCase variables/functions, PascalCase classes, UPPER_SNAKE_CASE constants.
 - Frontend: PascalCase components/files, camelCase props, handle* event handlers, use* hooks.
 - All React components must define PropTypes — including zero-prop components (use empty `{}`). Use `shape()` for objects and `arrayOf(shape())` for arrays — never raw `object` or `array`.
-- Use Material UI theme tokens — no inline color or spacing values.
+- Use Material UI theme tokens — no inline `style` objects or inline color, spacing, or typography values in MUI components. Use the `sx` prop or `styled()` with theme tokens.
 - API responses use `ApiResponse.success()` / `ApiResponse.error()` wrappers.
 - Sequelize models use `underscored: true` and `timestamps: true`.
 - Use JavaScript default parameters instead of `defaultProps` for function components (`defaultProps` is deprecated in React 18.3+).
 - Error handling: try/catch in controllers, throw typed errors from services.
+- Shared formatting functions (dates, currency, names) MUST live in `frontend/src/utils/` — never defined inline in components.
 
 ## Context Guidance
 
