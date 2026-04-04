@@ -14,6 +14,8 @@ This command wraps `/story-runner-kit` with Playwright smoke test gates to ensur
 
 If the pre-flight fails, work does not begin. If the post-flight fails, the PR is flagged as potentially broken.
 
+**Recommended workflow:** Run `/generate-issue` and `/refine-issue` before invoking this command. Refinement enriches the issue with ADRs, affected files, and UI specs, which downstream agents consume.
+
 ---
 
 ## Execution
@@ -81,7 +83,7 @@ Smoke Tests:
 All phases completed:
 - Pre-flight smoke test: App healthy before work
 - prep-agent: Branch created, issue fetched
-- plan-agent: Implementation plan created
+- plan-agent: Tactical edit plan created
 - implement-agent: Code implemented, tested, PR created
 - Post-flight smoke test: App still healthy after work
 
@@ -105,6 +107,8 @@ Next steps:
 
 ## Related Commands
 
+- `/generate-issue <statement>` - Create a new issue from a value statement
+- `/refine-issue <n1> <n2> ...` - Enrich issues with ADRs, affected files, UI specs
 - `/story-runner-kit <n>` - Inner workflow (no smoke test gates)
 - `/batch-runner <n1> <n2> ...` - Parallel issues with smoke test gates
 - `/prep-issue <n>` - Just prep phase

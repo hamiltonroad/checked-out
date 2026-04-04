@@ -13,8 +13,8 @@
 ## Prerequisites
 
 Files must exist (created by previous agents):
-- `.claude/temp/GH-ISSUE-<number>-REMOVE.md`
-- `.claude/temp/PLAN-<number>-REMOVE.md`
+- `.claude/temp/GH-ISSUE-<number>-REMOVE.md` -- includes issue narrative and refinement data (ADRs, OpenAPI changes, affected files, UI spec) when refined via `/refine-issue`
+- `.claude/temp/PLAN-<number>-REMOVE.md` -- tactical edit plan with exact file edits, method signatures, and edge cases
 
 ---
 
@@ -53,11 +53,13 @@ Suggested actions:
 4. `standards/quick-ref/backend-quick-ref.md` - Node.js patterns
 5. `standards/quick-ref/craftsmanship-quick-ref.md` - Code quality
 
+The GH-ISSUE file now contains refinement data (ADRs, OpenAPI changes, affected files, UI spec) when the issue was refined via `/refine-issue`. Use this data to guide implementation decisions.
+
 ### Step 3: Load and Parse Plan
 
 Read `.claude/temp/PLAN-<number>-REMOVE.md`
 
-Extract:
+The plan is a **tactical edit plan** with exact file edits, method signatures, and edge cases. Extract:
 - All tasks from "Implementation Steps" section
 - Files to create/modify/delete
 - Standards to follow
@@ -245,32 +247,6 @@ cd frontend && timeout 10 npm run dev || true
 
 **Result:** PASS / FAIL
 
-### Test 2: <Test Name>
-
-**Command:**
-```bash
-<actual command run>
-```
-
-**Output:**
-```
-<actual output>
-```
-
-**Database verification:**
-```sql
-<query run>
-```
-
-**Query result:**
-```
-<actual data returned>
-```
-
-**Result:** PASS / FAIL
-
-### Test 3: <Additional tests as needed>
-
 ---
 
 ## Quality Checks
@@ -289,10 +265,6 @@ cd frontend && timeout 10 npm run dev || true
 **Tests that require human interaction:**
 
 1. <Test description>
-   - Steps: <what to do>
-   - Expected: <what should happen>
-
-2. <Test description>
    - Steps: <what to do>
    - Expected: <what should happen>
 
@@ -440,9 +412,10 @@ Next steps for human:
 
 ## Notes
 
-- Execute plan MECHANICALLY - don't second-guess Opus's decisions
+- Execute plan MECHANICALLY - don't second-guess decisions in the tactical plan
 - Three-strikes rule prevents infinite loops
 - Always include ACTUAL output in verification doc (not placeholder text)
 - Fix bugs discovered during testing (don't just report)
 - Quality checks are mandatory, not optional
 - PR must be created before returning success
+- The GH-ISSUE file includes refinement data when `/refine-issue` was run -- use it for implementation context
