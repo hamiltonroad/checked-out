@@ -1,0 +1,114 @@
+# Checked Out API — OpenAPI 3.1.0 Root Document
+#
+# This is the root index. Paths and components are split by resource:
+#
+#   paths/          — One file per resource (health, auth, books, etc.)
+#   components/     — Shared schemas, responses, security schemes
+#
+# When adding a new resource:
+#   1. Create paths/<resource>.yaml with all endpoints
+#   2. Add schemas to components/schemas.yaml if needed
+#   3. Add $ref entries below for each new path
+#
+# To view the full API: load this file in Swagger Editor or Redocly.
+
+openapi: '3.1.0'
+info:
+  title: Checked Out API
+  version: '1.0.0'
+  description: |
+    REST API for the Checked Out library management system.
+    All data responses use the ApiResponse wrapper format.
+  contact:
+    name: Checked Out Team
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+tags:
+  - name: Health
+    description: Application health and readiness probes
+  - name: Auth
+    description: Authentication and session management
+  - name: Books
+    description: Book catalog browsing
+  - name: Checkouts
+    description: Book checkout and return operations
+  - name: Copies
+    description: Physical and Kindle copy availability
+  - name: Patrons
+    description: Library patron management
+  - name: Ratings
+    description: Book ratings and reviews
+
+paths:
+  # Health
+  /health:
+    $ref: 'paths/health.yaml#/~1health'
+  /health/live:
+    $ref: 'paths/health.yaml#/~1health~1live'
+  /health/ready:
+    $ref: 'paths/health.yaml#/~1health~1ready'
+
+  # Auth
+  /api/v1/auth/login:
+    $ref: 'paths/auth.yaml#/~1api~1v1~1auth~1login'
+  /api/v1/auth/logout:
+    $ref: 'paths/auth.yaml#/~1api~1v1~1auth~1logout'
+  /api/v1/auth/refresh:
+    $ref: 'paths/auth.yaml#/~1api~1v1~1auth~1refresh'
+  /api/v1/auth/me:
+    $ref: 'paths/auth.yaml#/~1api~1v1~1auth~1me'
+
+  # Books
+  /api/v1/books:
+    $ref: 'paths/books.yaml#/~1api~1v1~1books'
+  /api/v1/books/{id}:
+    $ref: 'paths/books.yaml#/~1api~1v1~1books~1{id}'
+
+  # Checkouts
+  /api/v1/checkouts:
+    $ref: 'paths/checkouts.yaml#/~1api~1v1~1checkouts'
+  /api/v1/checkouts/current:
+    $ref: 'paths/checkouts.yaml#/~1api~1v1~1checkouts~1current'
+  /api/v1/checkouts/overdue:
+    $ref: 'paths/checkouts.yaml#/~1api~1v1~1checkouts~1overdue'
+  /api/v1/checkouts/patron/{id}:
+    $ref: 'paths/checkouts.yaml#/~1api~1v1~1checkouts~1patron~1{id}'
+  /api/v1/checkouts/{id}/return:
+    $ref: 'paths/checkouts.yaml#/~1api~1v1~1checkouts~1{id}~1return'
+
+  # Copies
+  /api/v1/copies/book/{bookId}/available:
+    $ref: 'paths/copies.yaml#/~1api~1v1~1copies~1book~1{bookId}~1available'
+
+  # Patrons
+  /api/v1/patrons:
+    $ref: 'paths/patrons.yaml#/~1api~1v1~1patrons'
+  /api/v1/patrons/{id}:
+    $ref: 'paths/patrons.yaml#/~1api~1v1~1patrons~1{id}'
+
+  # Ratings
+  /api/v1/books/{id}/ratings:
+    $ref: 'paths/ratings.yaml#/~1api~1v1~1books~1{id}~1ratings'
+  /api/v1/books/{id}/ratings/stats:
+    $ref: 'paths/ratings.yaml#/~1api~1v1~1books~1{id}~1ratings~1stats'
+  /api/v1/books/top-rated:
+    $ref: 'paths/ratings.yaml#/~1api~1v1~1books~1top-rated'
+  /api/v1/ratings:
+    $ref: 'paths/ratings.yaml#/~1api~1v1~1ratings'
+  /api/v1/ratings/my-ratings:
+    $ref: 'paths/ratings.yaml#/~1api~1v1~1ratings~1my-ratings'
+  /api/v1/ratings/books/{bookId}:
+    $ref: 'paths/ratings.yaml#/~1api~1v1~1ratings~1books~1{bookId}'
+  /api/v1/patrons/{patronId}/ratings:
+    $ref: 'paths/ratings.yaml#/~1api~1v1~1patrons~1{patronId}~1ratings'
+
+components:
+  securitySchemes:
+    $ref: 'components/security-schemes.yaml'
+  schemas:
+    $ref: 'components/schemas.yaml'
+  responses:
+    $ref: 'components/responses.yaml'

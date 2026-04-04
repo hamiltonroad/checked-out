@@ -1,0 +1,5 @@
+cookieAuth:
+  type: apiKey
+  in: cookie
+  name: access_token
+  description: JWT access token stored in an HTTP-only cookie

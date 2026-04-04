@@ -1,0 +1,110 @@
+# Auth — Authentication and session management
+# Base path: /api/v1/auth
+
+/api/v1/auth/login:
+  post:
+    tags: [Auth]
+    summary: Authenticate patron and set auth cookies
+    operationId: authLogin
+    description: Rate-limited (strict). Sets access_token and refresh_token cookies on success.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [card_number, password]
+            properties:
+              card_number:
+                type: string
+                description: Patron library card number
+              password:
+                type: string
+                description: Patron password
+    responses:
+      '200':
+        description: Authentication successful
+        headers:
+          Set-Cookie:
+            description: Sets access_token and refresh_token cookies
+            schema:
+              type: string
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/Patron'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+
+/api/v1/auth/logout:
+  post:
+    tags: [Auth]
+    summary: Clear auth cookies
+    operationId: authLogout
+    responses:
+      '200':
+        description: Logged out successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: 'null'
+
+/api/v1/auth/refresh:
+  post:
+    tags: [Auth]
+    summary: Rotate access and refresh tokens
+    operationId: authRefresh
+    description: Rate-limited (strict). Reads refresh_token cookie and issues new token pair.
+    responses:
+      '200':
+        description: Tokens refreshed
+        headers:
+          Set-Cookie:
+            description: Sets new access_token and refresh_token cookies
+            schema:
+              type: string
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/Patron'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+
+/api/v1/auth/me:
+  get:
+    tags: [Auth]
+    summary: Get current authenticated patron
+    operationId: authMe
+    security:
+      - cookieAuth: []
+    responses:
+      '200':
+        description: Current patron data
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/Patron'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'

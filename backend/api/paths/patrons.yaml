@@ -1,0 +1,65 @@
+# Patrons — Library patron management
+# Base path: /api/v1/patrons
+
+/api/v1/patrons:
+  get:
+    tags: [Patrons]
+    summary: List patrons with optional status filter
+    operationId: listPatrons
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum: [active, inactive, suspended]
+        description: Filter by patron status
+    responses:
+      '200':
+        description: List of patrons
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas.yaml#/Patron'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+
+/api/v1/patrons/{id}:
+  get:
+    tags: [Patrons]
+    summary: Get a patron by ID
+    operationId: getPatronById
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: Patron ID
+    responses:
+      '200':
+        description: Patron details
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/Patron'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'

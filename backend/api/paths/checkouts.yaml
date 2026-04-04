@@ -1,0 +1,193 @@
+# Checkouts — Book checkout and return operations
+# Base path: /api/v1/checkouts
+
+/api/v1/checkouts:
+  get:
+    tags: [Checkouts]
+    summary: List all checkouts
+    operationId: getAllCheckouts
+    responses:
+      '200':
+        description: List of all checkouts
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas.yaml#/Checkout'
+  post:
+    tags: [Checkouts]
+    summary: Create a new checkout
+    operationId: createCheckout
+    description: Rate-limited (strict).
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [patron_id, copy_id]
+            properties:
+              patron_id:
+                type: integer
+                minimum: 1
+              copy_id:
+                type: integer
+                minimum: 1
+    responses:
+      '201':
+        description: Checkout created
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/Checkout'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+
+/api/v1/checkouts/current:
+  get:
+    tags: [Checkouts]
+    summary: Get current (active) checkouts
+    operationId: getCurrentCheckouts
+    security:
+      - cookieAuth: []
+    responses:
+      '200':
+        description: List of active checkouts
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas.yaml#/Checkout'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+
+/api/v1/checkouts/overdue:
+  get:
+    tags: [Checkouts]
+    summary: Get overdue checkouts
+    operationId: getOverdueCheckouts
+    security:
+      - cookieAuth: []
+    responses:
+      '200':
+        description: List of overdue checkouts
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas.yaml#/Checkout'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+
+/api/v1/checkouts/patron/{id}:
+  get:
+    tags: [Checkouts]
+    summary: Get checkouts for a specific patron
+    operationId: getCheckoutsByPatron
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: Patron ID
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum: [current, returned]
+        description: Filter by checkout status
+    responses:
+      '200':
+        description: Patron checkouts
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas.yaml#/Checkout'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+
+/api/v1/checkouts/{id}/return:
+  put:
+    tags: [Checkouts]
+    summary: Return a checked-out item
+    operationId: returnCheckout
+    description: Rate-limited (strict).
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: Checkout ID
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              returnDate:
+                type: string
+                format: date-time
+                description: Optional custom return date (ISO 8601)
+    responses:
+      '200':
+        description: Item returned successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/Checkout'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
