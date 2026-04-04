@@ -122,6 +122,19 @@ const bookValidator = {
     }),
   },
 };
+
+// PUT body validation example
+const checkoutValidator = {
+  return: {
+    params: Joi.object({
+      id: Joi.number().integer().positive().required(),
+    }),
+    body: Joi.object({
+      returnDate: Joi.date().iso().required(),
+      condition: Joi.string().valid('good', 'damaged', 'lost').required(),
+    }),
+  },
+};
 ```
 
 ---
@@ -192,6 +205,7 @@ app.use(express.json({ limit: '1mb' }));
 - **Use custom ApiError** for all errors
 - **Use transactions** for multi-step database operations
 - **Log with Winston** (never `console.log`)
+- **Extract shared error patterns** — when the same catch/log/respond block appears in 2+ controller methods, extract to a utility
 
 ### DON'T ❌
 - Put business logic in controllers

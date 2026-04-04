@@ -178,7 +178,16 @@ Read the code review results file and apply fixes:
 - **May fix:** Low findings — fix if straightforward and clearly beneficial, otherwise defer
 - After fixes, re-run quality checks (lint, build, test)
 
-### Step 3.5.4: Commit
+### Step 3.5.4: Enforce Critical/High Gate
+
+After applying fixes, re-read the code review results file. If ANY Critical or High finding still has `Resolved: No`, the worker MUST either:
+
+1. Fix the finding and re-run quality checks, OR
+2. ABORT with reason "Unresolved Critical/High code review finding(s) — cannot create PR."
+
+Do NOT proceed to Phase 4 with unresolved Critical or High findings.
+
+### Step 3.5.5: Commit
 
 If fixes were applied:
 

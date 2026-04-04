@@ -130,6 +130,34 @@ const { data: books, isLoading, error } = useBooks({ genre: 'Fiction' });
 
 ---
 
+## React Query Cache Invalidation
+
+When a mutation succeeds, **invalidate all query keys that display affected data**. Use React Query prefix matching to cover all child keys automatically.
+
+```jsx
+// hooks/useCheckoutBook.js
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import checkoutService from '../services/checkoutService';
+
+export function useCheckoutBook() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) => checkoutService.create(data),
+    onSuccess: () => {
+      // Prefix match: invalidates ['checkouts'], ['checkouts', id], etc.
+      queryClient.invalidateQueries({ queryKey: ['checkouts'] });
+      // Also invalidate related data that changed
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+    },
+  });
+}
+```
+
+**Rule:** Every mutation hook MUST invalidate all query keys displaying affected data. Stale cache is a recurring bug source.
+
+---
+
 ## API Service Layer
 
 ```javascript
@@ -305,6 +333,7 @@ const handleClick = useCallback(() => {
 - **Accessibility** - keyboard nav, ARIA, semantic HTML
 - **Test** user behavior, not implementation
 - **Validate parsed IDs** in form submit handlers before passing to API calls (guard against undefined)
+- **Extract formatting functions** (dates, currency, names) to `utils/` when used in 2+ components
 
 ### DON'T ❌
 - Use class components
@@ -315,6 +344,7 @@ const handleClick = useCallback(() => {
 - Nest components deeply (>3 levels)
 - Mix presentation and business logic
 - Use inline styles (use `sx` or `styled()`)
+- Add `<Link>` or `navigate()` to routes that don't exist in `router.jsx` — verify first
 
 ---
 
