@@ -1,0 +1,1226 @@
+openapi: '3.1.0'
+info:
+  title: Checked Out API
+  version: '1.0.0'
+  description: |
+    REST API for the Checked Out library management system.
+    All data responses use the ApiResponse wrapper format.
+  contact:
+    name: Checked Out Team
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+tags:
+  - name: Health
+    description: Application health and readiness probes
+  - name: Auth
+    description: Authentication and session management
+  - name: Books
+    description: Book catalog browsing
+  - name: Checkouts
+    description: Book checkout and return operations
+  - name: Copies
+    description: Physical and Kindle copy availability
+  - name: Patrons
+    description: Library patron management
+  - name: Ratings
+    description: Book ratings and reviews
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+paths:
+  # ---- Health ----
+  /health:
+    get:
+      tags: [Health]
+      summary: Deep readiness check (backward compatible)
+      operationId: healthReadiness
+      responses:
+        '200':
+          description: Application and database are healthy
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: Application is degraded (database unavailable)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/HealthStatus'
+
+  /health/live:
+    get:
+      tags: [Health]
+      summary: Simple liveness probe
+      operationId: healthLiveness
+      responses:
+        '200':
+          description: Application process is running
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: ok
+                          timestamp:
+                            type: string
+                            format: date-time
+
+  /health/ready:
+    get:
+      tags: [Health]
+      summary: Deep readiness check with database verification
+      operationId: healthReady
+      responses:
+        '200':
+          description: Application and database are healthy
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: Application is degraded (database unavailable)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/HealthStatus'
+
+  # ---- Auth ----
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate patron and set auth cookies
+      operationId: authLogin
+      description: Rate-limited (strict). Sets access_token and refresh_token cookies on success.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [card_number, password]
+              properties:
+                card_number:
+                  type: string
+                  description: Patron library card number
+                password:
+                  type: string
+                  description: Patron password
+      responses:
+        '200':
+          description: Authentication successful
+          headers:
+            Set-Cookie:
+              description: Sets access_token and refresh_token cookies
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Patron'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Clear auth cookies
+      operationId: authLogout
+      responses:
+        '200':
+          description: Logged out successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: 'null'
+
+  /api/v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rotate access and refresh tokens
+      operationId: authRefresh
+      description: Rate-limited (strict). Reads refresh_token cookie and issues new token pair.
+      responses:
+        '200':
+          description: Tokens refreshed
+          headers:
+            Set-Cookie:
+              description: Sets new access_token and refresh_token cookies
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Patron'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current authenticated patron
+      operationId: authMe
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Current patron data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Patron'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ---- Books ----
+  /api/v1/books:
+    get:
+      tags: [Books]
+      summary: List books with search and pagination
+      operationId: getBooks
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 255
+          description: Search term for book title or author
+        - name: genre
+          in: query
+          schema:
+            type: string
+            maxLength: 100
+          description: Filter by genre
+        - name: profanity
+          in: query
+          schema:
+            type: string
+            enum: ['true', 'false']
+          description: Filter by profanity flag
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Results per page
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          description: Number of results to skip
+      responses:
+        '200':
+          description: Paginated list of books with authors
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          books:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/BookWithAuthors'
+                          pagination:
+                            $ref: '#/components/schemas/Pagination'
+
+  /api/v1/books/{id}:
+    get:
+      tags: [Books]
+      summary: Get a single book by ID
+      operationId: getBookById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Book details with authors
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/BookWithAuthors'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---- Checkouts ----
+  /api/v1/checkouts:
+    get:
+      tags: [Checkouts]
+      summary: List all checkouts
+      operationId: getAllCheckouts
+      responses:
+        '200':
+          description: List of all checkouts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Checkout'
+    post:
+      tags: [Checkouts]
+      summary: Create a new checkout
+      operationId: createCheckout
+      description: Rate-limited (strict).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [patron_id, copy_id]
+              properties:
+                patron_id:
+                  type: integer
+                  minimum: 1
+                copy_id:
+                  type: integer
+                  minimum: 1
+      responses:
+        '201':
+          description: Checkout created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Checkout'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/checkouts/current:
+    get:
+      tags: [Checkouts]
+      summary: Get current (active) checkouts
+      operationId: getCurrentCheckouts
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: List of active checkouts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Checkout'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/checkouts/overdue:
+    get:
+      tags: [Checkouts]
+      summary: Get overdue checkouts
+      operationId: getOverdueCheckouts
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: List of overdue checkouts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Checkout'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/checkouts/patron/{id}:
+    get:
+      tags: [Checkouts]
+      summary: Get checkouts for a specific patron
+      operationId: getCheckoutsByPatron
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: Patron ID
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [current, returned]
+          description: Filter by checkout status
+      responses:
+        '200':
+          description: Patron checkouts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Checkout'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/checkouts/{id}/return:
+    put:
+      tags: [Checkouts]
+      summary: Return a checked-out item
+      operationId: returnCheckout
+      description: Rate-limited (strict).
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: Checkout ID
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                returnDate:
+                  type: string
+                  format: date-time
+                  description: Optional custom return date (ISO 8601)
+      responses:
+        '200':
+          description: Item returned successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Checkout'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---- Copies ----
+  /api/v1/copies/book/{bookId}/available:
+    get:
+      tags: [Copies]
+      summary: Get available copies for a book
+      operationId: getAvailableCopies
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: Book ID
+      responses:
+        '200':
+          description: Available copies with total count
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          copies:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Copy'
+                          totalCopies:
+                            type: integer
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---- Patrons ----
+  /api/v1/patrons:
+    get:
+      tags: [Patrons]
+      summary: List patrons with optional status filter
+      operationId: listPatrons
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, suspended]
+          description: Filter by patron status
+      responses:
+        '200':
+          description: List of patrons
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Patron'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/patrons/{id}:
+    get:
+      tags: [Patrons]
+      summary: Get a patron by ID
+      operationId: getPatronById
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: Patron ID
+      responses:
+        '200':
+          description: Patron details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Patron'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---- Ratings ----
+  /api/v1/books/{id}/ratings:
+    get:
+      tags: [Ratings]
+      summary: Get all ratings for a book
+      operationId: getBookRatings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Book ID
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Maximum number of ratings to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Number of ratings to skip
+        - name: includeReviews
+          in: query
+          schema:
+            type: string
+            enum: ['true', 'false']
+            default: 'true'
+          description: Whether to include review text
+      responses:
+        '200':
+          description: Ratings and statistics for the book
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          ratings:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Rating'
+                          total:
+                            type: integer
+                          stats:
+                            $ref: '#/components/schemas/RatingStats'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/books/{id}/ratings/stats:
+    get:
+      tags: [Ratings]
+      summary: Get rating statistics for a book
+      operationId: getBookRatingStats
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Book ID
+      responses:
+        '200':
+          description: Rating statistics
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RatingStats'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/books/top-rated:
+    get:
+      tags: [Ratings]
+      summary: Get top-rated books
+      operationId: getTopRatedBooks
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+          description: Maximum number of books to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Number of books to skip
+        - name: minRating
+          in: query
+          schema:
+            type: number
+          description: Minimum average rating filter
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            default: average_rating
+          description: Sort field (e.g. average_rating)
+      responses:
+        '200':
+          description: List of top-rated books
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          books:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/BookWithAuthors'
+                          total:
+                            type: integer
+
+  /api/v1/ratings:
+    post:
+      tags: [Ratings]
+      summary: Submit or update a rating
+      operationId: submitRating
+      security:
+        - cookieAuth: []
+      description: Rate-limited (strict). Creates a new rating or updates an existing one.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bookId, rating]
+              properties:
+                bookId:
+                  type: integer
+                  minimum: 1
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                reviewText:
+                  type: string
+                  maxLength: 2000
+                  nullable: true
+                  description: Optional review text (max 2000 characters)
+      responses:
+        '201':
+          description: Rating submitted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Rating'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/ratings/my-ratings:
+    get:
+      tags: [Ratings]
+      summary: Get current patron's ratings
+      operationId: getMyRatings
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Maximum number of ratings to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Number of ratings to skip
+      responses:
+        '200':
+          description: Patron's own ratings
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          ratings:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Rating'
+                          total:
+                            type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/ratings/books/{bookId}:
+    get:
+      tags: [Ratings]
+      summary: Get current patron's rating for a specific book
+      operationId: getMyRatingForBook
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Book ID
+      responses:
+        '200':
+          description: The patron's rating for this book
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Rating'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Ratings]
+      summary: Delete current patron's rating for a book
+      operationId: deleteRating
+      description: Rate-limited (strict).
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Book ID
+      responses:
+        '200':
+          description: Rating deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/patrons/{patronId}/ratings:
+    get:
+      tags: [Ratings]
+      summary: Get all ratings for a specific patron
+      operationId: getPatronRatings
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: patronId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Patron ID
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Maximum number of ratings to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Number of ratings to skip
+      responses:
+        '200':
+          description: Patron's ratings
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          ratings:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Rating'
+                          total:
+                            type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+# ---------------------------------------------------------------------------
+# Components
+# ---------------------------------------------------------------------------
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+      description: JWT access token stored in an HTTP-only cookie
+
+  schemas:
+    # ---- Wrapper types ----
+    ApiSuccessResponse:
+      type: object
+      required: [success, message, data]
+      properties:
+        success:
+          type: boolean
+          const: true
+        message:
+          type: string
+        data: {}
+
+    ApiErrorResponse:
+      type: object
+      required: [success, message, statusCode]
+      properties:
+        success:
+          type: boolean
+          const: false
+        message:
+          type: string
+        statusCode:
+          type: integer
+
+    # ---- Domain entities ----
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+        isbn:
+          type: string
+          maxLength: 13
+          nullable: true
+        title:
+          type: string
+          maxLength: 255
+        publisher:
+          type: string
+          maxLength: 255
+          nullable: true
+        publication_year:
+          type: integer
+          nullable: true
+        genre:
+          type: string
+          maxLength: 100
+          nullable: true
+        has_profanity:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Author:
+      type: object
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+          maxLength: 100
+          nullable: true
+        last_name:
+          type: string
+          maxLength: 100
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    BookWithAuthors:
+      allOf:
+        - $ref: '#/components/schemas/Book'
+        - type: object
+          properties:
+            authors:
+              type: array
+              items:
+                $ref: '#/components/schemas/Author'
+
+    Patron:
+      type: object
+      description: Library patron (password_hash excluded by default scope)
+      properties:
+        id:
+          type: integer
+        card_number:
+          type: string
+          maxLength: 50
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          nullable: true
+        phone:
+          type: string
+          maxLength: 20
+          nullable: true
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Checkout:
+      type: object
+      properties:
+        id:
+          type: integer
+        copy_id:
+          type: integer
+        patron_id:
+          type: integer
+        checkout_date:
+          type: string
+          format: date-time
+        due_date:
+          type: string
+          format: date-time
+        return_date:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Copy:
+      type: object
+      properties:
+        id:
+          type: integer
+        book_id:
+          type: integer
+        format:
+          type: string
+          enum: [physical, kindle]
+        copy_number:
+          type: integer
+          nullable: true
+        barcode:
+          type: string
+          maxLength: 50
+          nullable: true
+        kindle_asin:
+          type: string
+          maxLength: 50
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Rating:
+      type: object
+      properties:
+        id:
+          type: integer
+        book_id:
+          type: integer
+        patron_id:
+          type: integer
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        review_text:
+          type: string
+          maxLength: 2000
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    RatingStats:
+      type: object
+      properties:
+        average_rating:
+          type: number
+          format: float
+        total_ratings:
+          type: integer
+        distribution:
+          type: object
+          description: Count of ratings per star level (1-5)
+          properties:
+            '1':
+              type: integer
+            '2':
+              type: integer
+            '3':
+              type: integer
+            '4':
+              type: integer
+            '5':
+              type: integer
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        pages:
+          type: integer
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        database:
+          type: string
+          enum: [connected, disconnected]
+        timestamp:
+          type: string
+          format: date-time
+        responseTimeMs:
+          type: number
+
+  responses:
+    BadRequest:
+      description: Validation error or malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    Unauthorized:
+      description: Authentication required or invalid credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    Conflict:
+      description: Conflict (e.g. copy already checked out)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'

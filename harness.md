@@ -106,6 +106,14 @@ Post-review findings organized by issue. **13 active files** plus an `archive/` 
 
 ---
 
+## API Specification (`backend/api/`)
+
+| File | Purpose | Consult when... |
+|------|---------|-----------------|
+| `openapi.yaml` | OpenAPI 3.1.0 spec — machine-readable contract for all REST endpoints | Building API clients, validating endpoints, reviewing API surface, generating documentation |
+
+---
+
 ## File Relationships
 
 - **Quick-ref** files summarize their **full** counterparts in `standards/full/`.
