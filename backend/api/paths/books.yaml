@@ -1,0 +1,91 @@
+# Books — Book catalog browsing
+# Base path: /api/v1/books
+
+/api/v1/books:
+  get:
+    tags: [Books]
+    summary: List books with search and pagination
+    operationId: getBooks
+    parameters:
+      - name: search
+        in: query
+        schema:
+          type: string
+          maxLength: 255
+        description: Search term for book title or author
+      - name: genre
+        in: query
+        schema:
+          type: string
+          maxLength: 100
+        description: Filter by genre
+      - name: profanity
+        in: query
+        schema:
+          type: string
+          enum: ['true', 'false']
+        description: Filter by profanity flag
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+        description: Page number
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+        description: Results per page
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+        description: Number of results to skip
+    responses:
+      '200':
+        description: Paginated list of books with authors
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        books:
+                          type: array
+                          items:
+                            $ref: '../components/schemas.yaml#/BookWithAuthors'
+                        pagination:
+                          $ref: '../components/schemas.yaml#/Pagination'
+
+/api/v1/books/{id}:
+  get:
+    tags: [Books]
+    summary: Get a single book by ID
+    operationId: getBookById
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: Book details with authors
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/BookWithAuthors'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'

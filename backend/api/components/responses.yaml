@@ -1,0 +1,27 @@
+BadRequest:
+  description: Validation error or malformed request
+  content:
+    application/json:
+      schema:
+        $ref: './schemas.yaml#/ApiErrorResponse'
+
+Unauthorized:
+  description: Authentication required or invalid credentials
+  content:
+    application/json:
+      schema:
+        $ref: './schemas.yaml#/ApiErrorResponse'
+
+NotFound:
+  description: Resource not found
+  content:
+    application/json:
+      schema:
+        $ref: './schemas.yaml#/ApiErrorResponse'
+
+Conflict:
+  description: Conflict (e.g. copy already checked out)
+  content:
+    application/json:
+      schema:
+        $ref: './schemas.yaml#/ApiErrorResponse'

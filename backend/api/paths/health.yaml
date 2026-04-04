@@ -1,0 +1,85 @@
+# Health — Application health and readiness probes
+# Base path: /health
+
+/health:
+  get:
+    tags: [Health]
+    summary: Deep readiness check (backward compatible)
+    operationId: healthReadiness
+    responses:
+      '200':
+        description: Application and database are healthy
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/HealthStatus'
+      '503':
+        description: Application is degraded (database unavailable)
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/HealthStatus'
+
+/health/live:
+  get:
+    tags: [Health]
+    summary: Simple liveness probe
+    operationId: healthLiveness
+    responses:
+      '200':
+        description: Application process is running
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                          example: ok
+                        timestamp:
+                          type: string
+                          format: date-time
+
+/health/ready:
+  get:
+    tags: [Health]
+    summary: Deep readiness check with database verification
+    operationId: healthReady
+    responses:
+      '200':
+        description: Application and database are healthy
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/HealthStatus'
+      '503':
+        description: Application is degraded (database unavailable)
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/HealthStatus'

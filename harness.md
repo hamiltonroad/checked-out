@@ -108,9 +108,23 @@ Post-review findings organized by issue. **13 active files** plus an `archive/` 
 
 ## API Specification (`backend/api/`)
 
+Split by resource for maintainability. Load `openapi.yaml` in Swagger Editor or Redocly to view the full spec.
+
 | File | Purpose | Consult when... |
 |------|---------|-----------------|
-| `openapi.yaml` | OpenAPI 3.1.0 spec — machine-readable contract for all REST endpoints | Building API clients, validating endpoints, reviewing API surface, generating documentation |
+| `openapi.yaml` | Root index — `$ref` pointers to all path and component files | Understanding the full API surface, adding a new resource |
+| `paths/health.yaml` | Health probe endpoints (`/health`, `/health/live`, `/health/ready`) | Working on health checks or readiness probes |
+| `paths/auth.yaml` | Auth endpoints (login, logout, refresh, me) | Working on authentication or session management |
+| `paths/books.yaml` | Book catalog endpoints (list, get by ID) | Working on book browsing or search |
+| `paths/checkouts.yaml` | Checkout endpoints (create, return, current, overdue, by patron) | Working on checkout/return flows |
+| `paths/copies.yaml` | Copy availability endpoint | Working on copy availability |
+| `paths/patrons.yaml` | Patron endpoints (list, get by ID) | Working on patron management |
+| `paths/ratings.yaml` | Rating endpoints (submit, delete, stats, top-rated, by book/patron) | Working on ratings or reviews |
+| `components/schemas.yaml` | Shared schemas (Book, Patron, Checkout, Rating, etc.) | Adding or modifying response shapes |
+| `components/responses.yaml` | Shared error responses (400, 401, 404, 409) | Adding error responses to new endpoints |
+| `components/security-schemes.yaml` | JWT cookie auth definition | Working on auth-related endpoints |
+
+**Adding a new resource:** Create `paths/<resource>.yaml`, add schemas to `components/schemas.yaml` if needed, then add `$ref` entries in `openapi.yaml`.
 
 ---
 

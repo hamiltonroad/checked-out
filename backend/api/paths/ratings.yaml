@@ -1,0 +1,333 @@
+# Ratings — Book ratings and reviews
+# Paths mounted at /api/v1 (mixed under /books, /ratings, /patrons)
+
+/api/v1/books/{id}/ratings:
+  get:
+    tags: [Ratings]
+    summary: Get all ratings for a book
+    operationId: getBookRatings
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Book ID
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 10
+        description: Maximum number of ratings to return
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+        description: Number of ratings to skip
+      - name: includeReviews
+        in: query
+        schema:
+          type: string
+          enum: ['true', 'false']
+          default: 'true'
+        description: Whether to include review text
+    responses:
+      '200':
+        description: Ratings and statistics for the book
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        ratings:
+                          type: array
+                          items:
+                            $ref: '../components/schemas.yaml#/Rating'
+                        total:
+                          type: integer
+                        stats:
+                          $ref: '../components/schemas.yaml#/RatingStats'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+
+/api/v1/books/{id}/ratings/stats:
+  get:
+    tags: [Ratings]
+    summary: Get rating statistics for a book
+    operationId: getBookRatingStats
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Book ID
+    responses:
+      '200':
+        description: Rating statistics
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/RatingStats'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+
+/api/v1/books/top-rated:
+  get:
+    tags: [Ratings]
+    summary: Get top-rated books
+    operationId: getTopRatedBooks
+    parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 20
+        description: Maximum number of books to return
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+        description: Number of books to skip
+      - name: minRating
+        in: query
+        schema:
+          type: number
+        description: Minimum average rating filter
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+          default: average_rating
+        description: Sort field (e.g. average_rating)
+    responses:
+      '200':
+        description: List of top-rated books
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        books:
+                          type: array
+                          items:
+                            $ref: '../components/schemas.yaml#/BookWithAuthors'
+                        total:
+                          type: integer
+
+/api/v1/ratings:
+  post:
+    tags: [Ratings]
+    summary: Submit or update a rating
+    operationId: submitRating
+    security:
+      - cookieAuth: []
+    description: Rate-limited (strict). Creates a new rating or updates an existing one.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [bookId, rating]
+            properties:
+              bookId:
+                type: integer
+                minimum: 1
+              rating:
+                type: integer
+                minimum: 1
+                maximum: 5
+              reviewText:
+                type: string
+                maxLength: 2000
+                nullable: true
+                description: Optional review text (max 2000 characters)
+    responses:
+      '201':
+        description: Rating submitted
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/Rating'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+
+/api/v1/ratings/my-ratings:
+  get:
+    tags: [Ratings]
+    summary: Get current patron's ratings
+    operationId: getMyRatings
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 10
+        description: Maximum number of ratings to return
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+        description: Number of ratings to skip
+    responses:
+      '200':
+        description: Patron's own ratings
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        ratings:
+                          type: array
+                          items:
+                            $ref: '../components/schemas.yaml#/Rating'
+                        total:
+                          type: integer
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+
+/api/v1/ratings/books/{bookId}:
+  get:
+    tags: [Ratings]
+    summary: Get current patron's rating for a specific book
+    operationId: getMyRatingForBook
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: bookId
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Book ID
+    responses:
+      '200':
+        description: The patron's rating for this book
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/Rating'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+  delete:
+    tags: [Ratings]
+    summary: Delete current patron's rating for a book
+    operationId: deleteRating
+    description: Rate-limited (strict).
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: bookId
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Book ID
+    responses:
+      '200':
+        description: Rating deleted
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+
+/api/v1/patrons/{patronId}/ratings:
+  get:
+    tags: [Ratings]
+    summary: Get all ratings for a specific patron
+    operationId: getPatronRatings
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: patronId
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Patron ID
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 10
+        description: Maximum number of ratings to return
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          default: 0
+        description: Number of ratings to skip
+    responses:
+      '200':
+        description: Patron's ratings
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        ratings:
+                          type: array
+                          items:
+                            $ref: '../components/schemas.yaml#/Rating'
+                        total:
+                          type: integer
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'

@@ -1,0 +1,247 @@
+# Wrapper types
+ApiSuccessResponse:
+  type: object
+  required: [success, message, data]
+  properties:
+    success:
+      type: boolean
+      const: true
+    message:
+      type: string
+    data: {}
+
+ApiErrorResponse:
+  type: object
+  required: [success, message, statusCode]
+  properties:
+    success:
+      type: boolean
+      const: false
+    message:
+      type: string
+    statusCode:
+      type: integer
+
+# Domain entities
+Book:
+  type: object
+  properties:
+    id:
+      type: integer
+    isbn:
+      type: string
+      maxLength: 13
+      nullable: true
+    title:
+      type: string
+      maxLength: 255
+    publisher:
+      type: string
+      maxLength: 255
+      nullable: true
+    publication_year:
+      type: integer
+      nullable: true
+    genre:
+      type: string
+      maxLength: 100
+      nullable: true
+    has_profanity:
+      type: boolean
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+
+Author:
+  type: object
+  properties:
+    id:
+      type: integer
+    first_name:
+      type: string
+      maxLength: 100
+      nullable: true
+    last_name:
+      type: string
+      maxLength: 100
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+
+BookWithAuthors:
+  allOf:
+    - $ref: '#/Book'
+    - type: object
+      properties:
+        authors:
+          type: array
+          items:
+            $ref: '#/Author'
+
+Patron:
+  type: object
+  description: Library patron (password_hash excluded by default scope)
+  properties:
+    id:
+      type: integer
+    card_number:
+      type: string
+      maxLength: 50
+    first_name:
+      type: string
+      maxLength: 100
+    last_name:
+      type: string
+      maxLength: 100
+    email:
+      type: string
+      format: email
+      maxLength: 255
+      nullable: true
+    phone:
+      type: string
+      maxLength: 20
+      nullable: true
+    status:
+      type: string
+      enum: [active, inactive, suspended]
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+
+Checkout:
+  type: object
+  properties:
+    id:
+      type: integer
+    copy_id:
+      type: integer
+    patron_id:
+      type: integer
+    checkout_date:
+      type: string
+      format: date-time
+    due_date:
+      type: string
+      format: date-time
+    return_date:
+      type: string
+      format: date-time
+      nullable: true
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+
+Copy:
+  type: object
+  properties:
+    id:
+      type: integer
+    book_id:
+      type: integer
+    format:
+      type: string
+      enum: [physical, kindle]
+    copy_number:
+      type: integer
+      nullable: true
+    barcode:
+      type: string
+      maxLength: 50
+      nullable: true
+    kindle_asin:
+      type: string
+      maxLength: 50
+      nullable: true
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+
+Rating:
+  type: object
+  properties:
+    id:
+      type: integer
+    book_id:
+      type: integer
+    patron_id:
+      type: integer
+    rating:
+      type: integer
+      minimum: 1
+      maximum: 5
+    review_text:
+      type: string
+      maxLength: 2000
+      nullable: true
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+
+RatingStats:
+  type: object
+  properties:
+    average_rating:
+      type: number
+      format: float
+    total_ratings:
+      type: integer
+    distribution:
+      type: object
+      description: Count of ratings per star level (1-5)
+      properties:
+        '1':
+          type: integer
+        '2':
+          type: integer
+        '3':
+          type: integer
+        '4':
+          type: integer
+        '5':
+          type: integer
+
+Pagination:
+  type: object
+  properties:
+    total:
+      type: integer
+    page:
+      type: integer
+    limit:
+      type: integer
+    pages:
+      type: integer
+
+HealthStatus:
+  type: object
+  properties:
+    status:
+      type: string
+      enum: [ok, degraded]
+    database:
+      type: string
+      enum: [connected, disconnected]
+    timestamp:
+      type: string
+      format: date-time
+    responseTimeMs:
+      type: number

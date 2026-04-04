@@ -1,0 +1,37 @@
+# Copies — Physical and Kindle copy availability
+# Base path: /api/v1/copies
+
+/api/v1/copies/book/{bookId}/available:
+  get:
+    tags: [Copies]
+    summary: Get available copies for a book
+    operationId: getAvailableCopies
+    parameters:
+      - name: bookId
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: Book ID
+    responses:
+      '200':
+        description: Available copies with total count
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        copies:
+                          type: array
+                          items:
+                            $ref: '../components/schemas.yaml#/Copy'
+                        totalCopies:
+                          type: integer
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
