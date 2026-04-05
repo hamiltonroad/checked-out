@@ -24,18 +24,23 @@
     tags: [Checkouts]
     summary: Create a new checkout
     operationId: createCheckout
-    description: Rate-limited (strict).
+    description: Rate-limited (strict). Patron is derived from the authenticated session.
+    security:
+      - cookieAuth: []
     requestBody:
       required: true
       content:
         application/json:
           schema:
             type: object
-            required: [patron_id, copy_id]
+            required: [copy_id]
             properties:
               patron_id:
                 type: integer
                 minimum: 1
+                description: >
+                  Ignored — patron is derived from the authenticated session.
+                  Reserved for future role-based override (e.g. librarian checkout).
               copy_id:
                 type: integer
                 minimum: 1
@@ -53,6 +58,8 @@
                       $ref: '../components/schemas.yaml#/Checkout'
       '400':
         $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
       '404':
         $ref: '../components/responses.yaml#/NotFound'
       '409':
