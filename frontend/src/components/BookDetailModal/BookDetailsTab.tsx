@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { Box, Typography, Stack } from '@mui/material';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import StatusChip from '../StatusChip';
 import ProfanityWarning from '../ProfanityWarning';
 import { RatingDisplay } from '../Rating';
+import { getCopyCountText, getFormatAvailability } from '../../utils/copyUtils';
 import type { Book, RatingStatsData } from '../../types';
 
 interface DetailFieldProps {
@@ -93,9 +93,15 @@ function BookDetailsTab({ book, statsData }: BookDetailsTabProps) {
 
         <DetailField label="Genre" value={book.genre} />
 
-        <DetailField label="Status">
+        <DetailField label="Copies">
           <Box sx={{ mt: 0.5 }}>
-            <StatusChip status={book.status || 'available'} size="medium" />
+            <Typography variant="body1">{getCopyCountText(book.copies)}</Typography>
+            {getFormatAvailability(book.copies).map((fa) => (
+              <Typography key={fa.format} variant="body2" color="text.secondary">
+                {fa.format.charAt(0).toUpperCase() + fa.format.slice(1)}: {fa.available} of{' '}
+                {fa.total} available
+              </Typography>
+            ))}
           </Box>
         </DetailField>
       </Box>

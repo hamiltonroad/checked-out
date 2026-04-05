@@ -48,7 +48,9 @@ test.describe('Book filters', () => {
     await expect(page.getByText('Pride and Prejudice')).toBeVisible();
   });
 
-  test('rating filter shows empty state when no ratings exist', async ({ page }) => {
+  test('rating filter narrows book results', async ({ page }) => {
+    const initialTotal = await getTotalCount(page);
+
     // Open the Minimum Rating dropdown
     await page.getByLabel('Minimum Rating').click();
 
@@ -61,7 +63,8 @@ test.describe('Book filters', () => {
     );
 
     const filteredTotal = await getTotalCount(page);
-    expect(filteredTotal).toBe(0);
+    expect(filteredTotal).toBeLessThan(initialTotal);
+    expect(filteredTotal).toBeGreaterThan(0);
   });
 
   test('genre filter narrows book results', async ({ page }) => {
@@ -102,12 +105,15 @@ test.describe('Book filters', () => {
     // Click "Clear all filters"
     const clearAll = page.getByRole('button', { name: /Clear all filters/i });
     await expect(clearAll).toBeVisible();
+
+    // Set up response listener BEFORE clicking
+    const resetResponse = page.waitForResponse((resp) =>
+      resp.url().includes('/books') && !resp.url().includes('authorId') && resp.status() === 200
+    );
     await clearAll.click();
 
     // Wait for unfiltered results
-    await page.waitForResponse((resp) =>
-      resp.url().includes('/books') && !resp.url().includes('authorId') && resp.status() === 200
-    );
+    await resetResponse;
 
     const resetTotal = await getTotalCount(page);
     expect(resetTotal).toBeGreaterThanOrEqual(61);

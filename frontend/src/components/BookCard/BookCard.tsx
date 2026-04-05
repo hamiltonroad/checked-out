@@ -1,9 +1,9 @@
 import type React from 'react';
 import { Card, CardContent, Typography, Box } from '@mui/material';
-import StatusChip from '../StatusChip';
 import ProfanityWarning from '../ProfanityWarning';
 import { RatingDisplay } from '../Rating';
 import { getGenreStyle } from '../../utils/genreColors';
+import { getCopyCountText } from '../../utils/copyUtils';
 import type { Book } from '../../types';
 
 interface BookCardProps {
@@ -89,9 +89,9 @@ function BookCard({ book, onClick }: BookCardProps) {
             />
           </Box>
         )}
-        <Box>
-          <StatusChip status={book.status} size="small" />
-        </Box>
+        <Typography variant="body2" color="text.secondary">
+          {getCopyCountText(book.copies)}
+        </Typography>
       </CardContent>
     </Card>
   );
