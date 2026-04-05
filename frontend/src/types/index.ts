@@ -56,6 +56,7 @@ export interface Patron {
   first_name: string;
   last_name: string;
   card_number?: string;
+  status: PatronStatus;
   email?: string;
 }
 
