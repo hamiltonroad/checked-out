@@ -4,6 +4,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import ProfanityWarning from '../ProfanityWarning';
 import { RatingDisplay } from '../Rating';
 import { getCopyCountText, getFormatAvailability } from '../../utils/copyUtils';
+import WaitlistSection from './WaitlistSection';
 import type { Book, RatingStatsData } from '../../types';
 
 interface DetailFieldProps {
@@ -32,13 +33,14 @@ function DetailField({ label, value, children }: DetailFieldProps) {
 interface BookDetailsTabProps {
   book: Book;
   statsData?: RatingStatsData;
+  bookId?: number | null;
 }
 
 /**
  * BookDetailsTab displays book information including cover placeholder,
  * rating, authors, ISBN, publisher, year, genre, and status.
  */
-function BookDetailsTab({ book, statsData }: BookDetailsTabProps) {
+function BookDetailsTab({ book, statsData, bookId = null }: BookDetailsTabProps) {
   return (
     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ pt: 1 }}>
       <Box
@@ -101,6 +103,7 @@ function BookDetailsTab({ book, statsData }: BookDetailsTabProps) {
                 {fa.format}: {fa.available} of {fa.total} available
               </Typography>
             ))}
+            {bookId && book.copies && <WaitlistSection bookId={bookId} copies={book.copies} />}
           </Box>
         </DetailField>
       </Box>

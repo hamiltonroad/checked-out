@@ -114,7 +114,9 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
         {error && (
           <Alert severity="error">Error loading book: {error.message || 'Unknown error'}</Alert>
         )}
-        {tabValue === 0 && book && <BookDetailsTab book={book} statsData={statsData} />}
+        {tabValue === 0 && book && (
+          <BookDetailsTab book={book} statsData={statsData} bookId={bookId} />
+        )}
         {tabValue === 1 && book && bookId && <BookReviewsTab bookId={bookId} open={open} />}
         {showRatingInput && book && bookId && (
           <RatingInput
