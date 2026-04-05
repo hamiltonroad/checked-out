@@ -1,7 +1,7 @@
 import { Chip, Button, Box } from '@mui/material';
 import PropTypes from 'prop-types';
 import type { AuthorSummary } from '../../types';
-import { AVAILABILITY_FILTERS, AVAILABILITY_FILTER_LABELS } from './constants';
+import { AVAILABILITY_FILTERS, AVAILABILITY_FILTER_LABELS, FORMAT_OPTIONS } from './constants';
 
 interface ActiveFilterChipsProps {
   debouncedSearchTerm: string;
@@ -12,6 +12,8 @@ interface ActiveFilterChipsProps {
   onHideProfanityChange: (value: boolean) => void;
   selectedGenres: string[];
   onGenresChange: (genres: string[]) => void;
+  selectedFormats: string[];
+  onFormatsChange: (formats: string[]) => void;
   minRating: number;
   onMinRatingChange: (rating: number) => void;
   selectedAuthors: AuthorSummary[];
@@ -33,6 +35,8 @@ function ActiveFilterChips({
   onHideProfanityChange,
   selectedGenres,
   onGenresChange,
+  selectedFormats,
+  onFormatsChange,
   minRating,
   onMinRatingChange,
   selectedAuthors,
@@ -44,6 +48,10 @@ function ActiveFilterChips({
 
   const handleRemoveGenre = (genre: string) => {
     onGenresChange(selectedGenres.filter((g) => g !== genre));
+  };
+
+  const handleRemoveFormat = (format: string) => {
+    onFormatsChange(selectedFormats.filter((f) => f !== format));
   };
 
   const handleRemoveAuthor = (authorId: number) => {
@@ -89,6 +97,19 @@ function ActiveFilterChips({
           aria-label={`Remove genre filter: ${genre}`}
         />
       ))}
+      {selectedFormats.map((format) => {
+        const label = FORMAT_OPTIONS.find((o) => o.value === format)?.label || format;
+        return (
+          <Chip
+            key={format}
+            label={`Format: ${label}`}
+            onDelete={() => handleRemoveFormat(format)}
+            size="small"
+            variant="outlined"
+            aria-label={`Remove format filter: ${label}`}
+          />
+        );
+      })}
       {minRating > 0 && (
         <Chip
           label={`Rating: ${minRating}+ Stars`}
@@ -124,6 +145,8 @@ ActiveFilterChips.propTypes = {
   onHideProfanityChange: PropTypes.func.isRequired,
   selectedGenres: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
   onGenresChange: PropTypes.func.isRequired,
+  selectedFormats: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+  onFormatsChange: PropTypes.func.isRequired,
   minRating: PropTypes.number.isRequired,
   onMinRatingChange: PropTypes.func.isRequired,
   selectedAuthors: PropTypes.arrayOf(

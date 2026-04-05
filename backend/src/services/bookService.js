@@ -96,11 +96,10 @@ class BookService {
     return { bookWhere };
   }
 
-  /** Build ID-based pre-filters for search, authorId, and minRating */
+  /** Build ID-based pre-filters for search, authorId, format, and minRating */
   // eslint-disable-next-line class-methods-use-this
   async buildIdFilters(filters) {
     const idSets = [];
-
     if (filters.search) {
       const escaped = escapeLikeWildcards(filters.search);
       const titleMatches = await Book.findAll({
@@ -121,7 +120,16 @@ class BookService {
       const bookIds = authorMatches.flatMap((a) => a.books.map((b) => b.id));
       idSets.push(new Set(bookIds));
     }
-
+    if (filters.format) {
+      const formats = filters.format.split(',').map((f) => f.trim());
+      const formatMatches = await Copy.findAll({
+        where: { format: { [Op.in]: formats } },
+        attributes: ['book_id'],
+        group: ['book_id'],
+        raw: true,
+      });
+      idSets.push(new Set(formatMatches.map((c) => c.book_id)));
+    }
     if (filters.minRating) {
       const minRating = parseInt(filters.minRating, 10);
       const ratedBooks = await sequelize.query(

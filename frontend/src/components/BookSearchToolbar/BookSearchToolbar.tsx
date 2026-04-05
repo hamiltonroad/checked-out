@@ -1,7 +1,5 @@
 import {
   TextField,
-  InputAdornment,
-  IconButton,
   Select,
   MenuItem,
   FormControl,
@@ -13,13 +11,15 @@ import {
   Autocomplete,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
+import SearchField from './SearchField';
 import {
   AVAILABILITY_FILTERS,
-  AVAILABILITY_FILTER_LABELS,
+  AVAILABILITY_OPTIONS,
   GENRE_OPTIONS,
+  FORMAT_OPTIONS,
   RATING_FILTER_OPTIONS,
+  FILTER_ROW_SX,
+  FILTER_CONTROL_SX,
 } from './constants';
 import type { BookSearchToolbarProps } from './types';
 import ActiveFilterChips from './ActiveFilterChips';
@@ -40,6 +40,8 @@ function BookSearchToolbar({
   onClearSearch,
   selectedGenres,
   onGenresChange,
+  selectedFormats,
+  onFormatsChange,
   minRating,
   onMinRatingChange,
   selectedAuthors,
@@ -53,35 +55,19 @@ function BookSearchToolbar({
     availabilityFilter !== AVAILABILITY_FILTERS.ALL ||
     hideProfanity ||
     selectedGenres.length > 0 ||
+    selectedFormats.length > 0 ||
     minRating > 0 ||
     selectedAuthors.length > 0;
 
   return (
     <>
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 1.5 }}>
-        <TextField
-          fullWidth
-          label="Search by Title"
-          placeholder="Search by title..."
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-          inputRef={searchInputRef}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: searchTerm && (
-              <InputAdornment position="end">
-                <IconButton onClick={() => onSearchChange('')} aria-label="Clear search">
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
+      <Box sx={FILTER_ROW_SX}>
+        <SearchField
+          searchTerm={searchTerm}
+          onSearchChange={onSearchChange}
+          searchInputRef={searchInputRef}
         />
-        <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
+        <FormControl sx={FILTER_CONTROL_SX}>
           <InputLabel id="availability-filter-label">Availability</InputLabel>
           <Select
             labelId="availability-filter-label"
@@ -90,18 +76,14 @@ function BookSearchToolbar({
             label="Availability"
             onChange={(e: SelectChangeEvent) => onAvailabilityChange(e.target.value)}
           >
-            <MenuItem value={AVAILABILITY_FILTERS.ALL}>
-              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.ALL]}
-            </MenuItem>
-            <MenuItem value={AVAILABILITY_FILTERS.AVAILABLE}>
-              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE]}
-            </MenuItem>
-            <MenuItem value={AVAILABILITY_FILTERS.CHECKED_OUT}>
-              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT]}
-            </MenuItem>
+            {AVAILABILITY_OPTIONS.map((opt) => (
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
-        <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
+        <FormControl sx={FILTER_CONTROL_SX}>
           <InputLabel id="genre-filter-label">Genre</InputLabel>
           <Select
             labelId="genre-filter-label"
@@ -121,8 +103,8 @@ function BookSearchToolbar({
           </Select>
         </FormControl>
       </Box>
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 1.5 }}>
-        <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
+      <Box sx={FILTER_ROW_SX}>
+        <FormControl sx={FILTER_CONTROL_SX}>
           <InputLabel id="rating-filter-label">Minimum Rating</InputLabel>
           <Select
             labelId="rating-filter-label"
@@ -132,6 +114,25 @@ function BookSearchToolbar({
             onChange={(e: SelectChangeEvent<number>) => onMinRatingChange(e.target.value as number)}
           >
             {RATING_FILTER_OPTIONS.map((opt) => (
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl sx={FILTER_CONTROL_SX}>
+          <InputLabel id="format-filter-label">Format</InputLabel>
+          <Select
+            labelId="format-filter-label"
+            id="format-filter"
+            multiple
+            value={selectedFormats}
+            label="Format"
+            onChange={(e: SelectChangeEvent<string[]>) =>
+              onFormatsChange(e.target.value as string[])
+            }
+          >
+            {FORMAT_OPTIONS.map((opt) => (
               <MenuItem key={opt.value} value={opt.value}>
                 {opt.label}
               </MenuItem>
@@ -158,17 +159,16 @@ function BookSearchToolbar({
           )}
         />
       </Box>
-      <Box sx={{ mt: 1 }}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={hideProfanity}
-              onChange={(e) => onHideProfanityChange(e.target.checked)}
-            />
-          }
-          label="Hide books with profanity"
-        />
-      </Box>
+      <FormControlLabel
+        sx={{ mt: 1 }}
+        control={
+          <Checkbox
+            checked={hideProfanity}
+            onChange={(e) => onHideProfanityChange(e.target.checked)}
+          />
+        }
+        label="Hide books with profanity"
+      />
       <Typography variant="body2" color="text.secondary">
         Showing {filteredCount} of {totalCount} books
       </Typography>
@@ -181,6 +181,8 @@ function BookSearchToolbar({
         onHideProfanityChange={onHideProfanityChange}
         selectedGenres={selectedGenres}
         onGenresChange={onGenresChange}
+        selectedFormats={selectedFormats}
+        onFormatsChange={onFormatsChange}
         minRating={minRating}
         onMinRatingChange={onMinRatingChange}
         selectedAuthors={selectedAuthors}

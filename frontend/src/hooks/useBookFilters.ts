@@ -13,6 +13,8 @@ interface BookFiltersReturn {
   setHideProfanity: (value: boolean) => void;
   selectedGenres: string[];
   setSelectedGenres: (genres: string[]) => void;
+  selectedFormats: string[];
+  setSelectedFormats: (formats: string[]) => void;
   minRating: number;
   setMinRating: (rating: number) => void;
   selectedAuthors: AuthorSummary[];
@@ -35,6 +37,7 @@ export function useBookFilters(): BookFiltersReturn {
   const [availabilityFilter, setAvailabilityFilter] = useState(AVAILABILITY_ALL);
   const [hideProfanity, setHideProfanity] = useState(false);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
   const [minRating, setMinRating] = useState(0);
   const [selectedAuthors, setSelectedAuthors] = useState<AuthorSummary[]>([]);
   const [page, setPage] = useState(1);
@@ -52,7 +55,7 @@ export function useBookFilters(): BookFiltersReturn {
   // Reset page on filter changes
   useEffect(() => {
     setPage(1);
-  }, [hideProfanity, selectedGenres, minRating, selectedAuthors]);
+  }, [hideProfanity, selectedGenres, selectedFormats, minRating, selectedAuthors]);
 
   const handleClearAll = useCallback(() => {
     setSearchTerm('');
@@ -60,6 +63,7 @@ export function useBookFilters(): BookFiltersReturn {
     setAvailabilityFilter(AVAILABILITY_ALL);
     setHideProfanity(false);
     setSelectedGenres([]);
+    setSelectedFormats([]);
     setMinRating(0);
     setSelectedAuthors([]);
     setPage(1);
@@ -75,10 +79,19 @@ export function useBookFilters(): BookFiltersReturn {
     if (debouncedSearchTerm) params.search = debouncedSearchTerm;
     if (hideProfanity) params.profanity = 'false';
     if (selectedGenres.length > 0) params.genre = selectedGenres.join(',');
+    if (selectedFormats.length > 0) params.format = selectedFormats.join(',');
     if (minRating > 0) params.minRating = minRating;
     if (selectedAuthors.length > 0) params.authorId = selectedAuthors.map((a) => a.id).join(',');
     return params;
-  }, [debouncedSearchTerm, hideProfanity, selectedGenres, minRating, selectedAuthors, page]);
+  }, [
+    debouncedSearchTerm,
+    hideProfanity,
+    selectedGenres,
+    selectedFormats,
+    minRating,
+    selectedAuthors,
+    page,
+  ]);
 
   return {
     searchTerm,
@@ -90,6 +103,8 @@ export function useBookFilters(): BookFiltersReturn {
     setHideProfanity,
     selectedGenres,
     setSelectedGenres,
+    selectedFormats,
+    setSelectedFormats,
     minRating,
     setMinRating,
     selectedAuthors,

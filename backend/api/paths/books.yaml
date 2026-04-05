@@ -38,6 +38,12 @@
           type: string
           enum: ['true', 'false']
         description: Filter by profanity flag
+      - name: format
+        in: query
+        schema:
+          type: string
+          maxLength: 100
+        description: Filter by copy format (comma-separated, e.g. "physical,kindle")
       - name: page
         in: query
         schema:

@@ -11,6 +11,18 @@ const AVAILABILITY_FILTER_LABELS: Record<string, string> = {
   [AVAILABILITY_FILTERS.CHECKED_OUT]: 'Checked Out',
 };
 
+const AVAILABILITY_OPTIONS = [
+  { value: AVAILABILITY_FILTERS.ALL, label: AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.ALL] },
+  {
+    value: AVAILABILITY_FILTERS.AVAILABLE,
+    label: AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE],
+  },
+  {
+    value: AVAILABILITY_FILTERS.CHECKED_OUT,
+    label: AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT],
+  },
+];
+
 // Genre options matching seeded data
 const GENRE_OPTIONS: string[] = [
   'Biography',
@@ -24,6 +36,17 @@ const GENRE_OPTIONS: string[] = [
   'Science',
   'Science Fiction',
   'Self-Help',
+];
+
+// Format filter options matching Copy model enum
+interface FormatOption {
+  value: string;
+  label: string;
+}
+
+const FORMAT_OPTIONS: FormatOption[] = [
+  { value: 'physical', label: 'Physical' },
+  { value: 'kindle', label: 'Kindle' },
 ];
 
 // Rating filter options
@@ -40,5 +63,23 @@ const RATING_FILTER_OPTIONS: RatingFilterOption[] = [
   { value: 4, label: '4+ Stars' },
 ];
 
-export { AVAILABILITY_FILTERS, AVAILABILITY_FILTER_LABELS, GENRE_OPTIONS, RATING_FILTER_OPTIONS };
-export type { RatingFilterOption };
+// Layout constants for filter rows
+const FILTER_ROW_SX = {
+  display: 'flex',
+  flexDirection: { xs: 'column', sm: 'row' },
+  gap: 2,
+  mb: 1.5,
+};
+const FILTER_CONTROL_SX = { minWidth: { xs: '100%', sm: 200 } };
+
+export {
+  AVAILABILITY_FILTERS,
+  AVAILABILITY_FILTER_LABELS,
+  AVAILABILITY_OPTIONS,
+  GENRE_OPTIONS,
+  FORMAT_OPTIONS,
+  RATING_FILTER_OPTIONS,
+  FILTER_ROW_SX,
+  FILTER_CONTROL_SX,
+};
+export type { RatingFilterOption, FormatOption };

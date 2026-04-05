@@ -9,6 +9,7 @@ const bookValidator = {
       search: Joi.string().max(255).allow('').optional(),
       genre: Joi.string().max(500).optional(),
       profanity: Joi.string().valid('true', 'false').optional(),
+      format: Joi.string().max(100).optional(),
       minRating: Joi.number().integer().min(1).max(5).optional(),
       authorId: Joi.string().max(500).optional(),
       page: Joi.number().integer().min(1).optional(),
