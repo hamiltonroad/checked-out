@@ -7,10 +7,8 @@ import {
   DialogActions,
   Button,
   Alert,
-  Box,
   useMediaQuery,
   useTheme,
-  Skeleton,
   Slide,
   IconButton,
   Divider,
@@ -25,7 +23,7 @@ import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { useBook } from '../../hooks/useBook';
 import { useCheckout } from '../../hooks/useCheckout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import SkeletonField from '../SkeletonField';
+import BookDetailSkeleton from './BookDetailSkeleton';
 import { RatingInput } from '../Rating';
 import CheckoutDialog from '../CheckoutDialog';
 import ratingService from '../../services/ratingService';
@@ -81,6 +79,7 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
   });
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => setTabValue(newValue);
+  const isNoCopies = book?.status === 'no_copies';
 
   const handleCheckoutSubmit = async (checkoutData: { patron_id: number; copy_id: number }) => {
     try {
@@ -105,7 +104,12 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
     >
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         Book Details
-        <IconButton onClick={onClose} size="small" aria-label="close" sx={{ color: 'text.secondary' }}>
+        <IconButton
+          onClick={onClose}
+          size="small"
+          aria-label="close"
+          sx={{ color: 'text.secondary' }}
+        >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -116,20 +120,7 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
       </Tabs>
       <Divider />
       <DialogContent>
-        {isLoading && (
-          <Box sx={{ pt: 1 }}>
-            <Skeleton variant="text" sx={{ fontSize: '2rem', mb: 2 }} width="80%" />
-            <SkeletonField labelWidth="30%" valueWidth="60%" />
-            <SkeletonField labelWidth="20%" valueWidth="50%" />
-            <SkeletonField labelWidth="30%" valueWidth="40%" />
-            <SkeletonField labelWidth="40%" valueWidth="25%" />
-            <SkeletonField labelWidth="25%" valueWidth="35%" />
-            <Box sx={{ mb: 2 }}>
-              <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width="20%" />
-              <Skeleton variant="rounded" width={100} height={24} />
-            </Box>
-          </Box>
-        )}
+        {isLoading && <BookDetailSkeleton />}
 
         {error && (
           <Alert severity="error">Error loading book: {error.message || 'Unknown error'}</Alert>
@@ -149,13 +140,13 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
       <Divider />
       <DialogActions>
         {book && (
-          <Tooltip title={book.status === 'no_copies' ? 'No copies available for checkout' : ''}>
+          <Tooltip title={isNoCopies ? 'No copies available for checkout' : ''}>
             <span>
               <Button
                 onClick={() => setCheckoutOpen(true)}
                 startIcon={<LibraryBooksIcon />}
                 variant="contained"
-                disabled={book.status === 'no_copies'}
+                disabled={isNoCopies}
               >
                 Check Out
               </Button>
@@ -185,8 +176,15 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
         error={checkoutMutation.error ? formatApiError(checkoutMutation.error) : null}
         fieldErrors={parsedCheckoutErrors}
       />
-      <Snackbar open={checkoutSuccess} autoHideDuration={4000} onClose={() => setCheckoutSuccess(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-        <Alert severity="success" onClose={() => setCheckoutSuccess(false)}>Book checked out successfully!</Alert>
+      <Snackbar
+        open={checkoutSuccess}
+        autoHideDuration={4000}
+        onClose={() => setCheckoutSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setCheckoutSuccess(false)}>
+          Book checked out successfully!
+        </Alert>
       </Snackbar>
     </Dialog>
   );
