@@ -1,6 +1,7 @@
 import { Card, CardContent, Typography, Chip, Box, Grid } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import type { PatronDetail, PatronStatus } from '../../types';
+import CopyableField from './CopyableField';
 
 const STATUS_COLOR_MAP: Record<PatronStatus, 'success' | 'warning' | 'error'> = {
   active: 'success',
@@ -40,28 +41,16 @@ function PatronInfoCard({ patron }: PatronInfoCardProps) {
         </Box>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              Card Number
-            </Typography>
-            <Typography variant="body1">{patron.card_number}</Typography>
+            <CopyableField label="Card Number" value={patron.card_number} copyable />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              Email
-            </Typography>
-            <Typography variant="body1">{patron.email || 'N/A'}</Typography>
+            <CopyableField label="Email" value={patron.email} copyable />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              Phone
-            </Typography>
-            <Typography variant="body1">{patron.phone || 'N/A'}</Typography>
+            <CopyableField label="Phone" value={patron.phone} />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              Status
-            </Typography>
-            <Typography variant="body1">{STATUS_LABEL_MAP[patron.status]}</Typography>
+            <CopyableField label="Status" value={STATUS_LABEL_MAP[patron.status]} />
           </Grid>
         </Grid>
       </CardContent>
