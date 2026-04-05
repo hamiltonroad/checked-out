@@ -16,6 +16,8 @@ export interface BookSearchToolbarProps {
   onClearSearch: () => void;
   selectedGenres: string[];
   onGenresChange: (genres: string[]) => void;
+  selectedFormats: string[];
+  onFormatsChange: (formats: string[]) => void;
   minRating: number;
   onMinRatingChange: (rating: number) => void;
   selectedAuthors: AuthorSummary[];

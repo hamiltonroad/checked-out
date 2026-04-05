@@ -62,6 +62,7 @@ function BooksPage() {
     filters.debouncedSearchTerm ||
     filters.availabilityFilter !== AVAILABILITY_FILTERS.ALL ||
     filters.selectedGenres.length > 0 ||
+    filters.selectedFormats.length > 0 ||
     filters.minRating > 0 ||
     filters.selectedAuthors.length > 0;
 
@@ -114,6 +115,8 @@ function BooksPage() {
             onClearSearch={filters.handleClearSearch}
             selectedGenres={filters.selectedGenres}
             onGenresChange={filters.setSelectedGenres}
+            selectedFormats={filters.selectedFormats}
+            onFormatsChange={filters.setSelectedFormats}
             minRating={filters.minRating}
             onMinRatingChange={filters.setMinRating}
             selectedAuthors={filters.selectedAuthors}

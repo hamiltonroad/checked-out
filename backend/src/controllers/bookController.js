@@ -13,6 +13,7 @@ class BookController {
    * - minRating: Minimum average rating (1-5)
    * - authorId: Filter by author ID(s) (comma-separated)
    * - profanity: Filter by profanity status (true/false)
+   * - format: Filter by copy format (comma-separated, e.g. "physical,kindle")
    * - page: Page number (default 1)
    * - limit: Maximum number of results per page (default 20)
    * - offset: Number of records to skip (overrides page-based offset)
@@ -27,6 +28,7 @@ class BookController {
         search: req.query.search,
         genre: req.query.genre,
         profanity: req.query.profanity,
+        format: req.query.format,
         minRating: req.query.minRating,
         authorId: req.query.authorId,
         page: req.query.page,

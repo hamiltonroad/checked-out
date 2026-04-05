@@ -407,6 +407,23 @@ describe('BooksPage', () => {
       });
     });
 
+    it('should render format multi-select', () => {
+      renderWithQueryClient(<BooksPage />);
+      expect(screen.getByLabelText('Format')).toBeInTheDocument();
+    });
+
+    it('should show format chip when format is selected', async () => {
+      const user = userEvent.setup();
+      renderWithQueryClient(<BooksPage />);
+      const formatSelect = screen.getByLabelText('Format');
+      await user.click(formatSelect);
+      const physicalOption = screen.getByRole('option', { name: 'Physical' });
+      await user.click(physicalOption);
+      await waitFor(() => {
+        expect(screen.getByText('Format: Physical')).toBeInTheDocument();
+      });
+    });
+
     it('should show rating chip when min rating is selected', async () => {
       const user = userEvent.setup();
       renderWithQueryClient(<BooksPage />);
