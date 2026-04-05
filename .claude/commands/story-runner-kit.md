@@ -8,11 +8,12 @@
 
 ## Overview
 
-This command orchestrates three agents to complete a GitHub issue:
+This command orchestrates agents to complete a GitHub issue:
 
 1. **prep-agent** - Fetch issue, create branch, generate context hints
 2. **plan-agent** - Deep analysis, create implementation plan
 3. **implement-agent** - Execute plan, test, commit, create PR
+4. **code-review** - Review changes, fix Critical/High/Medium findings, commit fixes
 
 Each agent runs in an isolated context, preserving your main context window.
 
@@ -105,10 +106,73 @@ Agent tool invocation:
 
 **Wait for agent response.**
 
-**On SUCCESS:** Display completion message (Step 5)
+**On SUCCESS:** Continue to Step 5
 **On ABORT:** Display blocker and stop.
 
-### Step 5: Success - Display Completion
+### Step 5: Code Review and Fix
+
+**This step runs code review, fixes findings, and commits the results.**
+
+#### Step 5.1: Run code-review-pr
+
+Use the Skill tool to invoke the `code-review-pr` skill with the issue number:
+
+```
+Skill tool invocation:
+- skill: "code-review-pr"
+- args: "<number>"
+```
+
+This spawns code-review-agent which reviews the diff and creates `code-review-results/YYYY-MM-DD-issue-<number>.md`.
+
+#### Step 5.2: Verify Results File
+
+```bash
+ls code-review-results/*-issue-<number>.md
+```
+
+If the file does not exist, display a warning but continue to Step 6 (non-blocking).
+
+#### Step 5.3: Apply Fix Policy
+
+Read the code review results file and apply fixes:
+
+- **Must fix:** All Critical, High, and Medium findings
+- **May fix:** Low findings — fix if straightforward and clearly beneficial, otherwise defer
+- After fixes, re-run quality checks (lint, format, test)
+
+#### Step 5.4: Enforce Critical/High Gate
+
+After applying fixes, if ANY Critical or High finding remains unresolved:
+
+1. Attempt to fix the finding and re-run quality checks, OR
+2. Display a warning — do NOT block the PR, but clearly flag it for human review
+
+#### Step 5.5: Commit
+
+If fixes were applied:
+
+```bash
+git add <fixed files> code-review-results/
+git commit -m "fix: address code review findings for issue #<number>
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+git push
+```
+
+If no fixes needed, just commit the review results file:
+
+```bash
+git add code-review-results/
+git commit -m "docs: record code review findings for issue #<number>
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+git push
+```
+
+Record code review summary for display in Step 6.
+
+### Step 6: Success - Display Completion
 
 ```
 STORY RUNNER COMPLETE
@@ -120,6 +184,14 @@ All phases completed:
 - prep-agent: Branch created, issue fetched
 - plan-agent: Implementation plan created
 - implement-agent: Code implemented, tested, PR created
+- code-review: Reviewed, findings fixed, results committed
+
+Code Review:
+- Critical: <count> (all fixed)
+- High: <count> (all fixed)
+- Medium: <count> (<fixed>/<total>)
+- Low: <count> (deferred)
+- Recommendation: <Pass / Pass with fixes>
 
 Next steps:
 1. Review PR at <PR URL>
