@@ -3,6 +3,7 @@ import { Card, CardContent, Typography, Box } from '@mui/material';
 import StatusChip from '../StatusChip';
 import ProfanityWarning from '../ProfanityWarning';
 import { RatingDisplay } from '../Rating';
+import { getGenreStyle } from '../../utils/genreColors';
 import type { Book } from '../../types';
 
 interface BookCardProps {
@@ -11,9 +12,10 @@ interface BookCardProps {
 }
 
 /**
- * BookCard displays book information in a card format for mobile views
+ * BookCard displays book information in a card format with a genre-based cover placeholder
  */
 function BookCard({ book, onClick }: BookCardProps) {
+  const { bgColor, iconColor, Icon } = getGenreStyle(book.genre);
   const handleClick = () => {
     onClick(book.id);
   };
@@ -56,6 +58,18 @@ function BookCard({ book, onClick }: BookCardProps) {
         boxShadow: 1,
       }}
     >
+      <Box
+        sx={{
+          height: (theme) => theme.spacing(20),
+          bgcolor: bgColor,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        data-testid="genre-placeholder"
+      >
+        <Icon sx={{ fontSize: 48, color: iconColor }} />
+      </Box>
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
           <Typography variant="h6" component="h3">
