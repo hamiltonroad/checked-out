@@ -13,15 +13,3 @@ export const mockBook = {
 };
 
 export const createMockOnClick = () => vi.fn();
-
-/**
- * Sets up a mock for useOverflowDetection hook.
- * Call this before rendering the component.
- */
-export function mockOverflowDetection(isOverflowing: boolean) {
-  const mockRef = { current: null };
-  vi.doMock('../../hooks/useOverflowDetection', () => ({
-    useOverflowDetection: () => ({ contentRef: mockRef, isOverflowing }),
-  }));
-  return mockRef;
-}
