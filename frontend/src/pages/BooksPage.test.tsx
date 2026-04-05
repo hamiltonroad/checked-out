@@ -16,23 +16,6 @@ function renderWithQueryClient(ui: React.ReactElement) {
   return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
 }
 
-// Mock useMediaQuery and useTheme from Material-UI
-const mockUseMediaQuery = vi.fn();
-const mockUseTheme = vi.fn(() => ({
-  breakpoints: {
-    down: () => 'md',
-  },
-}));
-
-vi.mock('@mui/material', async () => {
-  const actual = await vi.importActual('@mui/material');
-  return {
-    ...actual,
-    useMediaQuery: () => mockUseMediaQuery(),
-    useTheme: () => mockUseTheme(),
-  };
-});
-
 /** Helper to build mock data in the new paginated response shape */
 function makeMockResponse(books: Array<Record<string, unknown>>, total?: number) {
   const count = total !== undefined ? total : books.length;
@@ -48,7 +31,6 @@ function makeMockResponse(books: Array<Record<string, unknown>>, total?: number)
 describe('BooksPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseMediaQuery.mockReturnValue(false);
     useBook.mockReturnValue({
       data: undefined,
       isLoading: false,
@@ -70,31 +52,37 @@ describe('BooksPage', () => {
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
-  it('should display books table when data is loaded', () => {
+  it('should display book cards when data is loaded', () => {
     const mockData = makeMockResponse([
       {
         id: 1,
         title: 'The Great Gatsby',
         authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }],
         status: 'available',
+        genre: 'Fiction',
       },
       {
         id: 2,
         title: '1984',
         authors: [{ first_name: 'George', last_name: 'Orwell' }],
         status: 'available',
+        genre: 'Science Fiction',
       },
     ]);
 
     useBooks.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
-    renderWithQueryClient(<BooksPage />);
+    const { container } = renderWithQueryClient(<BooksPage />);
 
     expect(screen.getByText('Books')).toBeInTheDocument();
     expect(screen.getByText('The Great Gatsby')).toBeInTheDocument();
     expect(screen.getByText('1984')).toBeInTheDocument();
     expect(screen.getByText('F. Scott Fitzgerald')).toBeInTheDocument();
     expect(screen.getByText('George Orwell')).toBeInTheDocument();
+
+    const cards = container.querySelectorAll('.MuiCard-root');
+    expect(cards.length).toBe(2);
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('should show error alert when error occurs', () => {
@@ -455,64 +443,27 @@ describe('BooksPage', () => {
     });
   });
 
-  describe('Responsive Rendering', () => {
+  it('should open modal when clicking a book card', async () => {
+    const user = userEvent.setup();
     const mockBooksData = makeMockResponse([
       {
         id: 1,
         title: 'The Great Gatsby',
         authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }],
         status: 'available',
-      },
-      {
-        id: 2,
-        title: '1984',
-        authors: [{ first_name: 'George', last_name: 'Orwell' }],
-        status: 'checked_out',
+        genre: 'Fiction',
       },
     ]);
+    useBooks.mockReturnValue({ data: mockBooksData, isLoading: false, error: null });
 
-    it('should display table view on desktop', () => {
-      mockUseMediaQuery.mockReturnValue(false);
-      useBooks.mockReturnValue({ data: mockBooksData, isLoading: false, error: null });
+    const { container } = renderWithQueryClient(<BooksPage />);
 
-      const { container } = renderWithQueryClient(<BooksPage />);
+    const firstCard = container.querySelector('.MuiCard-root');
+    await user.click(firstCard);
 
-      expect(screen.getByRole('table')).toBeInTheDocument();
-      expect(screen.getByText('The Great Gatsby')).toBeInTheDocument();
-      expect(screen.getByText('1984')).toBeInTheDocument();
-
-      const cards = container.querySelectorAll('.MuiCard-root');
-      expect(cards.length).toBe(0);
-    });
-
-    it('should display card view on mobile', () => {
-      mockUseMediaQuery.mockReturnValue(true);
-      useBooks.mockReturnValue({ data: mockBooksData, isLoading: false, error: null });
-
-      const { container } = renderWithQueryClient(<BooksPage />);
-
-      const cards = container.querySelectorAll('.MuiCard-root');
-      expect(cards.length).toBe(2);
-
-      expect(screen.getByText('The Great Gatsby')).toBeInTheDocument();
-      expect(screen.getByText('1984')).toBeInTheDocument();
-      expect(screen.queryByRole('table')).not.toBeInTheDocument();
-    });
-
-    it('should open modal when clicking book card on mobile', async () => {
-      const user = userEvent.setup();
-      mockUseMediaQuery.mockReturnValue(true);
-      useBooks.mockReturnValue({ data: mockBooksData, isLoading: false, error: null });
-
-      const { container } = renderWithQueryClient(<BooksPage />);
-
-      const firstCard = container.querySelector('.MuiCard-root');
-      await user.click(firstCard);
-
-      await waitFor(() => {
-        const dialog = screen.queryByRole('dialog');
-        expect(dialog).toBeInTheDocument();
-      });
+    await waitFor(() => {
+      const dialog = screen.queryByRole('dialog');
+      expect(dialog).toBeInTheDocument();
     });
   });
 });

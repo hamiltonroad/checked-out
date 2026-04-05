@@ -9,6 +9,7 @@ describe('BookCard', () => {
     title: 'The Great Gatsby',
     authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }],
     status: 'available',
+    genre: 'Fiction',
   };
 
   const mockOnClick = vi.fn();
@@ -129,5 +130,31 @@ describe('BookCard', () => {
     const card = screen.getByRole('button', { name: /view details for the great gatsby/i });
     expect(card).toHaveAttribute('role', 'button');
     expect(card).toHaveAttribute('aria-label', 'View details for The Great Gatsby');
+  });
+
+  // Genre placeholder tests
+  it('should render genre placeholder area', () => {
+    render(<BookCard book={mockBook} onClick={mockOnClick} />);
+
+    const placeholder = screen.getByTestId('genre-placeholder');
+    expect(placeholder).toBeInTheDocument();
+  });
+
+  it('should render genre placeholder with icon', () => {
+    render(<BookCard book={mockBook} onClick={mockOnClick} />);
+
+    const placeholder = screen.getByTestId('genre-placeholder');
+    const icon = placeholder.querySelector('svg');
+    expect(icon).toBeInTheDocument();
+  });
+
+  it('should render default placeholder when genre is undefined', () => {
+    const bookWithoutGenre = { ...mockBook, genre: undefined };
+    render(<BookCard book={bookWithoutGenre} onClick={mockOnClick} />);
+
+    const placeholder = screen.getByTestId('genre-placeholder');
+    expect(placeholder).toBeInTheDocument();
+    const icon = placeholder.querySelector('svg');
+    expect(icon).toBeInTheDocument();
   });
 });

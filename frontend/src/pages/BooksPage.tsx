@@ -1,15 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
-import {
-  Container,
-  Typography,
-  Paper,
-  Alert,
-  Box,
-  Fade,
-  Stack,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Container, Typography, Paper, Alert, Box, Fade, Grid } from '@mui/material';
 import SearchOffIcon from '@mui/icons-material/SearchOff';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import FilterListOffIcon from '@mui/icons-material/FilterListOff';
@@ -23,7 +13,6 @@ import BookSearchToolbar, {
   AVAILABILITY_FILTERS,
   AVAILABILITY_FILTER_LABELS,
 } from '../components/BookSearchToolbar';
-import BooksTable from '../components/BooksTable';
 import Pagination from '../components/Pagination';
 
 /**
@@ -38,8 +27,6 @@ function BooksPage() {
   const [hideProfanity, setHideProfanity] = useState(false);
   const [page, setPage] = useState(1);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const queryParams = useMemo(() => {
     const params: Record<string, string | number> = { page, limit: 20 };
@@ -170,20 +157,15 @@ function BooksPage() {
         </Paper>
       </Fade>
       {filteredBooks.length === 0 && renderEmptyState()}
-      {filteredBooks.length > 0 && !isMobile && (
+      {filteredBooks.length > 0 && (
         <Fade in={!isLoading} timeout={500}>
-          <div>
-            <BooksTable books={filteredBooks} onRowClick={handleRowClick} />
-          </div>
-        </Fade>
-      )}
-      {filteredBooks.length > 0 && isMobile && (
-        <Fade in={!isLoading} timeout={500}>
-          <Stack spacing={2}>
+          <Grid container spacing={2}>
             {filteredBooks.map((book) => (
-              <BookCard key={book.id} book={book} onClick={handleRowClick} />
+              <Grid item xs={12} sm={6} md={6} lg={4} xl={3} key={book.id}>
+                <BookCard book={book} onClick={handleRowClick} />
+              </Grid>
             ))}
-          </Stack>
+          </Grid>
         </Fade>
       )}
       {pagination.totalPages > 1 && (
