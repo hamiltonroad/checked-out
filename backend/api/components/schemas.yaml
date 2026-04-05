@@ -236,6 +236,24 @@ RatingStats:
         '5':
           type: integer
 
+WishlistEntry:
+  type: object
+  properties:
+    id:
+      type: integer
+    patron_id:
+      type: integer
+    book_id:
+      type: integer
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+    book:
+      $ref: '#/BookWithAuthors'
+
 Pagination:
   type: object
   properties:

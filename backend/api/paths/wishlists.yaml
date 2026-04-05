@@ -1,0 +1,87 @@
+/api/v1/wishlists:
+  post:
+    tags: [Wishlists]
+    summary: Add a book to the patron's wishlist
+    security:
+      - cookieAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [book_id]
+            properties:
+              book_id:
+                type: integer
+                description: ID of the book to add
+    responses:
+      '201':
+        description: Book added to wishlist
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+      '409':
+        description: Book already on wishlist
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas.yaml#/ApiErrorResponse'
+      '401':
+        description: Authentication required
+      '404':
+        description: Book not found
+
+  delete:
+    tags: [Wishlists]
+    summary: Remove a book from the patron's wishlist
+    security:
+      - cookieAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [book_id]
+            properties:
+              book_id:
+                type: integer
+                description: ID of the book to remove
+    responses:
+      '200':
+        description: Book removed from wishlist
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+      '401':
+        description: Authentication required
+      '404':
+        description: Wishlist entry not found
+
+/api/v1/patrons/{id}/wishlist:
+  get:
+    tags: [Wishlists]
+    summary: Get a patron's wishlist
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Patron ID
+    responses:
+      '200':
+        description: Patron's wishlist entries with book details
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+      '401':
+        description: Authentication required
+      '403':
+        description: Cannot view another patron's wishlist

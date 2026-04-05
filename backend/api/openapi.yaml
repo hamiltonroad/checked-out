@@ -43,6 +43,8 @@ tags:
     description: Library patron management
   - name: Ratings
     description: Book ratings and reviews
+  - name: Wishlists
+    description: Patron book wishlists
 
 paths:
   # Health
@@ -114,6 +116,12 @@ paths:
     $ref: 'paths/ratings.yaml#/~1api~1v1~1ratings~1books~1{bookId}'
   /api/v1/patrons/{patronId}/ratings:
     $ref: 'paths/ratings.yaml#/~1api~1v1~1patrons~1{patronId}~1ratings'
+
+  # Wishlists
+  /api/v1/wishlists:
+    $ref: 'paths/wishlists.yaml#/~1api~1v1~1wishlists'
+  /api/v1/patrons/{id}/wishlist:
+    $ref: 'paths/wishlists.yaml#/~1api~1v1~1patrons~1{id}~1wishlist'
 
 components:
   securitySchemes:
