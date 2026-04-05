@@ -1,9 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import PatronInfoCard from './PatronInfoCard';
 import type { PatronDetail } from '../../types';
-
-const mockWriteText = vi.fn().mockResolvedValue(undefined);
+import { setupClipboardMock, setupResizeObserverMock } from '../../test/mockHelpers';
 
 const mockPatron: PatronDetail = {
   id: 1,
@@ -17,17 +16,8 @@ const mockPatron: PatronDetail = {
 
 describe('PatronInfoCard', () => {
   beforeEach(() => {
-    mockWriteText.mockClear().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', {
-      value: { writeText: mockWriteText },
-      writable: true,
-      configurable: true,
-    });
-    window.ResizeObserver = class MockResizeObserver {
-      observe = vi.fn();
-      disconnect = vi.fn();
-      unobserve = vi.fn();
-    } as unknown as typeof ResizeObserver;
+    setupClipboardMock();
+    setupResizeObserverMock();
   });
 
   it('renders patron full name', () => {

@@ -2,22 +2,14 @@ import { render, screen, act, waitFor } from '@testing-library/react';
 
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import CopyableField from './CopyableField';
+import { setupClipboardMock, setupResizeObserverMock } from '../../test/mockHelpers';
 
-const mockWriteText = vi.fn().mockResolvedValue(undefined);
+let mockWriteText: ReturnType<typeof vi.fn>;
 
 describe('CopyableField', () => {
   beforeEach(() => {
-    mockWriteText.mockClear().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', {
-      value: { writeText: mockWriteText },
-      writable: true,
-      configurable: true,
-    });
-    window.ResizeObserver = class MockResizeObserver {
-      observe = vi.fn();
-      disconnect = vi.fn();
-      unobserve = vi.fn();
-    } as unknown as typeof ResizeObserver;
+    mockWriteText = setupClipboardMock();
+    setupResizeObserverMock();
   });
 
   it('renders label and value', () => {

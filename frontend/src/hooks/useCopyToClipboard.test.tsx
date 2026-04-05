@@ -2,8 +2,9 @@ import { render, screen, act, waitFor } from '@testing-library/react';
 
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { useCopyToClipboard } from './useCopyToClipboard';
+import { setupClipboardMock } from '../test/mockHelpers';
 
-const mockWriteText = vi.fn().mockResolvedValue(undefined);
+let mockWriteText: ReturnType<typeof vi.fn>;
 
 function TestComponent() {
   const { copyToClipboard, isCopied } = useCopyToClipboard();
@@ -17,12 +18,7 @@ function TestComponent() {
 
 describe('useCopyToClipboard', () => {
   beforeEach(() => {
-    mockWriteText.mockClear().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', {
-      value: { writeText: mockWriteText },
-      writable: true,
-      configurable: true,
-    });
+    mockWriteText = setupClipboardMock();
   });
 
   afterEach(() => {
