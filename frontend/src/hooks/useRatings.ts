@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import ratingService from '../services/ratingService';
 
+const RATINGS_PAGE_SIZE = 10;
+
 /**
  * Custom hook to fetch rating statistics for a book
  * @param {number|null} bookId - Book ID to fetch stats for
@@ -27,8 +29,8 @@ export function useBookRatings(bookId: number | null, page = 1, enabled = true) 
     queryKey: ['bookRatings', bookId, page],
     queryFn: () =>
       ratingService.getBookRatings(bookId!, {
-        limit: 10,
-        offset: (page - 1) * 10,
+        limit: RATINGS_PAGE_SIZE,
+        offset: (page - 1) * RATINGS_PAGE_SIZE,
       }),
     enabled: !!bookId && enabled,
   });
