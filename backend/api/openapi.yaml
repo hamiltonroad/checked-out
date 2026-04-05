@@ -43,6 +43,8 @@ tags:
     description: Library patron management
   - name: Ratings
     description: Book ratings and reviews
+  - name: Waitlist
+    description: Format-specific book waitlist queue
   - name: Wishlists
     description: Patron book wishlists
 
@@ -116,6 +118,14 @@ paths:
     $ref: 'paths/ratings.yaml#/~1api~1v1~1ratings~1books~1{bookId}'
   /api/v1/patrons/{patronId}/ratings:
     $ref: 'paths/ratings.yaml#/~1api~1v1~1patrons~1{patronId}~1ratings'
+
+  # Waitlist
+  /api/v1/waitlist:
+    $ref: 'paths/waitlist.yaml#/~1api~1v1~1waitlist'
+  /api/v1/books/{id}/waitlist:
+    $ref: 'paths/waitlist.yaml#/~1api~1v1~1books~1{id}~1waitlist'
+  /api/v1/patrons/{id}/waitlist:
+    $ref: 'paths/waitlist.yaml#/~1api~1v1~1patrons~1{id}~1waitlist'
 
   # Wishlists
   /api/v1/wishlists:

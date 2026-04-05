@@ -254,6 +254,42 @@ WishlistEntry:
     book:
       $ref: '#/BookWithAuthors'
 
+WaitlistEntryResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+    patron_id:
+      type: integer
+    book_id:
+      type: integer
+    format:
+      type: string
+      enum: [physical, kindle]
+    position:
+      type: integer
+    status:
+      type: string
+      enum: [waiting, notified, fulfilled, cancelled]
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+    patron:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+    book:
+      $ref: '#/Book'
+
 Pagination:
   type: object
   properties:
