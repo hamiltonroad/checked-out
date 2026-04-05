@@ -6,26 +6,16 @@ import { usePatronSearch } from '../../hooks/usePatronSearch';
 import { useRecentPatrons } from '../../hooks/useRecentPatrons';
 import { getFieldError } from '../../utils/errorUtils';
 import type { FieldError as ApiFieldError } from '../../types';
+import type { CheckoutPatron, CheckoutFormData } from './types';
 
 const MIN_SEARCH_LENGTH = 2;
-
-interface Patron {
-  id: number;
-  first_name: string;
-  last_name: string;
-  card_number: string;
-}
-
-interface CheckoutFormData {
-  patronId: Patron | null;
-}
 
 interface PatronSearchFieldProps {
   control: Control<CheckoutFormData>;
   errors: FieldErrors<CheckoutFormData>;
   fieldErrors: ApiFieldError[];
   isSubmitting: boolean;
-  setValue: (name: 'patronId', value: Patron | null) => void;
+  setValue: (name: 'patronId', value: CheckoutPatron | null) => void;
 }
 
 /**
@@ -43,10 +33,10 @@ function PatronSearchField({
   const { data: searchRes, isLoading: searchLoading } = usePatronSearch(searchInput);
   const { data: recentRes } = useRecentPatrons();
 
-  const searchResults: Patron[] = searchRes?.data || [];
-  const recentPatrons: Patron[] = recentRes?.data || [];
+  const searchResults: CheckoutPatron[] = searchRes?.data || [];
+  const recentPatrons: CheckoutPatron[] = recentRes?.data || [];
 
-  const handleChipClick = (patron: Patron) => {
+  const handleChipClick = (patron: CheckoutPatron) => {
     setValue('patronId', patron);
     setSearchInput('');
   };
@@ -65,10 +55,12 @@ function PatronSearchField({
             options={searchResults}
             loading={searchLoading}
             disabled={isSubmitting}
-            getOptionLabel={(option: Patron) =>
+            getOptionLabel={(option: CheckoutPatron) =>
               `${option.first_name} ${option.last_name} (${option.card_number})`
             }
-            isOptionEqualToValue={(option: Patron, value: Patron) => option.id === value.id}
+            isOptionEqualToValue={(option: CheckoutPatron, value: CheckoutPatron) =>
+              option.id === value.id
+            }
             noOptionsText={noOptionsText}
             onInputChange={(_, value, reason) => {
               if (reason === 'input') setSearchInput(value);

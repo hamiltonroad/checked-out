@@ -17,14 +17,9 @@ import type { FieldError as ApiFieldError } from '../../types';
 import CopyRadioGroup from '../CopyRadioGroup';
 import PatronSearchField from './PatronSearchField';
 
-const CHECKOUT_DURATION_DAYS = 14;
+import type { CheckoutPatron, CheckoutFormData } from './types';
 
-interface Patron {
-  id: number;
-  first_name: string;
-  last_name: string;
-  card_number: string;
-}
+const CHECKOUT_DURATION_DAYS = 14;
 
 interface CheckoutDialogProps {
   open: boolean;
@@ -34,10 +29,6 @@ interface CheckoutDialogProps {
   isSubmitting?: boolean;
   error?: string | null;
   fieldErrors?: ApiFieldError[];
-}
-
-interface CheckoutFormData {
-  patronId: Patron | null;
 }
 
 /**
@@ -82,7 +73,7 @@ function CheckoutDialog({
 
   useEffect(() => {
     if (open && authPatron) {
-      setValue('patronId', authPatron as Patron);
+      setValue('patronId', authPatron as CheckoutPatron);
     } else if (!open) {
       reset({ patronId: null });
       setSelectedCopyId('');
