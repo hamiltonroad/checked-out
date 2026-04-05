@@ -163,6 +163,7 @@ export interface NavigationItem {
   path: string;
   disabled: boolean;
   ariaLabel: string;
+  requiresAuth: boolean;
 }
 
 export interface EmptyStateAction {
