@@ -55,6 +55,7 @@ export interface Book {
   average_rating?: number | string;
   total_ratings?: number;
   authors: Author[];
+  copies?: Copy[];
 }
 
 export interface Patron {
@@ -126,6 +127,18 @@ export interface OverdueCheckout {
 }
 
 export type DueSeverity = 'error' | 'warning' | null;
+
+export interface CopyCheckout {
+  id: number;
+  return_date: string | null;
+}
+
+export interface Copy {
+  id: number;
+  book_id: number;
+  format: 'physical' | 'kindle';
+  checkouts: CopyCheckout[];
+}
 
 export interface Rating {
   id: number;

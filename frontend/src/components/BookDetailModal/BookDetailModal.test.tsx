@@ -68,6 +68,10 @@ describe('BookDetailModal', () => {
           { first_name: 'John', last_name: 'Doe' },
           { first_name: 'Jane', last_name: 'Smith' },
         ],
+        copies: [
+          { id: 1, book_id: 1, format: 'physical', checkouts: [] },
+          { id: 2, book_id: 1, format: 'kindle', checkouts: [] },
+        ],
       },
     };
     useBookHook.useBook.mockReturnValue({ isLoading: false, data: mockBook, error: null });
@@ -80,8 +84,7 @@ describe('BookDetailModal', () => {
     expect(screen.getByText('Test Publisher')).toBeInTheDocument();
     expect(screen.getByText('2023')).toBeInTheDocument();
     expect(screen.getByText('Fiction')).toBeInTheDocument();
-    // StatusChip renders the text "Available"
-    expect(screen.getByText('Available')).toBeInTheDocument();
+    expect(screen.getByText('2 copies')).toBeInTheDocument();
   });
 
   it('should handle missing optional fields gracefully', () => {
@@ -102,19 +105,37 @@ describe('BookDetailModal', () => {
     expect(screen.queryByText('Publisher')).not.toBeInTheDocument();
   });
 
-  it('should use fallback status when book.status is missing', () => {
+  it('should show "No copies" when copies array is empty', () => {
     const mockBook = {
       data: {
         id: 1,
         title: 'Test Book',
         authors: [],
+        copies: [],
       },
     };
     useBookHook.useBook.mockReturnValue({ isLoading: false, data: mockBook, error: null });
 
     renderWithQueryClient(<BookDetailModal open={true} onClose={mockOnClose} bookId={1} />);
 
-    expect(screen.getByText('Available')).toBeInTheDocument();
+    expect(screen.getByText('No copies')).toBeInTheDocument();
+  });
+
+  it('should disable checkout button when copies is empty', () => {
+    const mockBook = {
+      data: {
+        id: 1,
+        title: 'Test Book',
+        authors: [],
+        copies: [],
+      },
+    };
+    useBookHook.useBook.mockReturnValue({ isLoading: false, data: mockBook, error: null });
+
+    renderWithQueryClient(<BookDetailModal open={true} onClose={mockOnClose} bookId={1} />);
+
+    const checkoutButton = screen.getByRole('button', { name: /check out/i });
+    expect(checkoutButton).toBeDisabled();
   });
 
   it('should call onClose when Close button (in actions) is clicked', async () => {

@@ -79,7 +79,7 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
   });
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => setTabValue(newValue);
-  const isNoCopies = book?.status === 'no_copies';
+  const isNoCopies = !book?.copies || book.copies.length === 0;
 
   const handleCheckoutSubmit = async (checkoutData: { patron_id: number; copy_id: number }) => {
     try {

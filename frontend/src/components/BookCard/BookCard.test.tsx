@@ -10,6 +10,10 @@ describe('BookCard', () => {
     authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }],
     status: 'available',
     genre: 'Fiction',
+    copies: [
+      { id: 1, book_id: 1, format: 'physical', checkouts: [] },
+      { id: 2, book_id: 1, format: 'kindle', checkouts: [] },
+    ],
   };
 
   const mockOnClick = vi.fn();
@@ -47,11 +51,10 @@ describe('BookCard', () => {
     expect(authors).toBeInTheDocument();
   });
 
-  it('should render StatusChip with correct status', () => {
+  it('should render copy count text', () => {
     render(<BookCard book={mockBook} onClick={mockOnClick} />);
 
-    const statusChip = screen.getByText('Available');
-    expect(statusChip).toBeInTheDocument();
+    expect(screen.getByText('2 copies')).toBeInTheDocument();
   });
 
   it('should call onClick with book id when card is clicked', async () => {
@@ -80,16 +83,28 @@ describe('BookCard', () => {
     expect(card).toBeInTheDocument();
   });
 
-  it('should render different book statuses correctly', () => {
-    const checkedOutBook = { ...mockBook, status: 'checked_out' };
-    const { rerender } = render(<BookCard book={checkedOutBook} onClick={mockOnClick} />);
+  it('should render "No copies" when copies array is empty', () => {
+    const noCopiesBook = { ...mockBook, copies: [] };
+    render(<BookCard book={noCopiesBook} onClick={mockOnClick} />);
 
-    expect(screen.getByText('Checked Out')).toBeInTheDocument();
+    expect(screen.getByText('No copies')).toBeInTheDocument();
+  });
 
-    const overdueBook = { ...mockBook, status: 'overdue' };
-    rerender(<BookCard book={overdueBook} onClick={mockOnClick} />);
+  it('should render "1 copy" for a single copy', () => {
+    const singleCopyBook = {
+      ...mockBook,
+      copies: [{ id: 1, book_id: 1, format: 'physical', checkouts: [] }],
+    };
+    render(<BookCard book={singleCopyBook} onClick={mockOnClick} />);
 
-    expect(screen.getByText('Overdue')).toBeInTheDocument();
+    expect(screen.getByText('1 copy')).toBeInTheDocument();
+  });
+
+  it('should render "No copies" when copies is undefined', () => {
+    const noCopiesBook = { ...mockBook, copies: undefined };
+    render(<BookCard book={noCopiesBook} onClick={mockOnClick} />);
+
+    expect(screen.getByText('No copies')).toBeInTheDocument();
   });
 
   // Keyboard accessibility tests

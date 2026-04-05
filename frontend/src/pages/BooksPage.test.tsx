@@ -101,27 +101,30 @@ describe('BooksPage', () => {
     expect(screen.getByText('Terry Pratchett, Neil Gaiman')).toBeInTheDocument();
   });
 
-  it('should show availability status using StatusChip', () => {
+  it('should show copy count on book cards', () => {
     const mockData = makeMockResponse([
       {
         id: 1,
         title: 'Book 1',
         authors: [{ first_name: 'Author', last_name: 'One' }],
         status: 'available',
+        copies: [
+          { id: 1, book_id: 1, format: 'physical', checkouts: [] },
+          { id: 2, book_id: 1, format: 'kindle', checkouts: [] },
+        ],
       },
       {
         id: 2,
         title: 'Book 2',
         authors: [{ first_name: 'Author', last_name: 'Two' }],
         status: 'checked_out',
+        copies: [],
       },
     ]);
     useBooks.mockReturnValue({ data: mockData, isLoading: false, error: null });
-    const { container } = renderWithQueryClient(<BooksPage />);
-    expect(screen.getByText('Available')).toBeInTheDocument();
-    expect(screen.getByText('Checked Out')).toBeInTheDocument();
-    const chips = container.querySelectorAll('.MuiChip-root');
-    expect(chips.length).toBeGreaterThanOrEqual(2);
+    renderWithQueryClient(<BooksPage />);
+    expect(screen.getByText('2 copies')).toBeInTheDocument();
+    expect(screen.getByText('No copies')).toBeInTheDocument();
   });
 
   describe('Search Functionality', () => {
