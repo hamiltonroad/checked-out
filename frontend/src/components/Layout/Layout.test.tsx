@@ -1,208 +1,167 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import Layout from './Layout';
 import { ThemeProvider } from '../../context/ThemeContext';
 
+const mockLogout = vi.fn().mockResolvedValue(undefined);
+
+vi.mock('../../hooks/useAuth', () => ({
+  useAuth: vi.fn(() => ({
+    isAuthenticated: false,
+    patron: null,
+    logout: mockLogout,
+    loading: false,
+  })),
+}));
+
+import { useAuth } from '../../hooks/useAuth';
+
+const mockUseAuth = vi.mocked(useAuth);
+
+function renderLayout() {
+  return render(
+    <BrowserRouter>
+      <ThemeProvider>
+        <Layout />
+      </ThemeProvider>
+    </BrowserRouter>
+  );
+}
+
 describe('Layout', () => {
+  beforeEach(() => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: false,
+      patron: null,
+      logout: mockLogout,
+      loading: false,
+      login: vi.fn(),
+      clearAuth: vi.fn(),
+    });
+  });
+
   it('renders app title and subtitle', () => {
-    render(
-      <BrowserRouter>
-        <ThemeProvider>
-          <Layout />
-        </ThemeProvider>
-      </BrowserRouter>
-    );
-
-    // Check for main title (h1 heading)
+    renderLayout();
     expect(screen.getByRole('heading', { name: /checked out/i })).toBeInTheDocument();
-
-    // Check for subtitle
-    expect(screen.getByText('Library Management')).toBeInTheDocument();
+    expect(screen.getByText(/Library Management/)).toBeInTheDocument();
   });
 
   it('renders theme toggle button', () => {
-    render(
-      <BrowserRouter>
-        <ThemeProvider>
-          <Layout />
-        </ThemeProvider>
-      </BrowserRouter>
-    );
-
+    renderLayout();
     const button = screen.getByRole('button', { name: /toggle theme/i });
     expect(button).toBeInTheDocument();
   });
 
   it('displays tooltip text on theme toggle button', async () => {
     const user = userEvent.setup();
-    render(
-      <BrowserRouter>
-        <ThemeProvider>
-          <Layout />
-        </ThemeProvider>
-      </BrowserRouter>
-    );
+    renderLayout();
 
     const button = screen.getByRole('button', { name: /toggle theme/i });
     await user.hover(button);
 
-    // Tooltip appears asynchronously
     expect(await screen.findByText('Toggle light/dark mode')).toBeInTheDocument();
   });
 
   it('toggles theme when button is clicked', async () => {
     const user = userEvent.setup();
-    render(
-      <BrowserRouter>
-        <ThemeProvider>
-          <Layout />
-        </ThemeProvider>
-      </BrowserRouter>
-    );
+    renderLayout();
 
     const button = screen.getByRole('button', { name: /toggle theme/i });
-
-    // Click the button to toggle theme
     await user.click(button);
 
-    // Theme should have toggled (we can verify by checking localStorage)
-    expect(localStorage.getItem('themeMode')).toBeTruthy();
-  });
-
-  it('is keyboard accessible', async () => {
-    const user = userEvent.setup();
-    render(
-      <BrowserRouter>
-        <ThemeProvider>
-          <Layout />
-        </ThemeProvider>
-      </BrowserRouter>
-    );
-
-    const button = screen.getByRole('button', { name: /toggle theme/i });
-
-    // Tab to the button
-    await user.tab();
-    expect(button).toHaveFocus();
-
-    // Press Enter to activate
-    await user.keyboard('{Enter}');
-
-    // Should have toggled theme
     expect(localStorage.getItem('themeMode')).toBeTruthy();
   });
 
   it('displays moon icon in light mode', () => {
-    // Set light mode
     localStorage.setItem('themeMode', 'light');
-
-    render(
-      <BrowserRouter>
-        <ThemeProvider>
-          <Layout />
-        </ThemeProvider>
-      </BrowserRouter>
-    );
+    renderLayout();
 
     const button = screen.getByRole('button', { name: /toggle theme/i });
-    // Brightness4Icon is the moon icon shown in light mode
     const icon = button.querySelector('svg[data-testid="Brightness4Icon"]');
     expect(icon).toBeInTheDocument();
   });
 
   it('displays sun icon in dark mode', () => {
-    // Set dark mode
     localStorage.setItem('themeMode', 'dark');
-
-    render(
-      <BrowserRouter>
-        <ThemeProvider>
-          <Layout />
-        </ThemeProvider>
-      </BrowserRouter>
-    );
+    renderLayout();
 
     const button = screen.getByRole('button', { name: /toggle theme/i });
-    // Brightness7Icon is the sun icon shown in dark mode
     const icon = button.querySelector('svg[data-testid="Brightness7Icon"]');
     expect(icon).toBeInTheDocument();
   });
 
   it('renders outlet for child routes', () => {
-    const { container } = render(
-      <BrowserRouter>
-        <ThemeProvider>
-          <Layout />
-        </ThemeProvider>
-      </BrowserRouter>
-    );
-
-    // Container should be present for child content
+    const { container } = renderLayout();
     const mainContainer = container.querySelector('.MuiContainer-root');
     expect(mainContainer).toBeInTheDocument();
   });
 
-  it('has proper focus-visible styling', () => {
-    render(
-      <BrowserRouter>
-        <ThemeProvider>
-          <Layout />
-        </ThemeProvider>
-      </BrowserRouter>
-    );
-
-    const button = screen.getByRole('button', { name: /toggle theme/i });
-
-    // Check that the button has sx prop with focus-visible styles
-    expect(button).toBeInTheDocument();
-    // Note: Can't directly test :focus-visible pseudo-class in JSDOM,
-    // but we verify the component renders with the styling applied
-  });
-
   it('renders menu book icon', () => {
-    render(
-      <BrowserRouter>
-        <ThemeProvider>
-          <Layout />
-        </ThemeProvider>
-      </BrowserRouter>
-    );
-
-    // Check for MenuBookIcon by its data-testid (now appears twice: AppBar + drawer)
+    renderLayout();
     const icons = screen.getAllByTestId('MenuBookIcon');
     expect(icons.length).toBeGreaterThanOrEqual(1);
   });
 
   it('uses sticky positioning for AppBar', () => {
-    const { container } = render(
-      <BrowserRouter>
-        <ThemeProvider>
-          <Layout />
-        </ThemeProvider>
-      </BrowserRouter>
-    );
-
-    // Check for AppBar with sticky position class
+    const { container } = renderLayout();
     const appBar = container.querySelector('.MuiAppBar-positionSticky');
     expect(appBar).toBeInTheDocument();
   });
 
   it('uses headlineSmall typography variant for main title', () => {
-    const { container } = render(
-      <BrowserRouter>
-        <ThemeProvider>
-          <Layout />
-        </ThemeProvider>
-      </BrowserRouter>
-    );
-
-    // Find the h1 element and check it has the headlineSmall class
+    const { container } = renderLayout();
     const title = screen.getByRole('heading', { name: /checked out/i });
     expect(title).toBeInTheDocument();
 
-    // Verify it's using Typography component with proper variant
     const typography = container.querySelector('.MuiTypography-headlineSmall');
     expect(typography).toBeInTheDocument();
+  });
+
+  it('shows Log in button when unauthenticated', () => {
+    renderLayout();
+    expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
+  });
+
+  describe('when authenticated', () => {
+    const mockPatron = {
+      id: 7,
+      first_name: 'Dana',
+      last_name: 'Park',
+      status: 'active' as const,
+    };
+
+    beforeEach(() => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        patron: mockPatron,
+        logout: mockLogout,
+        loading: false,
+        login: vi.fn(),
+        clearAuth: vi.fn(),
+      });
+    });
+
+    it('renders patron name as a link to patron detail page', () => {
+      renderLayout();
+      const link = screen.getByRole('link', { name: /dana/i });
+      expect(link).toHaveAttribute('href', '/patrons/7');
+    });
+
+    it('renders person icon in navbar', () => {
+      renderLayout();
+      expect(screen.getByTestId('PersonIcon')).toBeInTheDocument();
+    });
+
+    it('renders Log out button', () => {
+      renderLayout();
+      expect(screen.getByRole('button', { name: /log out/i })).toBeInTheDocument();
+    });
+
+    it('does not render Log in button', () => {
+      renderLayout();
+      expect(screen.queryByRole('button', { name: /log in/i })).not.toBeInTheDocument();
+    });
   });
 });

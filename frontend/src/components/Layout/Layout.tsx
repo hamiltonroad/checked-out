@@ -16,6 +16,7 @@ import { useThemeMode } from '../../context/ThemeContext';
 import { useAuth } from '../../hooks/useAuth';
 import AppDrawer from '../AppDrawer';
 import MobileNav from '../MobileNav';
+import PatronNavLink from '../PatronNavLink';
 import { DRAWER_WIDTH } from '../../constants/navigation';
 
 /**
@@ -86,12 +87,7 @@ function Layout() {
             <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
               {isAuthenticated && patron ? (
                 <>
-                  <Typography
-                    variant="bodyMedium"
-                    sx={{ mr: 1, display: { xs: 'none', sm: 'inline' } }}
-                  >
-                    {patron.first_name}
-                  </Typography>
+                  <PatronNavLink patron={patron} />
                   <Button variant="text" color="inherit" onClick={handleLogout} size="small">
                     Log out
                   </Button>
