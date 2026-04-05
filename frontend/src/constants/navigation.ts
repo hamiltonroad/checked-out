@@ -11,6 +11,7 @@ export interface NavigationItem {
   path: string;
   disabled: boolean;
   ariaLabel: string;
+  requiresAuth: boolean;
 }
 
 /**
@@ -27,6 +28,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     path: '/',
     disabled: false,
     ariaLabel: 'Navigate to Books',
+    requiresAuth: false,
   },
   {
     id: 'checkouts',
@@ -35,6 +37,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     path: '/checkouts',
     disabled: false,
     ariaLabel: 'Navigate to Checkouts',
+    requiresAuth: true,
   },
   {
     id: 'patrons',
@@ -43,6 +46,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     path: '/patrons',
     disabled: true,
     ariaLabel: 'Patrons (coming soon)',
+    requiresAuth: false,
   },
   {
     id: 'reports',
@@ -51,6 +55,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     path: '/reports',
     disabled: true,
     ariaLabel: 'Reports (coming soon)',
+    requiresAuth: false,
   },
 ];
 

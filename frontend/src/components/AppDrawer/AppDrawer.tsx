@@ -1,5 +1,14 @@
-import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Tooltip,
+} from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import { NAVIGATION_ITEMS, DRAWER_WIDTH } from '../../constants/navigation';
 
 /**
@@ -30,6 +39,7 @@ import { NAVIGATION_ITEMS, DRAWER_WIDTH } from '../../constants/navigation';
 function AppDrawer() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   return (
     <Drawer
@@ -52,13 +62,15 @@ function AppDrawer() {
         {NAVIGATION_ITEMS.map((item) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
+          const authDisabled = item.requiresAuth && !isAuthenticated;
+          const isDisabled = item.disabled || authDisabled;
 
-          return (
+          const button = (
             <ListItem key={item.id} disablePadding>
               <ListItemButton
                 selected={isActive}
-                disabled={item.disabled}
-                onClick={() => !item.disabled && navigate(item.path)}
+                disabled={isDisabled}
+                onClick={() => !isDisabled && navigate(item.path)}
                 sx={{
                   '&.Mui-selected': {
                     bgcolor: 'action.selected',
@@ -68,16 +80,20 @@ function AppDrawer() {
                   },
                 }}
               >
-                <ListItemIcon
-                  sx={{
-                    color: isActive ? 'primary.main' : 'inherit',
-                  }}
-                >
+                <ListItemIcon sx={{ color: isActive ? 'primary.main' : 'inherit' }}>
                   <Icon />
                 </ListItemIcon>
                 <ListItemText primary={item.label} />
               </ListItemButton>
             </ListItem>
+          );
+
+          return authDisabled ? (
+            <Tooltip key={item.id} title="Log in to access" placement="right">
+              <span>{button}</span>
+            </Tooltip>
+          ) : (
+            button
           );
         })}
       </List>

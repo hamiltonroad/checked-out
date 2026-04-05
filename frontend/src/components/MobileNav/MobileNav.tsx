@@ -2,6 +2,7 @@ import type React from 'react';
 import { useState, useEffect } from 'react';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import { NAVIGATION_ITEMS } from '../../constants/navigation';
 
 /**
@@ -33,6 +34,7 @@ import { NAVIGATION_ITEMS } from '../../constants/navigation';
 function MobileNav() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   // Determine current value based on route
   const getCurrentValue = () => {
@@ -52,7 +54,8 @@ function MobileNav() {
     setValue(newValue);
 
     const selectedItem = NAVIGATION_ITEMS[newValue];
-    if (selectedItem && !selectedItem.disabled) {
+    const authBlocked = selectedItem?.requiresAuth && !isAuthenticated;
+    if (selectedItem && !selectedItem.disabled && !authBlocked) {
       navigate(selectedItem.path);
     }
   };
@@ -86,7 +89,7 @@ function MobileNav() {
               key={item.id}
               label={item.label}
               icon={<Icon />}
-              disabled={item.disabled}
+              disabled={item.disabled || (item.requiresAuth && !isAuthenticated)}
               aria-label={item.ariaLabel}
             />
           );
