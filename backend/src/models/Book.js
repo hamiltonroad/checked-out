@@ -64,6 +64,11 @@ module.exports = (sequelize) => {
       foreignKey: 'book_id',
       as: 'ratings',
     });
+
+    Book.hasMany(models.WaitlistEntry, {
+      foreignKey: 'book_id',
+      as: 'waitlistEntries',
+    });
   };
 
   return Book;

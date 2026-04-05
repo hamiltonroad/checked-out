@@ -85,6 +85,11 @@ module.exports = (sequelize) => {
       foreignKey: 'patron_id',
       as: 'ratings',
     });
+
+    Patron.hasMany(models.WaitlistEntry, {
+      foreignKey: 'patron_id',
+      as: 'waitlistEntries',
+    });
   };
 
   return Patron;
