@@ -1,0 +1,25 @@
+# Authors — Author catalog for autocomplete
+# Base path: /api/v1/authors
+
+/api/v1/authors:
+  get:
+    tags: [Authors]
+    summary: List all authors for autocomplete
+    operationId: getAuthors
+    responses:
+      '200':
+        description: List of all authors sorted by last name
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        authors:
+                          type: array
+                          items:
+                            $ref: '../components/schemas.yaml#/AuthorSummary'
