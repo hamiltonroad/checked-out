@@ -1,16 +1,16 @@
 import api from './api';
 
 interface CreateCheckoutParams {
-  patron_id: number;
   copy_id: number;
 }
 
 const checkoutService = {
   /**
-   * Create a new checkout record
+   * Create a new checkout record.
+   * Patron is derived from the authenticated session on the backend.
    */
-  async createCheckout({ patron_id, copy_id }: CreateCheckoutParams) {
-    const response = await api.post('/checkouts', { patron_id, copy_id });
+  async createCheckout({ copy_id }: CreateCheckoutParams) {
+    const response = await api.post('/checkouts', { copy_id });
     return response.data;
   },
 
