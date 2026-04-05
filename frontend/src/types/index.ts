@@ -37,6 +37,12 @@ export interface Author {
   last_name: string;
 }
 
+export interface AuthorSummary {
+  id: number;
+  first_name: string;
+  last_name: string;
+}
+
 export interface Book {
   id: number;
   title: string;
