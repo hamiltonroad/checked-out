@@ -23,7 +23,15 @@ class CheckoutController {
   // eslint-disable-next-line class-methods-use-this
   async createCheckout(req, res, next) {
     try {
-      const { patron_id: patronId, copy_id: copyId } = req.body;
+      const { copy_id: copyId } = req.body;
+
+      // ROLE-BASED OVERRIDE SEAM: Currently the patron is always the
+      // authenticated user. When a role system is implemented (e.g. librarian),
+      // add a check here to allow override:
+      //   const patronId = (req.patron.role === 'librarian' && req.body.patron_id)
+      //     ? req.body.patron_id
+      //     : req.patron.id;
+      const patronId = req.patron.id;
 
       const checkout = await checkoutService.createCheckout({
         patronId,

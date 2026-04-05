@@ -20,6 +20,7 @@ router.get('/', standardLimiter, checkoutController.getAllCheckouts);
 router.post(
   '/',
   strictLimiter,
+  authenticate,
   validateRequest(checkoutValidator.create),
   checkoutController.createCheckout
 );
