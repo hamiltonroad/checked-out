@@ -41,7 +41,7 @@ describe('getFormatAvailability', () => {
       { id: 2, book_id: 1, format: 'physical', checkouts: [] },
     ];
     const result = getFormatAvailability(copies);
-    expect(result).toEqual([{ format: 'physical', total: 2, available: 2 }]);
+    expect(result).toEqual([{ format: 'Physical', total: 2, available: 2 }]);
   });
 
   it('should group by multiple formats', () => {
@@ -52,8 +52,8 @@ describe('getFormatAvailability', () => {
     ];
     const result = getFormatAvailability(copies);
     expect(result).toEqual([
-      { format: 'physical', total: 2, available: 2 },
-      { format: 'kindle', total: 1, available: 1 },
+      { format: 'Physical', total: 2, available: 2 },
+      { format: 'Kindle', total: 1, available: 1 },
     ]);
   });
 
@@ -68,7 +68,7 @@ describe('getFormatAvailability', () => {
       { id: 2, book_id: 1, format: 'physical', checkouts: [] },
     ];
     const result = getFormatAvailability(copies);
-    expect(result).toEqual([{ format: 'physical', total: 2, available: 1 }]);
+    expect(result).toEqual([{ format: 'Physical', total: 2, available: 1 }]);
   });
 
   it('should count returned checkouts as available', () => {
@@ -81,13 +81,13 @@ describe('getFormatAvailability', () => {
       },
     ];
     const result = getFormatAvailability(copies);
-    expect(result).toEqual([{ format: 'kindle', total: 1, available: 1 }]);
+    expect(result).toEqual([{ format: 'Kindle', total: 1, available: 1 }]);
   });
 
   it('should handle copy with no checkouts array as available', () => {
     const copies = [{ id: 1, book_id: 1, format: 'physical' }] as Copy[];
     const result = getFormatAvailability(copies);
-    expect(result).toEqual([{ format: 'physical', total: 1, available: 1 }]);
+    expect(result).toEqual([{ format: 'Physical', total: 1, available: 1 }]);
   });
 
   it('should handle mixed availability across formats', () => {
@@ -99,8 +99,8 @@ describe('getFormatAvailability', () => {
     ];
     const result = getFormatAvailability(copies);
     expect(result).toEqual([
-      { format: 'physical', total: 3, available: 2 },
-      { format: 'kindle', total: 1, available: 0 },
+      { format: 'Physical', total: 3, available: 2 },
+      { format: 'Kindle', total: 1, available: 0 },
     ]);
   });
 });

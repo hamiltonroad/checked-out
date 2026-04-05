@@ -98,8 +98,7 @@ function BookDetailsTab({ book, statsData }: BookDetailsTabProps) {
             <Typography variant="body1">{getCopyCountText(book.copies)}</Typography>
             {getFormatAvailability(book.copies).map((fa) => (
               <Typography key={fa.format} variant="body2" color="text.secondary">
-                {fa.format.charAt(0).toUpperCase() + fa.format.slice(1)}: {fa.available} of{' '}
-                {fa.total} available
+                {fa.format}: {fa.available} of {fa.total} available
               </Typography>
             ))}
           </Box>

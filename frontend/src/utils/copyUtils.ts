@@ -42,7 +42,7 @@ export function getFormatAvailability(copies?: Copy[]): FormatAvailability[] {
   }
 
   return Array.from(formatMap.entries()).map(([format, counts]) => ({
-    format,
+    format: format.charAt(0).toUpperCase() + format.slice(1),
     ...counts,
   }));
 }
