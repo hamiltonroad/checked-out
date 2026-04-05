@@ -1,53 +1,27 @@
-import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, type ReactNode } from 'react';
 import { Container, Typography, Paper, Alert, Box, Fade, Grid } from '@mui/material';
 import SearchOffIcon from '@mui/icons-material/SearchOff';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 import { useBooks } from '../hooks/useBooks';
+import { useAuthors } from '../hooks/useAuthors';
+import { useBookFilters } from '../hooks/useBookFilters';
 import type { Book } from '../types';
 import BookDetailModal from '../components/BookDetailModal';
 import EmptyState from '../components/EmptyState';
 import BookCard from '../components/BookCard';
 import BooksPageSkeleton from '../components/BooksPageSkeleton';
-import BookSearchToolbar, {
-  AVAILABILITY_FILTERS,
-  AVAILABILITY_FILTER_LABELS,
-} from '../components/BookSearchToolbar';
+import BookSearchToolbar, { AVAILABILITY_FILTERS } from '../components/BookSearchToolbar';
 import Pagination from '../components/Pagination';
 
-/**
- * BooksPage displays a list of books with server-side search, filtering, and pagination
- */
+/** BooksPage displays a list of books with server-side search, filtering, and pagination */
 function BooksPage() {
   const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [availabilityFilter, setAvailabilityFilter] = useState(AVAILABILITY_FILTERS.ALL);
-  const [hideProfanity, setHideProfanity] = useState(false);
-  const [page, setPage] = useState(1);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const filters = useBookFilters();
+  const { data, isLoading, error } = useBooks(filters.queryParams);
+  const { data: authorsData, isLoading: authorsLoading, error: authorsError } = useAuthors();
 
-  const queryParams = useMemo(() => {
-    const params: Record<string, string | number> = { page, limit: 20 };
-    if (debouncedSearchTerm) params.search = debouncedSearchTerm;
-    if (hideProfanity) params.profanity = 'false';
-    return params;
-  }, [debouncedSearchTerm, hideProfanity, page]);
-
-  const { data, isLoading, error } = useBooks(queryParams);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [hideProfanity]);
+  const authors = authorsData?.data?.authors || [];
 
   const handleRowClick = (bookId: number) => {
     setSelectedBookId(bookId);
@@ -59,69 +33,47 @@ function BooksPage() {
     setSelectedBookId(null);
   };
 
-  const handleClearAll = useCallback(() => {
-    setSearchTerm('');
-    setDebouncedSearchTerm('');
-    setAvailabilityFilter(AVAILABILITY_FILTERS.ALL);
-    setHideProfanity(false);
-    setPage(1);
-  }, []);
-
-  const handleClearSearch = () => {
-    setSearchTerm('');
-    setDebouncedSearchTerm('');
-  };
-
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
         event.preventDefault();
-        searchInputRef.current?.focus();
+        filters.searchInputRef.current?.focus();
       }
-      if (event.key === 'Escape') handleClearAll();
+      if (event.key === 'Escape') filters.handleClearAll();
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleClearAll]);
+  }, [filters.handleClearAll, filters.searchInputRef]);
 
   const pagination = data?.data?.pagination || { page: 1, limit: 20, total: 0, totalPages: 0 };
   const filteredBooks = useMemo(() => {
     const serverBooks = data?.data?.books || [];
-    if (availabilityFilter === AVAILABILITY_FILTERS.ALL) return serverBooks;
-    return serverBooks.filter((book: Book) => book.status === availabilityFilter);
-  }, [data, availabilityFilter]);
+    if (filters.availabilityFilter === AVAILABILITY_FILTERS.ALL) return serverBooks;
+    return serverBooks.filter((book: Book) => book.status === filters.availabilityFilter);
+  }, [data, filters.availabilityFilter]);
 
   if (isLoading) return <BooksPageSkeleton />;
   if (error) {
     return <Alert severity="error">Error loading books: {error.message || 'Unknown error'}</Alert>;
   }
 
+  const hasFilters = filters.debouncedSearchTerm || filters.availabilityFilter !== AVAILABILITY_FILTERS.ALL
+    || filters.selectedGenres.length > 0 || filters.minRating > 0 || filters.selectedAuthors.length > 0;
+
   const renderEmptyState = (): ReactNode => {
     let icon: ReactNode, title: string, message: string;
-
-    if (debouncedSearchTerm && availabilityFilter !== AVAILABILITY_FILTERS.ALL) {
+    if (hasFilters) {
       icon = <SearchOffIcon sx={{ fontSize: 'inherit' }} />;
       title = 'No matching books found';
-      message = `No ${AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase()} books found matching "${debouncedSearchTerm}"`;
-    } else if (debouncedSearchTerm) {
-      icon = <SearchOffIcon sx={{ fontSize: 'inherit' }} />;
-      title = 'No matching books found';
-      message = `No books found matching "${debouncedSearchTerm}"`;
-    } else if (availabilityFilter !== AVAILABILITY_FILTERS.ALL) {
-      icon = <FilterListOffIcon sx={{ fontSize: 'inherit' }} />;
-      title = 'No books available';
-      message = `No ${AVAILABILITY_FILTER_LABELS[availabilityFilter].toLowerCase()} books`;
+      message = 'No books match your current filters. Try adjusting or clearing filters.';
     } else {
       icon = <MenuBookIcon sx={{ fontSize: 'inherit' }} />;
       title = 'No books in the library yet';
       message = 'The library is empty. Books will appear here once they are added.';
     }
-
     return (
       <Fade in={!isLoading} timeout={500}>
-        <div>
-          <EmptyState icon={icon} title={title} message={message} />
-        </div>
+        <div><EmptyState icon={icon} title={title} message={message} /></div>
       </Fade>
     );
   };
@@ -141,18 +93,27 @@ function BooksPage() {
       <Fade in={!isLoading} timeout={400}>
         <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
           <BookSearchToolbar
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            searchInputRef={searchInputRef}
-            availabilityFilter={availabilityFilter}
-            onAvailabilityChange={setAvailabilityFilter}
-            hideProfanity={hideProfanity}
-            onHideProfanityChange={setHideProfanity}
-            onClearAll={handleClearAll}
+            searchTerm={filters.searchTerm}
+            onSearchChange={filters.setSearchTerm}
+            searchInputRef={filters.searchInputRef}
+            availabilityFilter={filters.availabilityFilter}
+            onAvailabilityChange={filters.setAvailabilityFilter}
+            hideProfanity={filters.hideProfanity}
+            onHideProfanityChange={filters.setHideProfanity}
+            onClearAll={filters.handleClearAll}
             filteredCount={filteredBooks.length}
             totalCount={pagination.total}
-            debouncedSearchTerm={debouncedSearchTerm}
-            onClearSearch={handleClearSearch}
+            debouncedSearchTerm={filters.debouncedSearchTerm}
+            onClearSearch={filters.handleClearSearch}
+            selectedGenres={filters.selectedGenres}
+            onGenresChange={filters.setSelectedGenres}
+            minRating={filters.minRating}
+            onMinRatingChange={filters.setMinRating}
+            selectedAuthors={filters.selectedAuthors}
+            onAuthorsChange={filters.setSelectedAuthors}
+            authors={authors}
+            authorsLoading={authorsLoading}
+            authorsError={!!authorsError}
           />
         </Paper>
       </Fade>
@@ -169,11 +130,7 @@ function BooksPage() {
         </Fade>
       )}
       {pagination.totalPages > 1 && (
-        <Pagination
-          page={pagination.page}
-          totalPages={pagination.totalPages}
-          onPageChange={setPage}
-        />
+        <Pagination page={pagination.page} totalPages={pagination.totalPages} onPageChange={filters.setPage} />
       )}
       <BookDetailModal open={modalOpen} onClose={handleModalClose} bookId={selectedBookId} />
     </Container>
