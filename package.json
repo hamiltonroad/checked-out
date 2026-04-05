@@ -20,8 +20,14 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "backend/src/**/*.js": "cd backend && eslint --no-warn-ignored",
-    "frontend/src/**/*.{ts,tsx}": "cd frontend && eslint --no-warn-ignored"
+    "backend/src/**/*.{js,ts}": [
+      "cd backend && eslint --no-warn-ignored",
+      "prettier --check"
+    ],
+    "frontend/src/**/*.{js,jsx,ts,tsx}": [
+      "cd frontend && eslint --no-warn-ignored",
+      "prettier --check"
+    ]
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
