@@ -59,7 +59,7 @@ function PatronListPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const patrons: Patron[] = data?.data || [];
+  const patrons: Patron[] = useMemo(() => data?.data || [], [data]);
   const filteredPatrons = useMemo(() => {
     if (!debouncedSearchTerm) return patrons;
     const term = debouncedSearchTerm.toLowerCase();
@@ -122,9 +122,7 @@ function PatronListPage() {
       </Grid>
       <Fade in timeout={400}>
         <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
-          <Box
-            sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}
-          >
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
             <TextField
               fullWidth
               placeholder="Search by name or card number"
