@@ -25,7 +25,11 @@ const DEFAULT_STYLE: GenreStyle = {
 
 const GENRE_MAP: Record<string, GenreStyle> = {
   Fiction: { bgColor: 'info.light', iconColor: 'info.dark', Icon: MenuBookIcon },
-  'Science Fiction': { bgColor: 'primary.light', iconColor: 'primary.dark', Icon: RocketLaunchIcon },
+  'Science Fiction': {
+    bgColor: 'primary.light',
+    iconColor: 'primary.dark',
+    Icon: RocketLaunchIcon,
+  },
   Mystery: { bgColor: 'secondary.light', iconColor: 'secondary.dark', Icon: SearchIcon },
   Fantasy: { bgColor: 'success.light', iconColor: 'success.dark', Icon: AutoAwesomeIcon },
   Biography: { bgColor: 'tertiary.light', iconColor: 'tertiary.dark', Icon: PersonIcon },
