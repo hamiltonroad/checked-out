@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../hooks/useAuth';
 import { useAvailableCopies } from '../../hooks/useAvailableCopies';
+import { useBookWaitlist } from '../../hooks/useWaitlist';
 import CopyRadioGroup from '../CopyRadioGroup';
 
 const CHECKOUT_DURATION_DAYS = 14;
@@ -51,11 +52,22 @@ function CheckoutDialog({
   const { patron: authPatron } = useAuth();
 
   const { data: copiesRes, isLoading: loadingCopies } = useAvailableCopies(open ? bookId : null);
+  const { data: waitlistEntries = [] } = useBookWaitlist(open ? bookId : null);
 
   const copies = copiesRes?.data?.copies || [];
   const totalCopies = copiesRes?.data?.totalCopies || 0;
   const dueDate = computeDueDate();
   const noCopiesAvailable = !loadingCopies && copies.length === 0;
+
+  // Determine if selected copy's format is waitlist-gated for this patron
+  const selectedCopy = copies.find((c: { id: number }) => c.id === parseInt(selectedCopyId, 10));
+  const selectedFormat = selectedCopy?.format;
+  const formatWaitlist = selectedFormat
+    ? waitlistEntries.filter((e) => e.format === selectedFormat)
+    : [];
+  const isWaitlistGated =
+    formatWaitlist.length > 0 &&
+    (!authPatron || !formatWaitlist.some((e) => e.patron_id === authPatron.id && e.position === 1));
 
   useEffect(() => {
     if (!open) {
@@ -75,7 +87,8 @@ function CheckoutDialog({
 
   const patronDisplayName = authPatron ? `${authPatron.first_name} ${authPatron.last_name}` : '';
 
-  const isSubmitDisabled = isSubmitting || !selectedCopyId || noCopiesAvailable || !authPatron;
+  const isSubmitDisabled =
+    isSubmitting || !selectedCopyId || noCopiesAvailable || !authPatron || isWaitlistGated;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -93,6 +106,11 @@ function CheckoutDialog({
           fullWidth
           slotProps={{ input: { readOnly: true } }}
         />
+        {isWaitlistGated && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            This format has a waitlist. Only the next patron in line can check out.
+          </Alert>
+        )}
         <CopyRadioGroup
           copies={copies}
           value={selectedCopyId}

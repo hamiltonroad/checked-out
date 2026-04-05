@@ -203,3 +203,22 @@ export interface FieldError {
   field: string;
   message: string;
 }
+
+export interface WaitlistEntryData {
+  id: number;
+  patron_id: number;
+  book_id: number;
+  format: 'physical' | 'kindle';
+  position: number;
+  status: 'waiting' | 'notified' | 'fulfilled' | 'cancelled';
+  created_at: string;
+  patron?: {
+    id: number;
+    first_name: string;
+    last_name: string;
+  };
+  book?: {
+    id: number;
+    title: string;
+  };
+}

@@ -16,6 +16,7 @@ import { useReturnCheckout } from '../hooks/useReturnCheckout';
 import PatronInfoCard from '../components/PatronInfoCard';
 import PatronCurrentCheckouts from '../components/PatronCurrentCheckouts';
 import PatronCheckoutHistory from '../components/PatronCheckoutHistory';
+import PatronWaitlist from '../components/PatronWaitlist';
 import type { PatronCheckout } from '../types';
 
 /**
@@ -120,6 +121,11 @@ function PatronDetailPage() {
         Checkout History
       </Typography>
       <PatronCheckoutHistory checkouts={historyCheckouts} isLoading={historyQuery.isLoading} />
+
+      <Typography variant="h5" component="h2" sx={{ mb: 2, mt: 3, fontWeight: 500 }}>
+        Waitlist
+      </Typography>
+      <PatronWaitlist patronId={validId} />
 
       <Snackbar
         open={snackbar.open}

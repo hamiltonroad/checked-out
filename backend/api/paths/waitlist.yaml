@@ -1,0 +1,151 @@
+# Waitlist — Format-specific waitlist operations
+# Base paths: /api/v1/waitlist, /api/v1/books/{id}/waitlist, /api/v1/patrons/{id}/waitlist
+
+/api/v1/waitlist:
+  post:
+    tags: [Waitlist]
+    summary: Join the waitlist for a book+format
+    operationId: joinWaitlist
+    description: Rate-limited (strict). Patron is derived from the authenticated session.
+    security:
+      - cookieAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [book_id, format]
+            properties:
+              book_id:
+                type: integer
+                minimum: 1
+                description: ID of the book to join waitlist for
+              format:
+                type: string
+                enum: [physical, kindle]
+                description: Format to wait for
+    responses:
+      '201':
+        description: Joined waitlist
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '../components/schemas.yaml#/WaitlistEntryResponse'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+
+  delete:
+    tags: [Waitlist]
+    summary: Leave the waitlist for a book+format
+    operationId: leaveWaitlist
+    description: Rate-limited (strict). Patron is derived from the authenticated session.
+    security:
+      - cookieAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [book_id, format]
+            properties:
+              book_id:
+                type: integer
+                minimum: 1
+              format:
+                type: string
+                enum: [physical, kindle]
+    responses:
+      '200':
+        description: Left waitlist
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+
+/api/v1/books/{id}/waitlist:
+  get:
+    tags: [Waitlist]
+    summary: Get the waitlist for a book
+    operationId: getBookWaitlist
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: Book ID
+      - name: format
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [physical, kindle]
+        description: Filter by format
+    responses:
+      '200':
+        description: Waitlist entries for the book
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas.yaml#/WaitlistEntryResponse'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+
+/api/v1/patrons/{id}/waitlist:
+  get:
+    tags: [Waitlist]
+    summary: Get a patron's waitlist entries
+    operationId: getPatronWaitlist
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: Patron ID
+    responses:
+      '200':
+        description: Patron's waitlist entries with book details
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas.yaml#/WaitlistEntryResponse'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        description: Cannot view another patron's waitlist

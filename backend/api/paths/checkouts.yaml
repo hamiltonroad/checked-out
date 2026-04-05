@@ -63,7 +63,13 @@
       '404':
         $ref: '../components/responses.yaml#/NotFound'
       '409':
-        $ref: '../components/responses.yaml#/Conflict'
+        description: >
+          Conflict — copy already checked out, patron status invalid,
+          or patron is not front-of-line for a waitlisted format.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas.yaml#/ApiErrorResponse'
 
 /api/v1/checkouts/current:
   get:
