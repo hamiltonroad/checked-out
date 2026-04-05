@@ -1,6 +1,7 @@
 import type { SvgIconComponent } from '@mui/icons-material';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import PeopleIcon from '@mui/icons-material/People';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 
@@ -37,6 +38,15 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     path: '/checkouts',
     disabled: false,
     ariaLabel: 'Navigate to Checkouts',
+    requiresAuth: true,
+  },
+  {
+    id: 'wishlist',
+    label: 'My Wishlist',
+    icon: FavoriteIcon,
+    path: '/wishlist',
+    disabled: false,
+    ariaLabel: 'Navigate to My Wishlist',
     requiresAuth: true,
   },
   {

@@ -162,6 +162,14 @@ export interface ExistingRating {
   review_text?: string;
 }
 
+export interface WishlistEntry {
+  id: number;
+  patron_id: number;
+  book_id: number;
+  created_at: string;
+  book: Book;
+}
+
 // ============================================================================
 // UI Types
 // ============================================================================

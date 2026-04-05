@@ -23,6 +23,7 @@ db.Copy = require('./Copy')(sequelize);
 db.Checkout = require('./Checkout')(sequelize);
 db.Patron = require('./Patron')(sequelize);
 db.Rating = require('./Rating')(sequelize);
+db.Wishlist = require('./Wishlist')(sequelize);
 
 // Define associations
 Object.keys(db).forEach((modelName) => {

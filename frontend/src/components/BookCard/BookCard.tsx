@@ -3,6 +3,8 @@ import { useState, type KeyboardEvent, type MouseEvent } from 'react';
 import { Card, CardContent, Typography, Box, IconButton, Collapse } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ProfanityWarning from '../ProfanityWarning';
 import { RatingDisplay } from '../Rating';
 import { getGenreStyle } from '../../utils/genreColors';
@@ -15,13 +17,15 @@ const CONTENT_MAX_HEIGHT = 160;
 interface BookCardProps {
   book: Book;
   onClick: (bookId: number) => void;
+  isWishlisted?: boolean;
+  onWishlistToggle?: (bookId: number) => void;
 }
 
 /**
  * BookCard displays book information in a card format with a genre-based cover placeholder.
  * Cards render at a standardized height with expand/collapse for overflow content.
  */
-function BookCard({ book, onClick }: BookCardProps) {
+function BookCard({ book, onClick, isWishlisted = false, onWishlistToggle }: BookCardProps) {
   const { bgColor, iconColor, Icon } = getGenreStyle(book.genre);
   const [isExpanded, setIsExpanded] = useState(false);
   const { contentRef, isOverflowing } = useOverflowDetection();
@@ -46,6 +50,11 @@ function BookCard({ book, onClick }: BookCardProps) {
     if (event.key === 'Enter' || event.key === ' ') {
       event.stopPropagation();
     }
+  };
+
+  const handleWishlistClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    onWishlistToggle?.(book.id);
   };
 
   const authorsText = book.authors
@@ -93,10 +102,32 @@ function BookCard({ book, onClick }: BookCardProps) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          position: 'relative',
         }}
         data-testid="genre-placeholder"
       >
         <Icon sx={{ fontSize: 48, color: iconColor }} />
+        {onWishlistToggle && (
+          <IconButton
+            size="small"
+            onClick={handleWishlistClick}
+            aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            sx={{
+              position: 'absolute',
+              top: (theme) => theme.spacing(1),
+              right: (theme) => theme.spacing(1),
+              bgcolor: 'background.paper',
+              '&:hover': { bgcolor: 'background.paper' },
+              boxShadow: 1,
+            }}
+          >
+            {isWishlisted ? (
+              <FavoriteIcon color="error" fontSize="small" />
+            ) : (
+              <FavoriteBorderIcon fontSize="small" />
+            )}
+          </IconButton>
+        )}
       </Box>
       <CardContent>
         <Collapse in={isExpanded} collapsedSize={CONTENT_MAX_HEIGHT}>

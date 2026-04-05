@@ -1,10 +1,12 @@
-import { useState, useEffect, useMemo, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
 import { Container, Typography, Paper, Alert, Box, Fade, Grid } from '@mui/material';
 import SearchOffIcon from '@mui/icons-material/SearchOff';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { useBooks } from '../hooks/useBooks';
 import { useAuthors } from '../hooks/useAuthors';
 import { useBookFilters } from '../hooks/useBookFilters';
+import { useAuth } from '../hooks/useAuth';
+import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '../hooks/useWishlist';
 import type { Book } from '../types';
 import BookDetailModal from '../components/BookDetailModal';
 import EmptyState from '../components/EmptyState';
@@ -20,8 +22,29 @@ function BooksPage() {
   const filters = useBookFilters();
   const { data, isLoading, error } = useBooks(filters.queryParams);
   const { data: authorsData, isLoading: authorsLoading, error: authorsError } = useAuthors();
+  const { patron, isAuthenticated } = useAuth();
+  const { data: wishlistEntries } = useWishlist(patron?.id);
+  const addToWishlist = useAddToWishlist(patron?.id);
+  const removeFromWishlist = useRemoveFromWishlist(patron?.id);
+
+  const wishlistedBookIds = useMemo(() => {
+    const ids = new Set<number>();
+    wishlistEntries?.forEach((entry) => ids.add(entry.book_id));
+    return ids;
+  }, [wishlistEntries]);
 
   const authors = authorsData?.data?.authors || [];
+
+  const handleWishlistToggle = useCallback(
+    (bookId: number) => {
+      if (wishlistedBookIds.has(bookId)) {
+        removeFromWishlist.mutate(bookId);
+      } else {
+        addToWishlist.mutate(bookId);
+      }
+    },
+    [wishlistedBookIds, addToWishlist, removeFromWishlist]
+  );
 
   const handleRowClick = (bookId: number) => {
     setSelectedBookId(bookId);
@@ -130,7 +153,12 @@ function BooksPage() {
           <Grid container spacing={2}>
             {filteredBooks.map((book) => (
               <Grid item xs={12} sm={6} md={6} lg={4} xl={3} key={book.id}>
-                <BookCard book={book} onClick={handleRowClick} />
+                <BookCard
+                  book={book}
+                  onClick={handleRowClick}
+                  isWishlisted={wishlistedBookIds.has(book.id)}
+                  onWishlistToggle={isAuthenticated ? handleWishlistToggle : undefined}
+                />
               </Grid>
             ))}
           </Grid>
