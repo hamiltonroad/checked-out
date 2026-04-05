@@ -27,7 +27,7 @@ import BookDetailSkeleton from './BookDetailSkeleton';
 import { RatingInput } from '../Rating';
 import CheckoutDialog from '../CheckoutDialog';
 import ratingService from '../../services/ratingService';
-import { formatApiError, parseApiError } from '../../utils/errorUtils';
+import { formatApiError } from '../../utils/errorUtils';
 import BookDetailsTab from './BookDetailsTab';
 import BookReviewsTab from './BookReviewsTab';
 
@@ -58,9 +58,6 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
   const { data, isLoading, error } = useBook(bookId);
   const checkoutMutation = useCheckout();
   const book = data?.data;
-  const parsedCheckoutErrors = checkoutMutation.error
-    ? parseApiError(checkoutMutation.error).fieldErrors
-    : [];
 
   const { data: statsData } = useQuery({
     queryKey: ['bookRatingStats', bookId],
@@ -81,7 +78,7 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => setTabValue(newValue);
   const isNoCopies = !book?.copies || book.copies.length === 0;
 
-  const handleCheckoutSubmit = async (checkoutData: { patron_id: number; copy_id: number }) => {
+  const handleCheckoutSubmit = async (checkoutData: { copy_id: number }) => {
     try {
       await checkoutMutation.mutateAsync(checkoutData);
       setCheckoutOpen(false);
@@ -174,7 +171,6 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
         bookId={bookId}
         isSubmitting={checkoutMutation.isPending}
         error={checkoutMutation.error ? formatApiError(checkoutMutation.error) : null}
-        fieldErrors={parsedCheckoutErrors}
       />
       <Snackbar
         open={checkoutSuccess}

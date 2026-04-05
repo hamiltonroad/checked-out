@@ -8,7 +8,3 @@ export interface CheckoutPatron {
   last_name: string;
   card_number: string;
 }
-
-export interface CheckoutFormData {
-  patronId: CheckoutPatron | null;
-}

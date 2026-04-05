@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import {
   Dialog,
   DialogTitle,
@@ -10,25 +9,21 @@ import {
   Typography,
   CircularProgress,
   Box,
+  TextField,
 } from '@mui/material';
 import { useAuth } from '../../hooks/useAuth';
 import { useAvailableCopies } from '../../hooks/useAvailableCopies';
-import type { FieldError as ApiFieldError } from '../../types';
 import CopyRadioGroup from '../CopyRadioGroup';
-import PatronSearchField from './PatronSearchField';
-
-import type { CheckoutPatron, CheckoutFormData } from './types';
 
 const CHECKOUT_DURATION_DAYS = 14;
 
 interface CheckoutDialogProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: { patron_id: number; copy_id: number }) => void;
+  onSubmit: (data: { copy_id: number }) => void;
   bookId?: number | null;
   isSubmitting?: boolean;
   error?: string | null;
-  fieldErrors?: ApiFieldError[];
 }
 
 /**
@@ -41,7 +36,8 @@ function computeDueDate(): string {
 }
 
 /**
- * CheckoutDialog displays a form for checking out a book copy to a patron
+ * CheckoutDialog displays a form for checking out a book copy.
+ * The patron is always the authenticated user (read-only).
  */
 function CheckoutDialog({
   open,
@@ -50,19 +46,9 @@ function CheckoutDialog({
   bookId = null,
   isSubmitting = false,
   error = null,
-  fieldErrors = [],
 }: CheckoutDialogProps) {
   const [selectedCopyId, setSelectedCopyId] = useState('');
   const { patron: authPatron } = useAuth();
-  const {
-    handleSubmit,
-    reset,
-    control,
-    setValue,
-    formState: { errors },
-  } = useForm<CheckoutFormData>({
-    defaultValues: { patronId: null },
-  });
 
   const { data: copiesRes, isLoading: loadingCopies } = useAvailableCopies(open ? bookId : null);
 
@@ -72,25 +58,26 @@ function CheckoutDialog({
   const noCopiesAvailable = !loadingCopies && copies.length === 0;
 
   useEffect(() => {
-    if (open && authPatron) {
-      setValue('patronId', authPatron as CheckoutPatron);
-    } else if (!open) {
-      reset({ patronId: null });
+    if (!open) {
       setSelectedCopyId('');
     }
-  }, [open, reset, setValue, authPatron]);
+  }, [open]);
 
   const handleCopyChange = (copyId: string) => {
     setSelectedCopyId(copyId);
   };
 
-  const handleFormSubmit = (data: CheckoutFormData) => {
-    if (!data.patronId?.id || !selectedCopyId) return;
+  const handleFormSubmit = () => {
+    if (!authPatron || !selectedCopyId) return;
     const parsedCopyId = parseInt(selectedCopyId, 10);
-    onSubmit({ patron_id: data.patronId.id, copy_id: parsedCopyId });
+    onSubmit({ copy_id: parsedCopyId });
   };
 
-  const isSubmitDisabled = isSubmitting || !selectedCopyId || noCopiesAvailable;
+  const patronDisplayName = authPatron
+    ? `${authPatron.first_name} ${authPatron.last_name}`
+    : '';
+
+  const isSubmitDisabled = isSubmitting || !selectedCopyId || noCopiesAvailable || !authPatron;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -101,12 +88,12 @@ function CheckoutDialog({
             {error}
           </Alert>
         )}
-        <PatronSearchField
-          control={control}
-          errors={errors}
-          fieldErrors={fieldErrors}
-          isSubmitting={isSubmitting}
-          setValue={setValue}
+        <TextField
+          margin="dense"
+          label="Patron"
+          value={patronDisplayName}
+          fullWidth
+          slotProps={{ input: { readOnly: true } }}
         />
         <CopyRadioGroup
           copies={copies}
@@ -127,7 +114,7 @@ function CheckoutDialog({
           Cancel
         </Button>
         <Button
-          onClick={handleSubmit(handleFormSubmit)}
+          onClick={handleFormSubmit}
           variant="contained"
           disabled={isSubmitDisabled}
           startIcon={isSubmitting ? <CircularProgress size={16} /> : null}
