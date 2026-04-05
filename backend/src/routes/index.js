@@ -7,6 +7,7 @@ const checkoutRoutes = require('./checkoutRoutes');
 const copyRoutes = require('./copyRoutes');
 const patronRoutes = require('./patronRoutes');
 const wishlistRoutes = require('./wishlistRoutes');
+const waitlistRoutes = require('./waitlistRoutes');
 
 const router = express.Router();
 
@@ -24,5 +25,6 @@ router.use('/checkouts', checkoutRoutes);
 router.use('/copies', copyRoutes);
 router.use('/patrons', patronRoutes);
 router.use('/', wishlistRoutes);
+router.use('/', waitlistRoutes);
 
 module.exports = router;
