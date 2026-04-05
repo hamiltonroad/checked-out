@@ -18,8 +18,7 @@ module.exports = {
           book_id: bookMap['1984'],
           patron_id: 1,
           rating: 5,
-          review_text:
-            'An absolute masterpiece! This book changed my perspective on life.',
+          review_text: 'An absolute masterpiece! This book changed my perspective on life.',
           created_at: new Date('2024-11-01'),
           updated_at: new Date('2024-11-01'),
         },
@@ -43,8 +42,7 @@ module.exports = {
           book_id: bookMap['A Brief History of Time'],
           patron_id: 1,
           rating: 3,
-          review_text:
-            'It was okay. Not my favorite but worth reading once.',
+          review_text: 'It was okay. Not my favorite but worth reading once.',
           created_at: new Date('2024-11-12'),
           updated_at: new Date('2024-11-12'),
         },
@@ -52,8 +50,7 @@ module.exports = {
           book_id: bookMap['A Brief History of Time'],
           patron_id: 2,
           rating: 4,
-          review_text:
-            'Enjoyed the explanations of complex physics concepts.',
+          review_text: 'Enjoyed the explanations of complex physics concepts.',
           created_at: new Date('2024-11-15'),
           updated_at: new Date('2024-11-15'),
         },
@@ -61,8 +58,7 @@ module.exports = {
           book_id: bookMap['A Fire Upon the Deep'],
           patron_id: 2,
           rating: 5,
-          review_text:
-            "Couldn't put it down! Finished it in one sitting.",
+          review_text: "Couldn't put it down! Finished it in one sitting.",
           created_at: new Date('2024-11-08'),
           updated_at: new Date('2024-11-08'),
         },
@@ -70,8 +66,7 @@ module.exports = {
           book_id: bookMap['A Game of Thrones'],
           patron_id: 1,
           rating: 5,
-          review_text:
-            "Best fantasy book I've read this year. Highly recommend!",
+          review_text: "Best fantasy book I've read this year. Highly recommend!",
           created_at: new Date('2024-11-16'),
           updated_at: new Date('2024-11-16'),
         },

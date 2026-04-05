@@ -32,6 +32,13 @@ export default defineConfig([
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
       'react-hooks/exhaustive-deps': 'error',
+      'max-lines': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['../services/*', '../../services/*', '../../../services/*', '*/services/*'],
+          message: 'Do not import services directly in components. Use hooks instead (see CLAUDE.md).',
+        }],
+      }],
     },
   },
   // Test files configuration
@@ -50,6 +57,24 @@ export default defineConfig([
         afterAll: 'readonly',
         vi: 'readonly',
       },
+    },
+    rules: {
+      'max-lines': 'off',
+      'no-restricted-imports': 'off',
+    },
+  },
+  // Type, config, and theme files are exempt from max-lines
+  {
+    files: ['**/types/**/*.ts', '**/theme/**/*.ts', '**/config/**/*.ts'],
+    rules: {
+      'max-lines': 'off',
+    },
+  },
+  // Hooks and context files may import services directly
+  {
+    files: ['**/hooks/**/*.{ts,tsx}', '**/context/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
   // Smoke tests run in Node.js (Playwright)

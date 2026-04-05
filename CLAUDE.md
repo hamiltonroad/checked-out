@@ -49,6 +49,7 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - Seeder files with large data arrays MUST extract arrays to `backend/src/seeders/data/` when the seeder would otherwise exceed 200 lines.
 - All dev/seed passwords MUST use the same value from a single shared location.
 - When a mutation hook succeeds, it MUST invalidate all query keys displaying affected data. Use React Query prefix matching.
+- Shared TypeScript interfaces and types MUST be defined in one canonical location (`frontend/src/types/index.ts`) — do not redeclare types in constants or other files.
 
 ## Conventions
 
