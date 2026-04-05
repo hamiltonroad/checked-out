@@ -49,8 +49,20 @@ describe('BooksPage', () => {
 
   it('should display book cards when data is loaded', () => {
     const mockData = makeMockResponse([
-      { id: 1, title: 'The Great Gatsby', authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }], status: 'available', genre: 'Fiction' },
-      { id: 2, title: '1984', authors: [{ first_name: 'George', last_name: 'Orwell' }], status: 'available', genre: 'Science Fiction' },
+      {
+        id: 1,
+        title: 'The Great Gatsby',
+        authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }],
+        status: 'available',
+        genre: 'Fiction',
+      },
+      {
+        id: 2,
+        title: '1984',
+        authors: [{ first_name: 'George', last_name: 'Orwell' }],
+        status: 'available',
+        genre: 'Science Fiction',
+      },
     ]);
     useBooks.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
@@ -73,11 +85,17 @@ describe('BooksPage', () => {
   });
 
   it('should display authors comma-separated', () => {
-    const mockData = makeMockResponse([{
-      id: 1, title: 'Good Omens',
-      authors: [{ first_name: 'Terry', last_name: 'Pratchett' }, { first_name: 'Neil', last_name: 'Gaiman' }],
-      status: 'available',
-    }]);
+    const mockData = makeMockResponse([
+      {
+        id: 1,
+        title: 'Good Omens',
+        authors: [
+          { first_name: 'Terry', last_name: 'Pratchett' },
+          { first_name: 'Neil', last_name: 'Gaiman' },
+        ],
+        status: 'available',
+      },
+    ]);
     useBooks.mockReturnValue({ data: mockData, isLoading: false, error: null });
     renderWithQueryClient(<BooksPage />);
     expect(screen.getByText('Terry Pratchett, Neil Gaiman')).toBeInTheDocument();
@@ -85,8 +103,18 @@ describe('BooksPage', () => {
 
   it('should show availability status using StatusChip', () => {
     const mockData = makeMockResponse([
-      { id: 1, title: 'Book 1', authors: [{ first_name: 'Author', last_name: 'One' }], status: 'available' },
-      { id: 2, title: 'Book 2', authors: [{ first_name: 'Author', last_name: 'Two' }], status: 'checked_out' },
+      {
+        id: 1,
+        title: 'Book 1',
+        authors: [{ first_name: 'Author', last_name: 'One' }],
+        status: 'available',
+      },
+      {
+        id: 2,
+        title: 'Book 2',
+        authors: [{ first_name: 'Author', last_name: 'Two' }],
+        status: 'checked_out',
+      },
     ]);
     useBooks.mockReturnValue({ data: mockData, isLoading: false, error: null });
     const { container } = renderWithQueryClient(<BooksPage />);
@@ -98,9 +126,27 @@ describe('BooksPage', () => {
 
   describe('Search Functionality', () => {
     const mockBooksData = makeMockResponse([
-      { id: 1, title: 'Clean Code', authors: [{ first_name: 'Robert', last_name: 'Martin' }], status: 'available' },
-      { id: 2, title: 'The Pragmatic Programmer', authors: [{ first_name: 'Andrew', last_name: 'Hunt' }, { first_name: 'David', last_name: 'Thomas' }], status: 'available' },
-      { id: 3, title: 'Design Patterns', authors: [{ first_name: 'Erich', last_name: 'Gamma' }], status: 'available' },
+      {
+        id: 1,
+        title: 'Clean Code',
+        authors: [{ first_name: 'Robert', last_name: 'Martin' }],
+        status: 'available',
+      },
+      {
+        id: 2,
+        title: 'The Pragmatic Programmer',
+        authors: [
+          { first_name: 'Andrew', last_name: 'Hunt' },
+          { first_name: 'David', last_name: 'Thomas' },
+        ],
+        status: 'available',
+      },
+      {
+        id: 3,
+        title: 'Design Patterns',
+        authors: [{ first_name: 'Erich', last_name: 'Gamma' }],
+        status: 'available',
+      },
     ]);
 
     beforeEach(() => {
@@ -119,9 +165,12 @@ describe('BooksPage', () => {
       renderWithQueryClient(<BooksPage />);
       const searchInput = screen.getByLabelText('Search by Title');
       await user.type(searchInput, 'clean');
-      await waitFor(() => {
-        expect(screen.getByText('Search: "clean"')).toBeInTheDocument();
-      }, { timeout: 500 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Search: "clean"')).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
     });
 
     it('should show clear button when search has text', async () => {
@@ -159,9 +208,24 @@ describe('BooksPage', () => {
 
   describe('Availability Filter', () => {
     const mockBooksData = makeMockResponse([
-      { id: 1, title: 'Available Book 1', authors: [{ first_name: 'Author', last_name: 'One' }], status: 'available' },
-      { id: 2, title: 'Checked Out Book', authors: [{ first_name: 'Author', last_name: 'Two' }], status: 'checked_out' },
-      { id: 3, title: 'Available Book 2', authors: [{ first_name: 'Author', last_name: 'Three' }], status: 'available' },
+      {
+        id: 1,
+        title: 'Available Book 1',
+        authors: [{ first_name: 'Author', last_name: 'One' }],
+        status: 'available',
+      },
+      {
+        id: 2,
+        title: 'Checked Out Book',
+        authors: [{ first_name: 'Author', last_name: 'Two' }],
+        status: 'checked_out',
+      },
+      {
+        id: 3,
+        title: 'Available Book 2',
+        authors: [{ first_name: 'Author', last_name: 'Three' }],
+        status: 'available',
+      },
     ]);
 
     beforeEach(() => {
@@ -213,7 +277,9 @@ describe('BooksPage', () => {
       const filterSelect = screen.getByLabelText('Availability');
       await user.click(filterSelect);
       await user.click(screen.getByRole('option', { name: 'Available' }));
-      await waitFor(() => { expect(screen.queryByText('Checked Out Book')).not.toBeInTheDocument(); });
+      await waitFor(() => {
+        expect(screen.queryByText('Checked Out Book')).not.toBeInTheDocument();
+      });
       await user.click(filterSelect);
       await user.click(screen.getByRole('option', { name: 'All Books' }));
       await waitFor(() => {
@@ -225,8 +291,18 @@ describe('BooksPage', () => {
 
   describe('Filter Chips', () => {
     const mockBooksData = makeMockResponse([
-      { id: 1, title: 'Available Book 1', authors: [{ first_name: 'Author', last_name: 'One' }], status: 'available' },
-      { id: 2, title: 'Checked Out Book', authors: [{ first_name: 'Author', last_name: 'Two' }], status: 'checked_out' },
+      {
+        id: 1,
+        title: 'Available Book 1',
+        authors: [{ first_name: 'Author', last_name: 'One' }],
+        status: 'available',
+      },
+      {
+        id: 2,
+        title: 'Checked Out Book',
+        authors: [{ first_name: 'Author', last_name: 'Two' }],
+        status: 'checked_out',
+      },
     ]);
 
     beforeEach(() => {
@@ -244,9 +320,12 @@ describe('BooksPage', () => {
       renderWithQueryClient(<BooksPage />);
       const searchInput = screen.getByLabelText('Search by Title');
       await user.type(searchInput, 'test');
-      await waitFor(() => {
-        expect(screen.getByText('Search: "test"')).toBeInTheDocument();
-      }, { timeout: 500 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Search: "test"')).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
     });
 
     it('should show availability chip when filter is not All', async () => {
@@ -268,9 +347,12 @@ describe('BooksPage', () => {
       const filterSelect = screen.getByLabelText('Availability');
       await user.click(filterSelect);
       await user.click(screen.getByRole('option', { name: 'Available' }));
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: 'Clear all filters' })).toBeInTheDocument();
-      }, { timeout: 500 });
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: 'Clear all filters' })).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
       await user.click(screen.getByRole('button', { name: 'Clear all filters' }));
       await waitFor(() => {
         expect(searchInput).toHaveValue('');
@@ -282,7 +364,13 @@ describe('BooksPage', () => {
 
   describe('New Filter Controls', () => {
     const mockBooksData = makeMockResponse([
-      { id: 1, title: 'Test Book', authors: [{ first_name: 'Test', last_name: 'Author' }], status: 'available', genre: 'Fiction' },
+      {
+        id: 1,
+        title: 'Test Book',
+        authors: [{ first_name: 'Test', last_name: 'Author' }],
+        status: 'available',
+        genre: 'Fiction',
+      },
     ]);
 
     beforeEach(() => {
@@ -332,7 +420,13 @@ describe('BooksPage', () => {
   it('should open modal when clicking a book card', async () => {
     const user = userEvent.setup();
     const mockBooksData = makeMockResponse([
-      { id: 1, title: 'The Great Gatsby', authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }], status: 'available', genre: 'Fiction' },
+      {
+        id: 1,
+        title: 'The Great Gatsby',
+        authors: [{ first_name: 'F. Scott', last_name: 'Fitzgerald' }],
+        status: 'available',
+        genre: 'Fiction',
+      },
     ]);
     useBooks.mockReturnValue({ data: mockBooksData, isLoading: false, error: null });
     const { container } = renderWithQueryClient(<BooksPage />);

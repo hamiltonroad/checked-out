@@ -33,17 +33,18 @@ function BooksPage() {
     setSelectedBookId(null);
   };
 
+  const { handleClearAll, searchInputRef } = filters;
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
         event.preventDefault();
-        filters.searchInputRef.current?.focus();
+        searchInputRef.current?.focus();
       }
-      if (event.key === 'Escape') filters.handleClearAll();
+      if (event.key === 'Escape') handleClearAll();
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [filters.handleClearAll, filters.searchInputRef]);
+  }, [handleClearAll, searchInputRef]);
 
   const pagination = data?.data?.pagination || { page: 1, limit: 20, total: 0, totalPages: 0 };
   const filteredBooks = useMemo(() => {
@@ -57,8 +58,12 @@ function BooksPage() {
     return <Alert severity="error">Error loading books: {error.message || 'Unknown error'}</Alert>;
   }
 
-  const hasFilters = filters.debouncedSearchTerm || filters.availabilityFilter !== AVAILABILITY_FILTERS.ALL
-    || filters.selectedGenres.length > 0 || filters.minRating > 0 || filters.selectedAuthors.length > 0;
+  const hasFilters =
+    filters.debouncedSearchTerm ||
+    filters.availabilityFilter !== AVAILABILITY_FILTERS.ALL ||
+    filters.selectedGenres.length > 0 ||
+    filters.minRating > 0 ||
+    filters.selectedAuthors.length > 0;
 
   const renderEmptyState = (): ReactNode => {
     let icon: ReactNode, title: string, message: string;
@@ -73,7 +78,9 @@ function BooksPage() {
     }
     return (
       <Fade in={!isLoading} timeout={500}>
-        <div><EmptyState icon={icon} title={title} message={message} /></div>
+        <div>
+          <EmptyState icon={icon} title={title} message={message} />
+        </div>
       </Fade>
     );
   };
@@ -130,7 +137,11 @@ function BooksPage() {
         </Fade>
       )}
       {pagination.totalPages > 1 && (
-        <Pagination page={pagination.page} totalPages={pagination.totalPages} onPageChange={filters.setPage} />
+        <Pagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          onPageChange={filters.setPage}
+        />
       )}
       <BookDetailModal open={modalOpen} onClose={handleModalClose} bookId={selectedBookId} />
     </Container>

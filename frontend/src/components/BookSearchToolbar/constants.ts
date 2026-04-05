@@ -40,10 +40,5 @@ const RATING_FILTER_OPTIONS: RatingFilterOption[] = [
   { value: 4, label: '4+ Stars' },
 ];
 
-export {
-  AVAILABILITY_FILTERS,
-  AVAILABILITY_FILTER_LABELS,
-  GENRE_OPTIONS,
-  RATING_FILTER_OPTIONS,
-};
+export { AVAILABILITY_FILTERS, AVAILABILITY_FILTER_LABELS, GENRE_OPTIONS, RATING_FILTER_OPTIONS };
 export type { RatingFilterOption };

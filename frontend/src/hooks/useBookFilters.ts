@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, type RefObject } from 'react';
 import type { AuthorSummary } from '../types';
 
 const AVAILABILITY_ALL = 'all';
@@ -22,7 +22,7 @@ interface BookFiltersReturn {
   queryParams: Record<string, string | number>;
   handleClearAll: () => void;
   handleClearSearch: () => void;
-  searchInputRef: React.RefObject<HTMLInputElement | null>;
+  searchInputRef: RefObject<HTMLInputElement | null>;
 }
 
 /**
@@ -50,7 +50,9 @@ export function useBookFilters(): BookFiltersReturn {
   }, [searchTerm]);
 
   // Reset page on filter changes
-  useEffect(() => { setPage(1); }, [hideProfanity, selectedGenres, minRating, selectedAuthors]);
+  useEffect(() => {
+    setPage(1);
+  }, [hideProfanity, selectedGenres, minRating, selectedAuthors]);
 
   const handleClearAll = useCallback(() => {
     setSearchTerm('');
@@ -79,13 +81,24 @@ export function useBookFilters(): BookFiltersReturn {
   }, [debouncedSearchTerm, hideProfanity, selectedGenres, minRating, selectedAuthors, page]);
 
   return {
-    searchTerm, setSearchTerm, debouncedSearchTerm,
-    availabilityFilter, setAvailabilityFilter,
-    hideProfanity, setHideProfanity,
-    selectedGenres, setSelectedGenres,
-    minRating, setMinRating,
-    selectedAuthors, setSelectedAuthors,
-    page, setPage, queryParams,
-    handleClearAll, handleClearSearch, searchInputRef,
+    searchTerm,
+    setSearchTerm,
+    debouncedSearchTerm,
+    availabilityFilter,
+    setAvailabilityFilter,
+    hideProfanity,
+    setHideProfanity,
+    selectedGenres,
+    setSelectedGenres,
+    minRating,
+    setMinRating,
+    selectedAuthors,
+    setSelectedAuthors,
+    page,
+    setPage,
+    queryParams,
+    handleClearAll,
+    handleClearSearch,
+    searchInputRef,
   };
 }

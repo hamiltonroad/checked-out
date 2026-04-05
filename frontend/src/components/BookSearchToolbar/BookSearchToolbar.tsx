@@ -1,51 +1,60 @@
-import type { RefObject } from 'react';
 import {
-  TextField, InputAdornment, IconButton, Select, MenuItem,
-  FormControl, InputLabel, Box, Typography, FormControlLabel,
-  Checkbox, Autocomplete,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Box,
+  Typography,
+  FormControlLabel,
+  Checkbox,
+  Autocomplete,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
-import type { AuthorSummary } from '../../types';
-import { AVAILABILITY_FILTERS, AVAILABILITY_FILTER_LABELS, GENRE_OPTIONS, RATING_FILTER_OPTIONS } from './constants';
+import {
+  AVAILABILITY_FILTERS,
+  AVAILABILITY_FILTER_LABELS,
+  GENRE_OPTIONS,
+  RATING_FILTER_OPTIONS,
+} from './constants';
+import type { BookSearchToolbarProps } from './types';
 import ActiveFilterChips from './ActiveFilterChips';
-
-interface BookSearchToolbarProps {
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
-  searchInputRef: RefObject<HTMLInputElement | null>;
-  availabilityFilter: string;
-  onAvailabilityChange: (value: string) => void;
-  hideProfanity: boolean;
-  onHideProfanityChange: (value: boolean) => void;
-  onClearAll: () => void;
-  filteredCount: number;
-  totalCount: number;
-  debouncedSearchTerm: string;
-  onClearSearch: () => void;
-  selectedGenres: string[];
-  onGenresChange: (genres: string[]) => void;
-  minRating: number;
-  onMinRatingChange: (rating: number) => void;
-  selectedAuthors: AuthorSummary[];
-  onAuthorsChange: (authors: AuthorSummary[]) => void;
-  authors: AuthorSummary[];
-  authorsLoading: boolean;
-  authorsError: boolean;
-}
 
 /** BookSearchToolbar provides search, filtering controls, and active filter chips. */
 function BookSearchToolbar({
-  searchTerm, onSearchChange, searchInputRef, availabilityFilter, onAvailabilityChange,
-  hideProfanity, onHideProfanityChange, onClearAll, filteredCount, totalCount,
-  debouncedSearchTerm, onClearSearch, selectedGenres, onGenresChange,
-  minRating, onMinRatingChange, selectedAuthors, onAuthorsChange,
-  authors, authorsLoading, authorsError,
+  searchTerm,
+  onSearchChange,
+  searchInputRef,
+  availabilityFilter,
+  onAvailabilityChange,
+  hideProfanity,
+  onHideProfanityChange,
+  onClearAll,
+  filteredCount,
+  totalCount,
+  debouncedSearchTerm,
+  onClearSearch,
+  selectedGenres,
+  onGenresChange,
+  minRating,
+  onMinRatingChange,
+  selectedAuthors,
+  onAuthorsChange,
+  authors,
+  authorsLoading,
+  authorsError,
 }: BookSearchToolbarProps) {
   const hasActiveFilters =
-    debouncedSearchTerm || availabilityFilter !== AVAILABILITY_FILTERS.ALL ||
-    hideProfanity || selectedGenres.length > 0 || minRating > 0 || selectedAuthors.length > 0;
+    debouncedSearchTerm ||
+    availabilityFilter !== AVAILABILITY_FILTERS.ALL ||
+    hideProfanity ||
+    selectedGenres.length > 0 ||
+    minRating > 0 ||
+    selectedAuthors.length > 0;
 
   return (
     <>
@@ -59,7 +68,9 @@ function BookSearchToolbar({
           inputRef={searchInputRef}
           InputProps={{
             startAdornment: (
-              <InputAdornment position="start"><SearchIcon /></InputAdornment>
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
             ),
             endAdornment: searchTerm && (
               <InputAdornment position="end">
@@ -73,24 +84,39 @@ function BookSearchToolbar({
         <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
           <InputLabel id="availability-filter-label">Availability</InputLabel>
           <Select
-            labelId="availability-filter-label" id="availability-filter"
-            value={availabilityFilter} label="Availability"
+            labelId="availability-filter-label"
+            id="availability-filter"
+            value={availabilityFilter}
+            label="Availability"
             onChange={(e: SelectChangeEvent) => onAvailabilityChange(e.target.value)}
           >
-            <MenuItem value={AVAILABILITY_FILTERS.ALL}>{AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.ALL]}</MenuItem>
-            <MenuItem value={AVAILABILITY_FILTERS.AVAILABLE}>{AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE]}</MenuItem>
-            <MenuItem value={AVAILABILITY_FILTERS.CHECKED_OUT}>{AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT]}</MenuItem>
+            <MenuItem value={AVAILABILITY_FILTERS.ALL}>
+              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.ALL]}
+            </MenuItem>
+            <MenuItem value={AVAILABILITY_FILTERS.AVAILABLE}>
+              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE]}
+            </MenuItem>
+            <MenuItem value={AVAILABILITY_FILTERS.CHECKED_OUT}>
+              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT]}
+            </MenuItem>
           </Select>
         </FormControl>
         <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
           <InputLabel id="genre-filter-label">Genre</InputLabel>
           <Select
-            labelId="genre-filter-label" id="genre-filter" multiple
-            value={selectedGenres} label="Genre"
-            onChange={(e: SelectChangeEvent<string[]>) => onGenresChange(e.target.value as string[])}
+            labelId="genre-filter-label"
+            id="genre-filter"
+            multiple
+            value={selectedGenres}
+            label="Genre"
+            onChange={(e: SelectChangeEvent<string[]>) =>
+              onGenresChange(e.target.value as string[])
+            }
           >
             {GENRE_OPTIONS.map((genre) => (
-              <MenuItem key={genre} value={genre}>{genre}</MenuItem>
+              <MenuItem key={genre} value={genre}>
+                {genre}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
@@ -99,24 +125,34 @@ function BookSearchToolbar({
         <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
           <InputLabel id="rating-filter-label">Minimum Rating</InputLabel>
           <Select
-            labelId="rating-filter-label" id="rating-filter"
-            value={minRating} label="Minimum Rating"
+            labelId="rating-filter-label"
+            id="rating-filter"
+            value={minRating}
+            label="Minimum Rating"
             onChange={(e: SelectChangeEvent<number>) => onMinRatingChange(e.target.value as number)}
           >
             {RATING_FILTER_OPTIONS.map((opt) => (
-              <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
         <Autocomplete
-          multiple fullWidth options={authors} loading={authorsLoading}
-          disabled={authorsError} value={selectedAuthors}
+          multiple
+          fullWidth
+          options={authors}
+          loading={authorsLoading}
+          disabled={authorsError}
+          value={selectedAuthors}
           onChange={(_e, value) => onAuthorsChange(value)}
           getOptionLabel={(opt) => `${opt.last_name}, ${opt.first_name}`}
           isOptionEqualToValue={(opt, val) => opt.id === val.id}
           renderInput={(params) => (
             <TextField
-              {...params} label="Author(s)" placeholder="Search authors..."
+              {...params}
+              label="Author(s)"
+              placeholder="Search authors..."
               helperText={authorsError ? 'Failed to load authors' : undefined}
             />
           )}
@@ -124,7 +160,12 @@ function BookSearchToolbar({
       </Box>
       <Box sx={{ mt: 1 }}>
         <FormControlLabel
-          control={<Checkbox checked={hideProfanity} onChange={(e) => onHideProfanityChange(e.target.checked)} />}
+          control={
+            <Checkbox
+              checked={hideProfanity}
+              onChange={(e) => onHideProfanityChange(e.target.checked)}
+            />
+          }
           label="Hide books with profanity"
         />
       </Box>
@@ -132,13 +173,20 @@ function BookSearchToolbar({
         Showing {filteredCount} of {totalCount} books
       </Typography>
       <ActiveFilterChips
-        debouncedSearchTerm={debouncedSearchTerm} onClearSearch={onClearSearch}
-        availabilityFilter={availabilityFilter} onAvailabilityChange={onAvailabilityChange}
-        hideProfanity={hideProfanity} onHideProfanityChange={onHideProfanityChange}
-        selectedGenres={selectedGenres} onGenresChange={onGenresChange}
-        minRating={minRating} onMinRatingChange={onMinRatingChange}
-        selectedAuthors={selectedAuthors} onAuthorsChange={onAuthorsChange}
-        onClearAll={onClearAll} hasActiveFilters={!!hasActiveFilters}
+        debouncedSearchTerm={debouncedSearchTerm}
+        onClearSearch={onClearSearch}
+        availabilityFilter={availabilityFilter}
+        onAvailabilityChange={onAvailabilityChange}
+        hideProfanity={hideProfanity}
+        onHideProfanityChange={onHideProfanityChange}
+        selectedGenres={selectedGenres}
+        onGenresChange={onGenresChange}
+        minRating={minRating}
+        onMinRatingChange={onMinRatingChange}
+        selectedAuthors={selectedAuthors}
+        onAuthorsChange={onAuthorsChange}
+        onClearAll={onClearAll}
+        hasActiveFilters={!!hasActiveFilters}
       />
     </>
   );

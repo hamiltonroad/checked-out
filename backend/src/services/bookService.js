@@ -135,9 +135,7 @@ class BookService {
     if (idSets.length === 0) return {};
 
     // Intersect all ID sets
-    const intersected = idSets.reduce((acc, set) => {
-      return new Set([...acc].filter((id) => set.has(id)));
-    });
+    const intersected = idSets.reduce((acc, set) => new Set([...acc].filter((id) => set.has(id))));
 
     return { id: { [Op.in]: [...intersected] } };
   }
