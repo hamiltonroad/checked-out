@@ -1,9 +1,10 @@
-import { AppBar, Toolbar, Typography, Container, IconButton, Tooltip, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Container, IconButton, Tooltip, Box, Button } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { useThemeMode } from '../../context/ThemeContext';
+import { useAuth } from '../../hooks/useAuth';
 import AppDrawer from '../AppDrawer';
 import MobileNav from '../MobileNav';
 import { DRAWER_WIDTH } from '../../constants/navigation';
@@ -35,6 +36,13 @@ import { DRAWER_WIDTH } from '../../constants/navigation';
  */
 function Layout() {
   const { mode, toggleMode } = useThemeMode();
+  const { isAuthenticated, patron, logout, loading } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -65,6 +73,27 @@ function Layout() {
               • Library Management
             </Typography>
           </Box>
+          {!loading && (
+            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
+              {isAuthenticated && patron ? (
+                <>
+                  <Typography
+                    variant="bodyMedium"
+                    sx={{ mr: 1, display: { xs: 'none', sm: 'inline' } }}
+                  >
+                    {patron.first_name}
+                  </Typography>
+                  <Button variant="text" color="inherit" onClick={handleLogout} size="small">
+                    Log out
+                  </Button>
+                </>
+              ) : (
+                <Button variant="text" color="inherit" onClick={() => navigate('/login')} size="small">
+                  Log in
+                </Button>
+              )}
+            </Box>
+          )}
           <Tooltip title="Toggle light/dark mode">
             <IconButton onClick={toggleMode} color="inherit" aria-label="toggle theme">
               {/* Show icon for the mode that will be activated on click (not current mode) */}
