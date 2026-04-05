@@ -32,7 +32,13 @@ interface PatronSearchFieldProps {
  * PatronSearchField provides a server-side patron search autocomplete
  * with recent patron quick-select chips
  */
-function PatronSearchField({ control, errors, fieldErrors, isSubmitting, setValue }: PatronSearchFieldProps) {
+function PatronSearchField({
+  control,
+  errors,
+  fieldErrors,
+  isSubmitting,
+  setValue,
+}: PatronSearchFieldProps) {
   const [searchInput, setSearchInput] = useState('');
   const { data: searchRes, isLoading: searchLoading } = usePatronSearch(searchInput);
   const { data: recentRes } = useRecentPatrons();
@@ -45,9 +51,8 @@ function PatronSearchField({ control, errors, fieldErrors, isSubmitting, setValu
     setSearchInput('');
   };
 
-  const noOptionsText = searchInput.length < MIN_SEARCH_LENGTH
-    ? 'Type 2+ characters to search'
-    : 'No patrons found';
+  const noOptionsText =
+    searchInput.length < MIN_SEARCH_LENGTH ? 'Type 2+ characters to search' : 'No patrons found';
 
   return (
     <>
@@ -81,9 +86,7 @@ function PatronSearchField({ control, errors, fieldErrors, isSubmitting, setValu
                 required
                 fullWidth
                 error={!!errors.patronId || !!getFieldError(fieldErrors, 'patron_id')}
-                helperText={
-                  getFieldError(fieldErrors, 'patron_id') || errors.patronId?.message
-                }
+                helperText={getFieldError(fieldErrors, 'patron_id') || errors.patronId?.message}
               />
             )}
           />

@@ -102,10 +102,7 @@ class PatronCheckoutService {
   async getRecentPatrons(currentPatronId, limit = 5) {
     const recentCheckouts = await Checkout.findAll({
       where: { patron_id: { [Op.ne]: currentPatronId } },
-      attributes: [
-        'patron_id',
-        [sequelize.fn('MAX', sequelize.col('checkout_date')), 'latest'],
-      ],
+      attributes: ['patron_id', [sequelize.fn('MAX', sequelize.col('checkout_date')), 'latest']],
       group: ['patron_id'],
       order: [[sequelize.fn('MAX', sequelize.col('checkout_date')), 'DESC']],
       limit,
