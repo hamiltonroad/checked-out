@@ -36,13 +36,13 @@ class BookService {
   /**
    * Calculate book availability status based on copies and checkouts
    * @param {Array<Object>} copies - Copy objects with nested checkouts
-   * @returns {string} 'available' or 'checked_out'
+   * @returns {string} 'available', 'checked_out', or 'no_copies'
    */
   // eslint-disable-next-line class-methods-use-this
   calculateBookStatus(copies) {
     try {
       if (!copies || !Array.isArray(copies) || copies.length === 0) {
-        return 'available';
+        return 'no_copies';
       }
 
       const hasAvailableCopy = copies.some((copy) => {
@@ -58,7 +58,7 @@ class BookService {
       return hasAvailableCopy ? 'available' : 'checked_out';
     } catch (error) {
       logger.error('Error calculating book status:', error);
-      return 'available';
+      return 'no_copies';
     }
   }
 

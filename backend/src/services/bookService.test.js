@@ -167,10 +167,10 @@ describe('BookService', () => {
   });
 
   describe('calculateBookStatus', () => {
-    it('should return available when no copies exist', () => {
-      expect(bookService.calculateBookStatus([])).toBe('available');
-      expect(bookService.calculateBookStatus(null)).toBe('available');
-      expect(bookService.calculateBookStatus(undefined)).toBe('available');
+    it('should return no_copies when no copies exist', () => {
+      expect(bookService.calculateBookStatus([])).toBe('no_copies');
+      expect(bookService.calculateBookStatus(null)).toBe('no_copies');
+      expect(bookService.calculateBookStatus(undefined)).toBe('no_copies');
     });
 
     it('should return available when copy has no checkouts', () => {
