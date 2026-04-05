@@ -1,20 +1,5 @@
-import {
-  Container,
-  Box,
-  Typography,
-  Paper,
-  Skeleton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
+import { Container, Box, Typography, Paper, Skeleton, Grid } from '@mui/material';
 
-/**
- * BooksPageSkeleton displays a loading placeholder for the BooksPage
- */
 /**
  * BooksPageSkeleton displays a loading placeholder for the BooksPage.
  * This component takes no props.
@@ -49,32 +34,21 @@ function BooksPageSkeleton() {
         </Box>
         <Skeleton variant="text" width={150} />
       </Paper>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Title</TableCell>
-              <TableCell>Author(s)</TableCell>
-              <TableCell>Availability</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {[...Array(6)].map((_, index) => (
-              <TableRow key={index}>
-                <TableCell>
-                  <Skeleton variant="text" width="60%" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton variant="text" width="40%" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton variant="rounded" width={100} height={24} />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Grid container spacing={2}>
+        {[...Array(6)].map((_, index) => (
+          <Grid item xs={12} sm={6} md={6} lg={4} xl={3} key={index}>
+            <Paper elevation={1} sx={{ overflow: 'hidden' }}>
+              <Skeleton variant="rectangular" height={160} />
+              <Box sx={{ p: 2 }}>
+                <Skeleton variant="text" width="80%" height={28} />
+                <Skeleton variant="text" width="60%" height={20} />
+                <Skeleton variant="text" width="40%" height={20} />
+                <Skeleton variant="rounded" width={80} height={24} sx={{ mt: 1 }} />
+              </Box>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
     </Container>
   );
 }
