@@ -44,9 +44,9 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     label: 'Patrons',
     icon: PeopleIcon,
     path: '/patrons',
-    disabled: true,
-    ariaLabel: 'Patrons (coming soon)',
-    requiresAuth: false,
+    disabled: false,
+    ariaLabel: 'Navigate to Patrons',
+    requiresAuth: true,
   },
   {
     id: 'reports',
