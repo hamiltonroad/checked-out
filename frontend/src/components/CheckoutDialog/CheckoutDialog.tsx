@@ -1,33 +1,25 @@
 import { useEffect, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   Button,
   Alert,
   Typography,
   CircularProgress,
   Box,
-  Autocomplete,
 } from '@mui/material';
-import { createFilterOptions } from '@mui/material/Autocomplete';
-import { usePatrons } from '../../hooks/usePatrons';
+import { useAuth } from '../../hooks/useAuth';
 import { useAvailableCopies } from '../../hooks/useAvailableCopies';
-import { getFieldError } from '../../utils/errorUtils';
 import type { FieldError as ApiFieldError } from '../../types';
 import CopyRadioGroup from '../CopyRadioGroup';
+import PatronSearchField from './PatronSearchField';
+
+import type { CheckoutPatron, CheckoutFormData } from './types';
 
 const CHECKOUT_DURATION_DAYS = 14;
-
-interface Patron {
-  id: number;
-  first_name: string;
-  last_name: string;
-  card_number: string;
-}
 
 interface CheckoutDialogProps {
   open: boolean;
@@ -38,14 +30,6 @@ interface CheckoutDialogProps {
   error?: string | null;
   fieldErrors?: ApiFieldError[];
 }
-
-interface CheckoutFormData {
-  patronId: Patron | null;
-}
-
-const patronFilter = createFilterOptions<Patron>({
-  stringify: (o) => `${o.first_name} ${o.last_name} ${o.card_number}`,
-});
 
 /**
  * Compute due date as today + CHECKOUT_DURATION_DAYS, formatted for display
@@ -69,33 +53,32 @@ function CheckoutDialog({
   fieldErrors = [],
 }: CheckoutDialogProps) {
   const [selectedCopyId, setSelectedCopyId] = useState('');
+  const { patron: authPatron } = useAuth();
   const {
     handleSubmit,
     reset,
     control,
+    setValue,
     formState: { errors },
-  } = useForm<CheckoutFormData>({ defaultValues: { patronId: null } });
-
-  const {
-    data: patronsRes,
-    isLoading: loadingPatrons,
-    isError: patronsError,
-  } = usePatrons({ status: 'active' });
+  } = useForm<CheckoutFormData>({
+    defaultValues: { patronId: null },
+  });
 
   const { data: copiesRes, isLoading: loadingCopies } = useAvailableCopies(open ? bookId : null);
 
-  const patrons: Patron[] = patronsRes?.data || [];
   const copies = copiesRes?.data?.copies || [];
   const totalCopies = copiesRes?.data?.totalCopies || 0;
   const dueDate = computeDueDate();
   const noCopiesAvailable = !loadingCopies && copies.length === 0;
 
   useEffect(() => {
-    if (!open) {
-      reset();
+    if (open && authPatron) {
+      setValue('patronId', authPatron as CheckoutPatron);
+    } else if (!open) {
+      reset({ patronId: null });
       setSelectedCopyId('');
     }
-  }, [open, reset]);
+  }, [open, reset, setValue, authPatron]);
 
   const handleCopyChange = (copyId: string) => {
     setSelectedCopyId(copyId);
@@ -118,42 +101,12 @@ function CheckoutDialog({
             {error}
           </Alert>
         )}
-        <Controller
-          name="patronId"
+        <PatronSearchField
           control={control}
-          rules={{ required: 'Patron is required.' }}
-          render={({ field }) => (
-            <Autocomplete
-              options={patrons}
-              loading={loadingPatrons}
-              disabled={isSubmitting || patronsError}
-              getOptionLabel={(option) =>
-                `${option.first_name} ${option.last_name} (${option.card_number})`
-              }
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-              filterOptions={patronFilter}
-              noOptionsText="No patrons found"
-              onChange={(_, selected) => field.onChange(selected)}
-              value={field.value || null}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  margin="dense"
-                  label="Patron"
-                  required
-                  fullWidth
-                  error={
-                    !!errors.patronId || patronsError || !!getFieldError(fieldErrors, 'patron_id')
-                  }
-                  helperText={
-                    patronsError
-                      ? 'Failed to load patrons'
-                      : getFieldError(fieldErrors, 'patron_id') || errors.patronId?.message
-                  }
-                />
-              )}
-            />
-          )}
+          errors={errors}
+          fieldErrors={fieldErrors}
+          isSubmitting={isSubmitting}
+          setValue={setValue}
         />
         <CopyRadioGroup
           copies={copies}

@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Checkout, Patron, Copy, Book, Author } = require('../models');
+const { Checkout, Patron, Copy, Book, Author, sequelize } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -90,6 +90,39 @@ class PatronCheckoutService {
     });
 
     return checkouts.map(formatPatronCheckoutResponse);
+  }
+
+  /**
+   * Get recently checked-out-to patrons (excluding the current user)
+   * @param {number} currentPatronId - The authenticated patron's ID
+   * @param {number} [limit=5] - Maximum patrons to return
+   * @returns {Promise<Array>} Recent patron records
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async getRecentPatrons(currentPatronId, limit = 5) {
+    const recentCheckouts = await Checkout.findAll({
+      where: { patron_id: { [Op.ne]: currentPatronId } },
+      attributes: ['patron_id', [sequelize.fn('MAX', sequelize.col('checkout_date')), 'latest']],
+      group: ['patron_id'],
+      order: [[sequelize.fn('MAX', sequelize.col('checkout_date')), 'DESC']],
+      limit,
+      raw: true,
+    });
+
+    if (recentCheckouts.length === 0) {
+      return [];
+    }
+
+    const patronIds = recentCheckouts.map((c) => c.patron_id);
+
+    const patrons = await Patron.findAll({
+      where: { id: { [Op.in]: patronIds }, status: 'active' },
+      attributes: ['id', 'first_name', 'last_name', 'card_number'],
+    });
+
+    // Preserve recency order from the checkout query
+    const patronMap = new Map(patrons.map((p) => [p.id, p]));
+    return patronIds.map((id) => patronMap.get(id)).filter(Boolean);
   }
 }
 

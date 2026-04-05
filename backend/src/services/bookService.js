@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const { Book, Author, Copy, Checkout, sequelize } = require('../models');
 const ApiError = require('../utils/ApiError');
 const logger = require('../config/logger');
+const escapeLikeWildcards = require('../utils/escapeLikeWildcards');
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
@@ -78,16 +79,6 @@ class BookService {
   }
 
   /**
-   * Escape LIKE wildcard characters in a search string
-   * @param {string} str - Raw search string
-   * @returns {string} Escaped string safe for LIKE patterns
-   */
-  // eslint-disable-next-line class-methods-use-this
-  escapeLikeWildcards(str) {
-    return str.replace(/[%_]/g, '\\$&');
-  }
-
-  /**
    * Build Sequelize where clause from filter params
    * @param {Object} filters - Query filters
    * @returns {{ bookWhere: Object, authorWhere: Object|null }}
@@ -107,7 +98,7 @@ class BookService {
     }
 
     if (search) {
-      const escaped = this.escapeLikeWildcards(search);
+      const escaped = escapeLikeWildcards(search);
       authorWhere = {
         [Op.or]: [
           { first_name: { [Op.like]: `%${escaped}%` } },
@@ -133,7 +124,7 @@ class BookService {
     // When searching, find matching book IDs first (title OR author match)
     let bookIdFilter = null;
     if (filters.search) {
-      const escaped = this.escapeLikeWildcards(filters.search);
+      const escaped = escapeLikeWildcards(filters.search);
 
       const titleMatches = await Book.findAll({
         where: { title: { [Op.like]: `%${escaped}%` } },
