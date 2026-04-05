@@ -1,9 +1,8 @@
 import type React from 'react';
 import { useState } from 'react';
 import { Alert, Box } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
 import { RatingStats, ReviewsList } from '../Rating';
-import ratingService from '../../services/ratingService';
+import { useBookRatings, useBookRatingStats } from '../../hooks/useRatings';
 
 interface BookReviewsTabProps {
   bookId: number;
@@ -16,29 +15,13 @@ interface BookReviewsTabProps {
 function BookReviewsTab({ bookId, open }: BookReviewsTabProps) {
   const [reviewPage, setReviewPage] = useState(1);
 
-  // Fetch ratings and reviews
   const {
     data: ratingsData,
     isLoading: ratingsLoading,
     error: ratingsError,
-  } = useQuery({
-    queryKey: ['bookRatings', bookId, reviewPage],
-    queryFn: async () => {
-      const result = await ratingService.getBookRatings(bookId, {
-        limit: 10,
-        offset: (reviewPage - 1) * 10,
-      });
-      return result;
-    },
-    enabled: !!bookId && open,
-  });
+  } = useBookRatings(bookId, reviewPage, open);
 
-  // Fetch rating stats
-  const { data: statsData } = useQuery({
-    queryKey: ['bookRatingStats', bookId],
-    queryFn: () => ratingService.getBookRatingStats(bookId),
-    enabled: !!bookId && open,
-  });
+  const { data: statsData } = useBookRatingStats(bookId, open);
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, page: number) => {
     setReviewPage(page);

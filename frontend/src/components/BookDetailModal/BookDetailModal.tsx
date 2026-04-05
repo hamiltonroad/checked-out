@@ -22,11 +22,11 @@ import StarIcon from '@mui/icons-material/Star';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { useBook } from '../../hooks/useBook';
 import { useCheckout } from '../../hooks/useCheckout';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useBookRatingStats, useSubmitRating } from '../../hooks/useRatings';
+import { useQueryClient } from '@tanstack/react-query';
 import BookDetailSkeleton from './BookDetailSkeleton';
 import { RatingInput } from '../Rating';
 import CheckoutDialog from '../CheckoutDialog';
-import ratingService from '../../services/ratingService';
 import { formatApiError } from '../../utils/errorUtils';
 import BookDetailsTab from './BookDetailsTab';
 import BookReviewsTab from './BookReviewsTab';
@@ -59,21 +59,13 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
   const checkoutMutation = useCheckout();
   const book = data?.data;
 
-  const { data: statsData } = useQuery({
-    queryKey: ['bookRatingStats', bookId],
-    queryFn: () => ratingService.getBookRatingStats(bookId!),
-    enabled: !!bookId && open,
-  });
+  const { data: statsData } = useBookRatingStats(bookId, open);
 
-  const submitRatingMutation = useMutation({
-    mutationFn: ratingService.submitRating,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bookRatings', bookId] });
-      queryClient.invalidateQueries({ queryKey: ['bookRatingStats', bookId] });
-      queryClient.invalidateQueries({ queryKey: ['books'] }); // Refresh book list
-      setShowRatingInput(false);
-    },
-  });
+  const submitRatingMutation = useSubmitRating(bookId);
+
+  const handleRatingSuccess = () => {
+    setShowRatingInput(false);
+  };
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => setTabValue(newValue);
   const isNoCopies = !book?.copies || book.copies.length === 0;
@@ -129,7 +121,10 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
             bookId={bookId}
             bookTitle={book.title}
             existingRating={null}
-            onSubmit={submitRatingMutation.mutateAsync}
+            onSubmit={async (data) => {
+              await submitRatingMutation.mutateAsync(data);
+              handleRatingSuccess();
+            }}
             onClose={() => setShowRatingInput(false)}
           />
         )}
