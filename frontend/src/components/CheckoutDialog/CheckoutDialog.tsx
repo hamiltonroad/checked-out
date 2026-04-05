@@ -73,9 +73,7 @@ function CheckoutDialog({
     onSubmit({ copy_id: parsedCopyId });
   };
 
-  const patronDisplayName = authPatron
-    ? `${authPatron.first_name} ${authPatron.last_name}`
-    : '';
+  const patronDisplayName = authPatron ? `${authPatron.first_name} ${authPatron.last_name}` : '';
 
   const isSubmitDisabled = isSubmitting || !selectedCopyId || noCopiesAvailable || !authPatron;
 

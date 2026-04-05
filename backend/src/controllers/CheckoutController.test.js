@@ -84,10 +84,7 @@ describe('CheckoutController', () => {
       await checkoutController.createCheckout(mockReq, mockRes, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(201);
-      const expectedResponse = ApiResponse.success(
-        mockCheckout,
-        'Checkout created successfully'
-      );
+      const expectedResponse = ApiResponse.success(mockCheckout, 'Checkout created successfully');
       expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
     });
 
