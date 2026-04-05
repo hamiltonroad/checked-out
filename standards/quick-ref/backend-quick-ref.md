@@ -176,6 +176,28 @@ await Book.update({ status }, { where: { id } });
 await book.destroy();
 ```
 
+### Complex Query Patterns (No Raw SQL)
+
+```javascript
+// GROUP BY with aggregation
+const genreCounts = await Book.findAll({
+  attributes: ['genre', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+  group: ['genre'],
+});
+
+// HAVING clause
+const popularGenres = await Book.findAll({
+  attributes: ['genre', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+  group: ['genre'],
+  having: sequelize.where(sequelize.fn('COUNT', sequelize.col('id')), { [Op.gt]: 5 }),
+});
+
+// Subquery via include (replaces correlated subqueries)
+const booksWithCheckouts = await Book.findAll({
+  include: [{ model: Checkout, required: true }],
+});
+```
+
 ---
 
 ## Security

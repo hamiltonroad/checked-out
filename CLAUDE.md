@@ -33,6 +33,7 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - Do NOT put business logic in controllers. Controllers call services. Period.
 - Do NOT use console.log in production code. Use the structured logger.
 - Do NOT use raw SQL queries. Use Sequelize ORM methods.
+- For complex queries (GROUP BY, HAVING, subqueries), use Sequelize methods (`findAll` with `group`, `having`, `attributes` with `sequelize.fn`/`sequelize.col`, and `include` with subqueries) instead of raw SQL. See backend quick-ref for examples.
 - Do NOT interpolate user-supplied values into `sequelize.literal()`. Use parameterized Sequelize methods instead.
 - Do NOT commit .env files or hardcode credentials.
 - Do NOT skip testing. Run lint + format before marking work complete.
@@ -50,12 +51,15 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - All dev/seed passwords MUST use the same value from a single shared location.
 - When a mutation hook succeeds, it MUST invalidate all query keys displaying affected data. Use React Query prefix matching.
 - Shared TypeScript interfaces and types MUST be defined in one canonical location (`frontend/src/types/index.ts`) — do not redeclare types in constants or other files.
+- Shared domain constants (status maps, color maps, label maps) MUST live in `frontend/src/constants/` — never duplicated across components.
+- When extracting a component to its own file, migrate all applicable tests to the new component's test file — do not silently drop test coverage.
+- Validators must not accept fields the controller ignores unless there is a documented migration plan with issue reference.
 
 ## Conventions
 
 - Backend: camelCase variables/functions, PascalCase classes, UPPER_SNAKE_CASE constants.
 - Frontend: PascalCase components/files, camelCase props, handle* event handlers, use* hooks.
-- All React components must define PropTypes — including zero-prop components (use empty `{}`). Use `shape()` for objects and `arrayOf(shape())` for arrays — never raw `object` or `array`.
+- All React components must define prop types. In `.tsx` files, TypeScript `interface`/`type` definitions satisfy this requirement. In `.jsx` files, use `PropTypes` with `shape()` for objects and `arrayOf(shape())` for arrays — never raw `object` or `array`. Zero-prop components use an empty interface or empty `PropTypes = {}`.
 - Use Material UI theme tokens — no inline `style` objects or inline color, spacing, or typography values in MUI components. Use the `sx` prop or `styled()` with theme tokens.
 - API responses use `ApiResponse.success()` / `ApiResponse.error()` wrappers.
 - Sequelize models use `underscored: true` and `timestamps: true`.

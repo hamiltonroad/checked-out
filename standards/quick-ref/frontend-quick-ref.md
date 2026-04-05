@@ -72,11 +72,23 @@ BookCard.propTypes = {
 export default BookCard;
 ```
 
-### Zero-Prop PropTypes
+### Zero-Prop Type Definitions
 
-All components must declare PropTypes — even those that accept no props. Use an empty object:
+All components must declare prop types — even those that accept no props. In `.tsx` files, use an empty interface. In `.jsx` files, use an empty `propTypes` object:
+
+```tsx
+// .tsx — empty interface
+interface StatusBarProps {}
+
+const StatusBar = ({}: StatusBarProps) => {
+  return <Box sx={{ p: 1 }}>Ready</Box>;
+};
+
+export default StatusBar;
+```
 
 ```jsx
+// .jsx — empty propTypes
 const StatusBar = () => {
   return <Box sx={{ p: 1 }}>Ready</Box>;
 };
@@ -85,6 +97,8 @@ StatusBar.propTypes = {};
 
 export default StatusBar;
 ```
+
+> **Note:** TypeScript `interface`/`type` definitions satisfy the prop types requirement for `.tsx` files. `PropTypes` are only required in `.jsx` files.
 
 ---
 
@@ -325,7 +339,7 @@ const handleClick = useCallback(() => {
 
 ### DO ✅
 - **Functional components** with hooks only
-- **PropTypes** for all props
+- **Prop type definitions** for all props (TS interfaces for .tsx, PropTypes for .jsx)
 - **Extract logic** into custom hooks
 - **Service layer** for all API calls
 - **Error boundaries** for error handling
@@ -353,7 +367,7 @@ const handleClick = useCallback(() => {
 Before commit:
 - [ ] ESLint passes
 - [ ] Prettier formatted
-- [ ] PropTypes defined
+- [ ] Prop types defined (TS interface or PropTypes)
 - [ ] Tests passing
 - [ ] No console.log
 - [ ] Accessible
