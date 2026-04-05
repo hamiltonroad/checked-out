@@ -12,13 +12,26 @@
         schema:
           type: string
           maxLength: 255
-        description: Search term for book title or author
+        description: Search term for book title
       - name: genre
         in: query
         schema:
           type: string
-          maxLength: 100
-        description: Filter by genre
+          maxLength: 500
+        description: Filter by genre (comma-separated for multiple, e.g. "Fiction,Fantasy")
+      - name: minRating
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 5
+        description: Minimum average rating threshold (books with no ratings excluded)
+      - name: authorId
+        in: query
+        schema:
+          type: string
+          maxLength: 500
+        description: Filter by author ID(s) (comma-separated, e.g. "1,2,3")
       - name: profanity
         in: query
         schema:

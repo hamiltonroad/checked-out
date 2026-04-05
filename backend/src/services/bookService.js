@@ -78,74 +78,77 @@ class BookService {
     return bookData;
   }
 
-  /**
-   * Build Sequelize where clause from filter params
-   * @param {Object} filters - Query filters
-   * @returns {{ bookWhere: Object, authorWhere: Object|null }}
-   */
+  /** Build Sequelize where clause from filter params */
   // eslint-disable-next-line class-methods-use-this
   buildWhereClause(filters) {
-    const { search, genre, profanity } = filters;
+    const { genre, profanity } = filters;
     const bookWhere = {};
-    let authorWhere = null;
 
     if (genre) {
-      bookWhere.genre = genre;
+      const genres = genre.includes(',') ? genre.split(',').map((g) => g.trim()) : [genre];
+      bookWhere.genre = genres.length > 1 ? { [Op.in]: genres } : genres[0];
     }
 
     if (profanity !== undefined && profanity !== '') {
       bookWhere.has_profanity = profanity === 'true' || profanity === true;
     }
 
-    if (search) {
-      const escaped = escapeLikeWildcards(search);
-      authorWhere = {
-        [Op.or]: [
-          { first_name: { [Op.like]: `%${escaped}%` } },
-          { last_name: { [Op.like]: `%${escaped}%` } },
-        ],
-      };
-    }
-
-    return { bookWhere, authorWhere };
+    return { bookWhere };
   }
 
-  /**
-   * Get all books with filtering, search, and pagination
-   * @param {Object} filters - Query filters
-   * @returns {Promise<Object>} { books, pagination }
-   */
-  async getAllBooks(filters = {}) {
-    const page = Math.max(parseInt(filters.page, 10) || DEFAULT_PAGE, 1);
-    const limit = Math.min(parseInt(filters.limit, 10) || DEFAULT_LIMIT, MAX_LIMIT);
-    const offset = filters.offset !== undefined ? parseInt(filters.offset, 10) : (page - 1) * limit;
-    const { bookWhere, authorWhere } = this.buildWhereClause(filters);
+  /** Build ID-based pre-filters for search, authorId, and minRating */
+  // eslint-disable-next-line class-methods-use-this
+  async buildIdFilters(filters) {
+    const idSets = [];
 
-    // When searching, find matching book IDs first (title OR author match)
-    let bookIdFilter = null;
     if (filters.search) {
       const escaped = escapeLikeWildcards(filters.search);
-
       const titleMatches = await Book.findAll({
         where: { title: { [Op.like]: `%${escaped}%` } },
         attributes: ['id'],
         raw: true,
       });
+      idSets.push(new Set(titleMatches.map((b) => b.id)));
+    }
 
+    if (filters.authorId) {
+      const authorIds = filters.authorId.split(',').map((id) => parseInt(id.trim(), 10));
       const authorMatches = await Author.findAll({
-        where: authorWhere,
+        where: { id: { [Op.in]: authorIds } },
         attributes: [],
         include: [{ model: Book, as: 'books', attributes: ['id'], through: { attributes: [] } }],
       });
-
-      const authorBookIds = authorMatches.flatMap((a) => a.books.map((b) => b.id));
-      const titleBookIds = titleMatches.map((b) => b.id);
-      const allMatchIds = [...new Set([...titleBookIds, ...authorBookIds])];
-
-      bookIdFilter = { id: { [Op.in]: allMatchIds } };
+      const bookIds = authorMatches.flatMap((a) => a.books.map((b) => b.id));
+      idSets.push(new Set(bookIds));
     }
 
-    const where = { ...bookWhere, ...bookIdFilter };
+    if (filters.minRating) {
+      const minRating = parseInt(filters.minRating, 10);
+      const ratedBooks = await sequelize.query(
+        `SELECT book_id FROM ratings GROUP BY book_id HAVING AVG(rating) >= ? AND COUNT(*) > 0`,
+        { replacements: [minRating], type: sequelize.QueryTypes.SELECT }
+      );
+      const bookIds = ratedBooks.map((r) => r.book_id);
+      idSets.push(new Set(bookIds));
+    }
+
+    if (idSets.length === 0) return {};
+
+    // Intersect all ID sets
+    const intersected = idSets.reduce((acc, set) => new Set([...acc].filter((id) => set.has(id))));
+
+    return { id: { [Op.in]: [...intersected] } };
+  }
+
+  /** Get all books with filtering, search, and pagination */
+  async getAllBooks(filters = {}) {
+    const page = Math.max(parseInt(filters.page, 10) || DEFAULT_PAGE, 1);
+    const limit = Math.min(parseInt(filters.limit, 10) || DEFAULT_LIMIT, MAX_LIMIT);
+    const offset = filters.offset !== undefined ? parseInt(filters.offset, 10) : (page - 1) * limit;
+    const { bookWhere } = this.buildWhereClause(filters);
+
+    const idFilters = await this.buildIdFilters(filters);
+    const where = { ...bookWhere, ...idFilters };
 
     const { count: total, rows: books } = await Book.findAndCountAll({
       where,

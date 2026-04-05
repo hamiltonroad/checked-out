@@ -8,8 +8,10 @@ class BookController {
   /**
    * Get all books with authors, supporting search, filtering, and pagination
    * Query Parameters:
-   * - search: Search by title or author name
-   * - genre: Filter by genre
+   * - search: Search by book title
+   * - genre: Filter by genre (comma-separated for multiple)
+   * - minRating: Minimum average rating (1-5)
+   * - authorId: Filter by author ID(s) (comma-separated)
    * - profanity: Filter by profanity status (true/false)
    * - page: Page number (default 1)
    * - limit: Maximum number of results per page (default 20)
@@ -25,6 +27,8 @@ class BookController {
         search: req.query.search,
         genre: req.query.genre,
         profanity: req.query.profanity,
+        minRating: req.query.minRating,
+        authorId: req.query.authorId,
         page: req.query.page,
         limit: req.query.limit,
         offset: req.query.offset,

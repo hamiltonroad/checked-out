@@ -74,6 +74,19 @@ Author:
       type: string
       format: date-time
 
+AuthorSummary:
+  type: object
+  properties:
+    id:
+      type: integer
+    first_name:
+      type: string
+      maxLength: 100
+      nullable: true
+    last_name:
+      type: string
+      maxLength: 100
+
 BookWithAuthors:
   allOf:
     - $ref: '#/Book'

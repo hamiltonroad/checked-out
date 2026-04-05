@@ -4,6 +4,8 @@ interface BookQueryParams {
   search?: string;
   genre?: string;
   profanity?: string | boolean;
+  minRating?: number;
+  authorId?: string;
   page?: number;
   limit?: number;
 }
@@ -15,6 +17,8 @@ const bookService = {
     if (params.search) queryParams.search = params.search;
     if (params.genre) queryParams.genre = params.genre;
     if (params.profanity !== undefined) queryParams.profanity = String(params.profanity);
+    if (params.minRating) queryParams.minRating = String(params.minRating);
+    if (params.authorId) queryParams.authorId = params.authorId;
     if (params.page) queryParams.page = String(params.page);
     if (params.limit) queryParams.limit = String(params.limit);
 
