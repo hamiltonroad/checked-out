@@ -1,23 +1,15 @@
 import type { RefObject } from 'react';
 import {
-  TextField,
-  InputAdornment,
-  IconButton,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Chip,
-  Button,
-  Box,
-  Typography,
-  FormControlLabel,
-  Checkbox,
+  TextField, InputAdornment, IconButton, Select, MenuItem,
+  FormControl, InputLabel, Box, Typography, FormControlLabel,
+  Checkbox, Autocomplete,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
-import { AVAILABILITY_FILTERS, AVAILABILITY_FILTER_LABELS } from './constants';
+import type { AuthorSummary } from '../../types';
+import { AVAILABILITY_FILTERS, AVAILABILITY_FILTER_LABELS, GENRE_OPTIONS, RATING_FILTER_OPTIONS } from './constants';
+import ActiveFilterChips from './ActiveFilterChips';
 
 interface BookSearchToolbarProps {
   searchTerm: string;
@@ -32,52 +24,42 @@ interface BookSearchToolbarProps {
   totalCount: number;
   debouncedSearchTerm: string;
   onClearSearch: () => void;
+  selectedGenres: string[];
+  onGenresChange: (genres: string[]) => void;
+  minRating: number;
+  onMinRatingChange: (rating: number) => void;
+  selectedAuthors: AuthorSummary[];
+  onAuthorsChange: (authors: AuthorSummary[]) => void;
+  authors: AuthorSummary[];
+  authorsLoading: boolean;
+  authorsError: boolean;
 }
 
-/**
- * BookSearchToolbar provides search, availability filtering, profanity filtering,
- * filter chips, and a clear-all button for the BooksPage.
- */
+/** BookSearchToolbar provides search, filtering controls, and active filter chips. */
 function BookSearchToolbar({
-  searchTerm,
-  onSearchChange,
-  searchInputRef,
-  availabilityFilter,
-  onAvailabilityChange,
-  hideProfanity,
-  onHideProfanityChange,
-  onClearAll,
-  filteredCount,
-  totalCount,
-  debouncedSearchTerm,
-  onClearSearch,
+  searchTerm, onSearchChange, searchInputRef, availabilityFilter, onAvailabilityChange,
+  hideProfanity, onHideProfanityChange, onClearAll, filteredCount, totalCount,
+  debouncedSearchTerm, onClearSearch, selectedGenres, onGenresChange,
+  minRating, onMinRatingChange, selectedAuthors, onAuthorsChange,
+  authors, authorsLoading, authorsError,
 }: BookSearchToolbarProps) {
   const hasActiveFilters =
-    debouncedSearchTerm || availabilityFilter !== AVAILABILITY_FILTERS.ALL || hideProfanity;
+    debouncedSearchTerm || availabilityFilter !== AVAILABILITY_FILTERS.ALL ||
+    hideProfanity || selectedGenres.length > 0 || minRating > 0 || selectedAuthors.length > 0;
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          gap: 2,
-          alignItems: 'flex-start',
-          mb: 1.5,
-        }}
-      >
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 1.5 }}>
         <TextField
           fullWidth
-          label="Search Books"
-          placeholder="Search by title or author..."
+          label="Search by Title"
+          placeholder="Search by title..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           inputRef={searchInputRef}
           InputProps={{
             startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
+              <InputAdornment position="start"><SearchIcon /></InputAdornment>
             ),
             endAdornment: searchTerm && (
               <InputAdornment position="end">
@@ -91,87 +73,73 @@ function BookSearchToolbar({
         <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
           <InputLabel id="availability-filter-label">Availability</InputLabel>
           <Select
-            labelId="availability-filter-label"
-            id="availability-filter"
-            value={availabilityFilter}
-            label="Availability"
+            labelId="availability-filter-label" id="availability-filter"
+            value={availabilityFilter} label="Availability"
             onChange={(e: SelectChangeEvent) => onAvailabilityChange(e.target.value)}
           >
-            <MenuItem value={AVAILABILITY_FILTERS.ALL}>
-              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.ALL]}
-            </MenuItem>
-            <MenuItem value={AVAILABILITY_FILTERS.AVAILABLE}>
-              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE]}
-            </MenuItem>
-            <MenuItem value={AVAILABILITY_FILTERS.CHECKED_OUT}>
-              {AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT]}
-            </MenuItem>
+            <MenuItem value={AVAILABILITY_FILTERS.ALL}>{AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.ALL]}</MenuItem>
+            <MenuItem value={AVAILABILITY_FILTERS.AVAILABLE}>{AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.AVAILABLE]}</MenuItem>
+            <MenuItem value={AVAILABILITY_FILTERS.CHECKED_OUT}>{AVAILABILITY_FILTER_LABELS[AVAILABILITY_FILTERS.CHECKED_OUT]}</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
+          <InputLabel id="genre-filter-label">Genre</InputLabel>
+          <Select
+            labelId="genre-filter-label" id="genre-filter" multiple
+            value={selectedGenres} label="Genre"
+            onChange={(e: SelectChangeEvent<string[]>) => onGenresChange(e.target.value as string[])}
+          >
+            {GENRE_OPTIONS.map((genre) => (
+              <MenuItem key={genre} value={genre}>{genre}</MenuItem>
+            ))}
           </Select>
         </FormControl>
       </Box>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 1.5 }}>
+        <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
+          <InputLabel id="rating-filter-label">Minimum Rating</InputLabel>
+          <Select
+            labelId="rating-filter-label" id="rating-filter"
+            value={minRating} label="Minimum Rating"
+            onChange={(e: SelectChangeEvent<number>) => onMinRatingChange(e.target.value as number)}
+          >
+            {RATING_FILTER_OPTIONS.map((opt) => (
+              <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Autocomplete
+          multiple fullWidth options={authors} loading={authorsLoading}
+          disabled={authorsError} value={selectedAuthors}
+          onChange={(_e, value) => onAuthorsChange(value)}
+          getOptionLabel={(opt) => `${opt.last_name}, ${opt.first_name}`}
+          isOptionEqualToValue={(opt, val) => opt.id === val.id}
+          renderInput={(params) => (
+            <TextField
+              {...params} label="Author(s)" placeholder="Search authors..."
+              helperText={authorsError ? 'Failed to load authors' : undefined}
+            />
+          )}
+        />
+      </Box>
       <Box sx={{ mt: 1 }}>
         <FormControlLabel
-          control={
-            <Checkbox
-              checked={hideProfanity}
-              onChange={(e) => onHideProfanityChange(e.target.checked)}
-            />
-          }
+          control={<Checkbox checked={hideProfanity} onChange={(e) => onHideProfanityChange(e.target.checked)} />}
           label="Hide books with profanity"
         />
       </Box>
       <Typography variant="body2" color="text.secondary">
         Showing {filteredCount} of {totalCount} books
       </Typography>
-      {hasActiveFilters && (
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 1,
-            mt: 2,
-            alignItems: 'center',
-          }}
-        >
-          {debouncedSearchTerm && (
-            <Chip
-              label={`Search: "${debouncedSearchTerm}"`}
-              onDelete={onClearSearch}
-              size="small"
-              variant="outlined"
-              aria-label={`Remove search filter: ${debouncedSearchTerm}`}
-            />
-          )}
-          {availabilityFilter !== AVAILABILITY_FILTERS.ALL && (
-            <Chip
-              label={`Availability: ${AVAILABILITY_FILTER_LABELS[availabilityFilter]}`}
-              onDelete={() => onAvailabilityChange(AVAILABILITY_FILTERS.ALL)}
-              size="small"
-              variant="outlined"
-              aria-label={`Remove availability filter: ${AVAILABILITY_FILTER_LABELS[availabilityFilter]}`}
-            />
-          )}
-          {hideProfanity && (
-            <Chip
-              label="Hiding profanity"
-              onDelete={() => onHideProfanityChange(false)}
-              size="small"
-              variant="outlined"
-              aria-label="Remove profanity filter"
-            />
-          )}
-          {hasActiveFilters && (
-            <Button
-              size="small"
-              onClick={onClearAll}
-              sx={{ ml: 0.5 }}
-              aria-label="Clear all filters"
-            >
-              Clear all filters
-            </Button>
-          )}
-        </Box>
-      )}
+      <ActiveFilterChips
+        debouncedSearchTerm={debouncedSearchTerm} onClearSearch={onClearSearch}
+        availabilityFilter={availabilityFilter} onAvailabilityChange={onAvailabilityChange}
+        hideProfanity={hideProfanity} onHideProfanityChange={onHideProfanityChange}
+        selectedGenres={selectedGenres} onGenresChange={onGenresChange}
+        minRating={minRating} onMinRatingChange={onMinRatingChange}
+        selectedAuthors={selectedAuthors} onAuthorsChange={onAuthorsChange}
+        onClearAll={onClearAll} hasActiveFilters={!!hasActiveFilters}
+      />
     </>
   );
 }
