@@ -1,4 +1,13 @@
-import { AppBar, Toolbar, Typography, Container, IconButton, Tooltip, Box, Button } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Container,
+  IconButton,
+  Tooltip,
+  Box,
+  Button,
+} from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
@@ -88,7 +97,12 @@ function Layout() {
                   </Button>
                 </>
               ) : (
-                <Button variant="text" color="inherit" onClick={() => navigate('/login')} size="small">
+                <Button
+                  variant="text"
+                  color="inherit"
+                  onClick={() => navigate('/login')}
+                  size="small"
+                >
                   Log in
                 </Button>
               )}
