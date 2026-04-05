@@ -9,6 +9,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (cardNumber: string, password: string) => Promise<Patron>;
   logout: () => Promise<void>;
+  clearAuth: () => void;
 }
 
 interface AuthProviderProps {
@@ -16,6 +17,15 @@ interface AuthProviderProps {
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+/** Module-level reference for use by Axios interceptor (outside React tree) */
+let _clearAuth: (() => void) | null = null;
+
+/** Returns the clearAuth function when AuthProvider is mounted */
+// eslint-disable-next-line react-refresh/only-export-components
+export function getAuthClearFn(): (() => void) | null {
+  return _clearAuth;
+}
 
 /**
  * AuthProvider — manages patron authentication state via JWT cookies.
@@ -65,6 +75,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setPatron(null);
   }, []);
 
+  const handleClearAuth = useCallback(() => {
+    setPatron(null);
+  }, []);
+
+  // Expose clearAuth to the Axios interceptor (outside React tree)
+  useEffect(() => {
+    _clearAuth = handleClearAuth;
+    return () => {
+      _clearAuth = null;
+    };
+  }, [handleClearAuth]);
+
   const value = useMemo(
     () => ({
       patron,
@@ -72,8 +94,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       loading,
       login: handleLogin,
       logout: handleLogout,
+      clearAuth: handleClearAuth,
     }),
-    [patron, loading, handleLogin, handleLogout]
+    [patron, loading, handleLogin, handleLogout, handleClearAuth]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
