@@ -65,8 +65,8 @@ module.exports = {
     const patronCount = parseInt(results[0].count, 10);
 
     if (patronCount > IDEMPOTENCY_THRESHOLD) {
+      // eslint-disable-next-line no-console
       console.log(
-        // eslint-disable-line no-console
         `Skipping bulk patron seed: ${patronCount} patrons already exist (threshold: ${IDEMPOTENCY_THRESHOLD}).`
       );
       return;
@@ -100,8 +100,8 @@ module.exports = {
 
     await queryInterface.bulkInsert('patrons', patrons);
 
+    // eslint-disable-next-line no-console
     console.log(
-      // eslint-disable-line no-console
       `Seeded ${PATRON_COUNT} bulk patrons (card numbers ${BULK_CARD_PREFIX}00001 to ${BULK_CARD_PREFIX}05000).`
     );
     console.log(`Dev password for all bulk patrons: ${DEV_PASSWORD}`); // eslint-disable-line no-console

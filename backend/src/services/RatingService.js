@@ -5,6 +5,7 @@ class RatingService {
   /**
    * Create or update a rating
    */
+  // eslint-disable-next-line class-methods-use-this
   async createOrUpdateRating({ bookId, patronId, rating, reviewText }) {
     // Validate rating value
     if (!rating || rating < 1 || rating > 5) {
@@ -39,22 +40,23 @@ class RatingService {
       });
 
       return existingRating;
-    } else {
-      // Create new rating
-      const newRating = await Rating.create({
-        book_id: bookId,
-        patron_id: patronId,
-        rating,
-        review_text: reviewText,
-      });
-
-      return newRating;
     }
+
+    // Create new rating
+    const newRating = await Rating.create({
+      book_id: bookId,
+      patron_id: patronId,
+      rating,
+      review_text: reviewText,
+    });
+
+    return newRating;
   }
 
   /**
    * Get all ratings for a specific book
    */
+  // eslint-disable-next-line class-methods-use-this
   async getBookRatings(bookId, options = {}) {
     const { limit = 10, offset = 0, includeReviews = true } = options;
 
@@ -90,6 +92,7 @@ class RatingService {
   /**
    * Get all ratings by a specific patron
    */
+  // eslint-disable-next-line class-methods-use-this
   async getPatronRatings(patronId, options = {}) {
     const { limit = 10, offset = 0 } = options;
 
@@ -127,6 +130,7 @@ class RatingService {
   /**
    * Get a specific rating
    */
+  // eslint-disable-next-line class-methods-use-this
   async getRating(bookId, patronId) {
     const rating = await Rating.findOne({
       where: {
@@ -157,6 +161,7 @@ class RatingService {
   /**
    * Delete a rating
    */
+  // eslint-disable-next-line class-methods-use-this
   async deleteRating(bookId, patronId, requestingPatronId) {
     // Check if the requesting patron is the owner of the rating
     if (patronId !== requestingPatronId) {

@@ -5,6 +5,7 @@ class WishlistService {
   /**
    * Add a book to a patron's wishlist
    */
+  // eslint-disable-next-line class-methods-use-this
   async addToWishlist(patronId, bookId) {
     const book = await Book.findByPk(bookId);
     if (!book) {
@@ -30,6 +31,7 @@ class WishlistService {
   /**
    * Remove a book from a patron's wishlist
    */
+  // eslint-disable-next-line class-methods-use-this
   async removeFromWishlist(patronId, bookId) {
     const entry = await Wishlist.findOne({
       where: { patron_id: patronId, book_id: bookId },
@@ -47,6 +49,7 @@ class WishlistService {
   /**
    * Get all wishlist entries for a patron with book details
    */
+  // eslint-disable-next-line class-methods-use-this
   async getPatronWishlist(patronId) {
     const entries = await Wishlist.findAll({
       where: { patron_id: patronId },

@@ -19,6 +19,10 @@
     "test:smoke": "npx playwright test",
     "prepare": "husky"
   },
+  "lint-staged": {
+    "backend/src/**/*.js": "cd backend && eslint --no-warn-ignored",
+    "frontend/src/**/*.{ts,tsx}": "cd frontend && eslint --no-warn-ignored"
+  },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "husky": "^9.1.7",

@@ -20,7 +20,7 @@ function WishlistPage() {
     removeFromWishlist.mutate(bookId);
   };
 
-  const handleBookClick = (_bookId: number) => {
+  const handleBookClick = () => {
     navigate('/');
   };
 

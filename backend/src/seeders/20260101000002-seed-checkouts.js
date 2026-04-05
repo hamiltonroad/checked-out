@@ -6,6 +6,10 @@
  */
 
 module.exports = {
-  async up() {},
-  async down() {},
+  async up() {
+    // No-op: replaced by 20260101000002-seed-copies.js and 20260101000003-seed-checkouts.js
+  },
+  async down() {
+    // No-op: replaced by 20260101000002-seed-copies.js and 20260101000003-seed-checkouts.js
+  },
 };

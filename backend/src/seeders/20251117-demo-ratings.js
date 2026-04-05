@@ -1,15 +1,13 @@
-'use strict';
-
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up(queryInterface) {
     const [books] = await queryInterface.sequelize.query(
       `SELECT id, title FROM books WHERE title IN ('1984', 'A Brief History of Time', 'A Fire Upon the Deep', 'A Game of Thrones')`
     );
 
     const bookMap = {};
-    for (const book of books) {
+    books.forEach((book) => {
       bookMap[book.title] = book.id;
-    }
+    });
 
     await queryInterface.bulkInsert(
       'ratings',
@@ -75,7 +73,7 @@ module.exports = {
     );
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface) {
     await queryInterface.bulkDelete('ratings', null, {});
   },
 };
