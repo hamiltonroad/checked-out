@@ -16,6 +16,22 @@ router.get(
 );
 
 router.get(
+  '/search',
+  standardLimiter,
+  authenticate,
+  validateRequest(patronValidator.search),
+  patronController.searchPatrons
+);
+
+router.get(
+  '/recent',
+  standardLimiter,
+  authenticate,
+  validateRequest(patronValidator.recent),
+  patronController.getRecentPatrons
+);
+
+router.get(
   '/:id',
   standardLimiter,
   authenticate,
