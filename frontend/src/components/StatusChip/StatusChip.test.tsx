@@ -24,6 +24,20 @@ describe('StatusChip', () => {
     expect(chip).toBeInTheDocument();
   });
 
+  it('should render no_copies status with default chip', () => {
+    render(<StatusChip status="no_copies" />);
+
+    const chip = screen.getByText('No Copies');
+    expect(chip).toBeInTheDocument();
+  });
+
+  it('should display RemoveCircleOutlineIcon for no_copies status', () => {
+    const { container } = render(<StatusChip status="no_copies" />);
+
+    const icon = container.querySelector('.MuiChip-icon');
+    expect(icon).toBeInTheDocument();
+  });
+
   it('should render with small size by default', () => {
     const { container } = render(<StatusChip status="available" />);
 

@@ -83,6 +83,10 @@ BookWithAuthors:
           type: array
           items:
             $ref: '#/Author'
+        status:
+          type: string
+          enum: [available, checked_out, no_copies]
+          description: Computed availability status based on copies and checkouts
 
 Patron:
   type: object

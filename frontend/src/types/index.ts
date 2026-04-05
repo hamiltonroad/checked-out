@@ -44,7 +44,7 @@ export interface Book {
   publisher?: string;
   publication_year?: number;
   genre?: string;
-  status: 'available' | 'checked_out' | 'overdue';
+  status: 'available' | 'checked_out' | 'overdue' | 'no_copies';
   has_profanity?: boolean;
   average_rating?: number | string;
   total_ratings?: number;
@@ -146,7 +146,7 @@ export interface ExistingRating {
 // UI Types
 // ============================================================================
 
-export type BookStatus = 'available' | 'checked_out' | 'overdue';
+export type BookStatus = 'available' | 'checked_out' | 'overdue' | 'no_copies';
 
 export type ChipSize = 'small' | 'medium';
 
