@@ -5,6 +5,8 @@ interface UseBooksParams {
   search?: string;
   genre?: string;
   profanity?: string;
+  minRating?: number;
+  authorId?: string;
   page?: number;
   limit?: number;
 }
