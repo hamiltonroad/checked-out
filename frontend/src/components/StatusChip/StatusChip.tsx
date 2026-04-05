@@ -3,11 +3,12 @@ import type { SvgIconComponent } from '@mui/icons-material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import ErrorIcon from '@mui/icons-material/Error';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import type { BookStatus, ChipSize } from '../../types';
 
 interface StatusConfig {
   label: string;
-  color: 'success' | 'warning' | 'error';
+  color: 'success' | 'warning' | 'error' | 'default';
   IconComponent: SvgIconComponent;
 }
 
@@ -26,6 +27,11 @@ const STATUS_CONFIG: Record<BookStatus, StatusConfig> = {
     label: 'Overdue',
     color: 'error',
     IconComponent: ErrorIcon,
+  },
+  no_copies: {
+    label: 'No Copies',
+    color: 'default',
+    IconComponent: RemoveCircleOutlineIcon,
   },
 };
 

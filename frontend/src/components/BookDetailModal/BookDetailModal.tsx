@@ -17,6 +17,7 @@ import {
   Tabs,
   Tab,
   Snackbar,
+  Tooltip,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import StarIcon from '@mui/icons-material/Star';
@@ -59,8 +60,9 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
   const { data, isLoading, error } = useBook(bookId);
   const checkoutMutation = useCheckout();
   const book = data?.data;
-  const checkoutError = checkoutMutation.error;
-  const parsedCheckoutErrors = checkoutError ? parseApiError(checkoutError).fieldErrors : [];
+  const parsedCheckoutErrors = checkoutMutation.error
+    ? parseApiError(checkoutMutation.error).fieldErrors
+    : [];
 
   const { data: statsData } = useQuery({
     queryKey: ['bookRatingStats', bookId],
@@ -103,12 +105,7 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
     >
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         Book Details
-        <IconButton
-          onClick={onClose}
-          size="small"
-          aria-label="close"
-          sx={{ color: 'text.secondary' }}
-        >
+        <IconButton onClick={onClose} size="small" aria-label="close" sx={{ color: 'text.secondary' }}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -152,13 +149,18 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
       <Divider />
       <DialogActions>
         {book && (
-          <Button
-            onClick={() => setCheckoutOpen(true)}
-            startIcon={<LibraryBooksIcon />}
-            variant="contained"
-          >
-            Check Out
-          </Button>
+          <Tooltip title={book.status === 'no_copies' ? 'No copies available for checkout' : ''}>
+            <span>
+              <Button
+                onClick={() => setCheckoutOpen(true)}
+                startIcon={<LibraryBooksIcon />}
+                variant="contained"
+                disabled={book.status === 'no_copies'}
+              >
+                Check Out
+              </Button>
+            </span>
+          </Tooltip>
         )}
         {book && (
           <Button
@@ -180,18 +182,11 @@ function BookDetailModal({ open, onClose, bookId }: BookDetailModalProps) {
         onSubmit={handleCheckoutSubmit}
         bookId={bookId}
         isSubmitting={checkoutMutation.isPending}
-        error={checkoutError ? formatApiError(checkoutError) : null}
+        error={checkoutMutation.error ? formatApiError(checkoutMutation.error) : null}
         fieldErrors={parsedCheckoutErrors}
       />
-      <Snackbar
-        open={checkoutSuccess}
-        autoHideDuration={4000}
-        onClose={() => setCheckoutSuccess(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity="success" onClose={() => setCheckoutSuccess(false)}>
-          Book checked out successfully!
-        </Alert>
+      <Snackbar open={checkoutSuccess} autoHideDuration={4000} onClose={() => setCheckoutSuccess(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity="success" onClose={() => setCheckoutSuccess(false)}>Book checked out successfully!</Alert>
       </Snackbar>
     </Dialog>
   );
