@@ -32,6 +32,80 @@
       '401':
         $ref: '../components/responses.yaml#/Unauthorized'
 
+/api/v1/patrons/search:
+  get:
+    tags: [Patrons]
+    summary: Search patrons by name or card number
+    operationId: searchPatrons
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 2
+          maxLength: 100
+        description: Search term (partial name or card number)
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 10
+          minimum: 1
+          maximum: 10
+        description: Maximum results to return
+    responses:
+      '200':
+        description: Matching patrons
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas.yaml#/Patron'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+
+/api/v1/patrons/recent:
+  get:
+    tags: [Patrons]
+    summary: Get recently checked-out-to patrons
+    operationId: getRecentPatrons
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 5
+        description: Maximum recent patrons to return
+    responses:
+      '200':
+        description: Recent patrons
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '../components/schemas.yaml#/Patron'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+
 /api/v1/patrons/{id}:
   get:
     tags: [Patrons]

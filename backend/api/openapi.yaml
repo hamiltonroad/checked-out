@@ -86,6 +86,10 @@ paths:
   # Patrons
   /api/v1/patrons:
     $ref: 'paths/patrons.yaml#/~1api~1v1~1patrons'
+  /api/v1/patrons/search:
+    $ref: 'paths/patrons.yaml#/~1api~1v1~1patrons~1search'
+  /api/v1/patrons/recent:
+    $ref: 'paths/patrons.yaml#/~1api~1v1~1patrons~1recent'
   /api/v1/patrons/{id}:
     $ref: 'paths/patrons.yaml#/~1api~1v1~1patrons~1{id}'
 
