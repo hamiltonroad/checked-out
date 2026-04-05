@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import BooksPage from './pages/BooksPage';
 import CheckoutsPage from './pages/CheckoutsPage';
 import PatronDetailPage from './pages/PatronDetailPage';
+import PatronListPage from './pages/PatronListPage';
 import LoginPage from './pages/LoginPage';
 import TypographyTestPage from './pages/TypographyTestPage';
 
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: 'checkouts', element: <CheckoutsPage /> },
+          { path: 'patrons', element: <PatronListPage /> },
           { path: 'patrons/:id', element: <PatronDetailPage /> },
         ],
       },

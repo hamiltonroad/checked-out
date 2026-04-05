@@ -9,7 +9,7 @@ class PatronService {
    * Retrieve patrons, optionally filtered by status
    * @param {Object} [options] - Filter options
    * @param {string} [options.status] - Filter by patron status (e.g. 'active')
-   * @returns {Promise<Array>} Array of patron objects with id, first_name, last_name, card_number
+   * @returns {Promise<Array>} Array of patron objects with id, first_name, last_name, card_number, status
    */
   // eslint-disable-next-line class-methods-use-this
   async getActivePatrons({ status } = {}) {
@@ -20,7 +20,7 @@ class PatronService {
 
     return Patron.findAll({
       where,
-      attributes: ['id', 'first_name', 'last_name', 'card_number'],
+      attributes: ['id', 'first_name', 'last_name', 'card_number', 'status'],
       order: [
         ['last_name', 'ASC'],
         ['first_name', 'ASC'],
