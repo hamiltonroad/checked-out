@@ -1,6 +1,6 @@
 import api from './api';
 
-export interface CopyAvailability {
+interface CopyAvailability {
   id: number;
   copy_number: number;
   format: string;
@@ -8,7 +8,7 @@ export interface CopyAvailability {
   asin: string | null;
 }
 
-export interface AvailableCopiesResponse {
+interface AvailableCopiesResponse {
   success: boolean;
   message: string;
   data: {

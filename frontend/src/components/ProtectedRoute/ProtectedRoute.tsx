@@ -1,7 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { useAuth } from '../../hooks/useAuth';
-import { hasMinimumRole, ROLES } from '../../utils/roles';
+import { hasMinimumRole } from '../../utils/roles';
 import AuthLoadingScreen from '../AuthLoadingScreen';
 import type { PatronRole } from '../../types';
 
@@ -38,9 +37,5 @@ function ProtectedRoute({ requiredRole }: ProtectedRouteProps = {}) {
 
   return <Outlet />;
 }
-
-ProtectedRoute.propTypes = {
-  requiredRole: PropTypes.oneOf(Object.values(ROLES)),
-};
 
 export default ProtectedRoute;

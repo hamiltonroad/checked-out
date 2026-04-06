@@ -96,6 +96,14 @@ Collect all recommendations where `Harness Change Made` is `No` (case-insensitiv
 
 **Clean review files:** If no Harness Improvement Recommendations table exists (the file says "No recommendations" or similar), skip recommendation extraction for that file. This is expected for clean reviews.
 
+#### Recurrence floor (issue #231)
+
+While extracting recommendations, also tally **finding categories** across the full review window (e.g. "unused exports", "duplicate type definitions", "raw role literals"). A category is the topic of the finding, not the verbatim wording.
+
+**Rule:** Any finding category that appears **3 or more times** across the review window is automatically elevated to a harvested recommendation regardless of the individual severity of each occurrence. This catches recurring Low-severity findings whose pattern is a Medium-level signal.
+
+Track these in a separate `recurrence-elevated` bucket and merge them into the gaps file in Step 5 with a `Reason: recurrence floor (≥3 occurrences)` annotation.
+
 ### Step 4: Validate Recommendations Against Current Harness
 
 For each unaddressed recommendation, check whether it has since been implemented by examining the relevant harness files:
@@ -126,6 +134,22 @@ Report validation results:
 Still needed: X
 Already addressed: Y
 ```
+
+### Step 4.5: CLAUDE.md Consistency Pass (issue #231)
+
+After validating recommendations against the current harness, perform a **CLAUDE.md consistency pass**:
+
+For each draft recommendation, read `CLAUDE.md` and check whether its subject (PropTypes, role strings, transactions, magic numbers, etc.) already has a prose rule. If the recommendation contradicts an existing CLAUDE.md rule — meaning the rule exists but the codebase is violating it — flag the recommendation as `enforcement-drift` and prioritize it as **high regardless of original severity**.
+
+Enforcement-drift findings indicate the harness already has a written rule but no mechanical enforcement (or the enforcement is broken). These are higher-leverage than missing rules because the rule's existence proves the team already agreed on it.
+
+Annotate each enforcement-drift recommendation with:
+
+- `Type: enforcement-drift`
+- `Existing CLAUDE.md rule: <quoted line>`
+- `Why drift: <one sentence>`
+
+Surface the count of enforcement-drift findings in the Summary Report.
 
 ### Step 5: Write Harness Gaps File
 
@@ -219,6 +243,8 @@ Display a final summary:
 - Harness recommendations extracted: X
 - Already addressed: X
 - Still needed (after dedup): X
+- Recurrence-elevated (≥3 occurrences): X
+- Enforcement-drift findings: X
 - GitHub issues created: X (or "skipped — gh not available")
 - Files archived: X
 
@@ -232,11 +258,20 @@ X rows appended to code-review-results/metrics.csv
 2. #[NUMBER] - [title] (X recommendations)
 ...
 
+### Findings Not Harvested
+
+| Category | Occurrences | Reason |
+| --- | --- | --- |
+| <category> | N | <low severity / single occurrence / already addressed / out of scope> |
+
+This section is **mandatory** (issue #231). Every finding category that was considered but not harvested MUST appear here with its occurrence count and the reason it was excluded. This produces an audit trail so a human (or a follow-up pass) can verify the exclusions are deliberate rather than silent drops.
+
 ### Next Steps
 
 1. Review the created issues and prioritize harness improvements
 2. After implementing improvements, run `/harvest-reviews-kit` on the next batch of code reviews
 3. Compare metrics.csv over time — finding counts should trend downward as the harness strengthens
+4. Audit the **Findings Not Harvested** table for categories that should have been elevated
 ```
 
 ---

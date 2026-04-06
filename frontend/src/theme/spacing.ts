@@ -51,7 +51,7 @@
  *   marginBottom: theme.spacing(4), // 32px
  * }));
  */
-export const spacing = (factor: number): number => factor * 8;
+const spacing = (factor: number): number => factor * 8;
 
 /**
  * Spacing scale array with all available spacing values
@@ -80,6 +80,4 @@ export const spacing = (factor: number): number => factor * 8;
  * const standardPadding = spacingScale[4]; // 16px
  * const sectionGap = spacingScale[6]; // 24px
  */
-export const spacingScale = [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48];
-
 export default spacing;

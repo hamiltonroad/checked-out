@@ -8,7 +8,6 @@ import {
   TableRow,
   Paper,
   Button,
-  Typography,
   Skeleton,
 } from '@mui/material';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';

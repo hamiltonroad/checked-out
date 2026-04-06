@@ -253,5 +253,3 @@ export const darkPalette = {
   // Lighter dividers on dark backgrounds
   divider: 'rgba(255, 255, 255, 0.12)',
 };
-
-export default lightPalette;

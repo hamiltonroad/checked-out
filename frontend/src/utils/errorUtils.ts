@@ -21,7 +21,7 @@ interface ParsedError {
  * Handles the standardized format: { errors: [{ field, message }] }
  * Also handles legacy flat-string error messages for backward compatibility.
  */
-export function parseApiError(error: ApiErrorResponse): ParsedError {
+function parseApiError(error: ApiErrorResponse): ParsedError {
   const response = error?.response?.data;
 
   if (!response) {
@@ -35,14 +35,6 @@ export function parseApiError(error: ApiErrorResponse): ParsedError {
   const message = response.message || 'An error occurred';
 
   return { message, fieldErrors };
-}
-
-/**
- * Get the error message for a specific field from a list of field errors.
- */
-export function getFieldError(fieldErrors: FieldError[], fieldName: string): string | null {
-  const found = fieldErrors.find((e) => e.field === fieldName);
-  return found ? found.message : null;
 }
 
 /**

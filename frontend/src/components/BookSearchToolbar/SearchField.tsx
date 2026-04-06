@@ -1,6 +1,5 @@
 import type { RefObject } from 'react';
 import { TextField, InputAdornment, IconButton } from '@mui/material';
-import PropTypes from 'prop-types';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 
@@ -37,11 +36,5 @@ function SearchField({ searchTerm, onSearchChange, searchInputRef }: SearchField
     />
   );
 }
-
-SearchField.propTypes = {
-  searchTerm: PropTypes.string.isRequired,
-  onSearchChange: PropTypes.func.isRequired,
-  searchInputRef: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
-};
 
 export default SearchField;

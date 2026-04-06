@@ -70,11 +70,11 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 
 - Backend: camelCase variables/functions, PascalCase classes, UPPER_SNAKE_CASE constants.
 - Frontend: PascalCase components/files, camelCase props, handle* event handlers, use* hooks.
-- All React components must define prop types. In `.tsx` files, TypeScript `interface`/`type` definitions satisfy this requirement. In `.jsx` files, use `PropTypes` with `shape()` for objects and `arrayOf(shape())` for arrays — never raw `object` or `array`. Zero-prop components use an empty interface or empty `PropTypes = {}`.
+- All React components MUST be authored as `.tsx` files with props typed via a TypeScript `interface` or `type`. Zero-prop components use an empty interface (`interface Props {}`). Component-local prop types live in the same file as the component unless shared across 3+ consumers, in which case they belong in `frontend/src/types/index.ts`. Importing from `prop-types` is forbidden — enforced by ESLint (HARNESS-NO-PROP-TYPES, issue #231).
 - Use Material UI theme tokens — no inline `style` objects or inline color, spacing, or typography values in MUI components. Use the `sx` prop or `styled()` with theme tokens.
 - API responses use `ApiResponse.success()` / `ApiResponse.error()` wrappers.
 - Sequelize models use `underscored: true` and `timestamps: true`.
-- Use JavaScript default parameters instead of `defaultProps` for function components (`defaultProps` is deprecated in React 18.3+).
+- Use JavaScript default parameters for default prop values on function components (`defaultProps` is deprecated in React 18.3+).
 - Error handling: try/catch in controllers, throw typed errors from services.
 - Shared formatting functions (dates, currency, names) MUST live in `frontend/src/utils/` — never defined inline in components.
 

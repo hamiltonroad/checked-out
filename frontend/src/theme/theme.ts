@@ -83,9 +83,3 @@ export const getTheme = (mode: 'light' | 'dark' = 'light') => {
     components,
   });
 };
-
-// Default theme (light mode) for backward compatibility
-// This ensures existing imports continue to work without changes
-const theme = getTheme('light');
-
-export default theme;

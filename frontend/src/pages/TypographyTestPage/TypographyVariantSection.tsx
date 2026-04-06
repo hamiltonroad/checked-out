@@ -1,5 +1,4 @@
 import { Box, Typography, Paper } from '@mui/material';
-import PropTypes from 'prop-types';
 
 interface VariantItem {
   typography: string;
@@ -33,16 +32,5 @@ function TypographyVariantSection({ title, variants }: TypographyVariantSectionP
     </Paper>
   );
 }
-
-TypographyVariantSection.propTypes = {
-  title: PropTypes.string.isRequired,
-  variants: PropTypes.arrayOf(
-    PropTypes.shape({
-      typography: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
-      details: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-};
 
 export default TypographyVariantSection;

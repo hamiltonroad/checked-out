@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
+    "lint": "eslint . && npm run lint:unused-exports",
+    "lint:unused-exports": "ts-unused-exports tsconfig.json --excludePathsFromReport='vite.config.ts;src/main.tsx;src/App.tsx;src/vite-env.d.ts;.*\\.test\\.tsx?$'",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,css,md}\"",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
@@ -38,8 +39,10 @@
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "globals": "^16.4.0",
     "jsdom": "^27.4.0",
+    "ts-unused-exports": "^11.0.1",
     "typescript": "^6.0.2",
     "vite": "^7.1.7",
     "vitest": "^4.0.6"

@@ -82,4 +82,3 @@ export {
   FILTER_ROW_SX,
   FILTER_CONTROL_SX,
 };
-export type { RatingFilterOption, FormatOption };

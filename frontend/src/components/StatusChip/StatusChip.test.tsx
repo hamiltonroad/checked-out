@@ -53,7 +53,7 @@ describe('StatusChip', () => {
   });
 
   it('should fallback to available status for invalid status', () => {
-    // Suppress PropTypes warning for this test
+    // Suppress potential console.error noise from invalid status fallback
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     render(<StatusChip status="invalid_status" />);

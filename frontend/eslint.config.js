@@ -4,6 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsparser from '@typescript-eslint/parser'
+import unusedImports from 'eslint-plugin-unused-imports'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
@@ -27,13 +28,32 @@ export default defineConfig([
     },
     plugins: {
       '@typescript-eslint': tseslint,
+      'unused-imports': unusedImports,
     },
     rules: {
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      '@typescript-eslint/no-unused-vars': 'off',
+      // HARNESS-UNUSED-EXPORTS (issue #231) — catches unused imports + locals on save.
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
+      // [HARNESS-NO-PROP-TYPES issue #231] — explicit-module-boundary-types is a soft signal.
+      '@typescript-eslint/explicit-module-boundary-types': 'warn',
       'react-hooks/exhaustive-deps': 'error',
       'max-lines': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
       'no-restricted-imports': ['error', {
+        // [HARNESS-NO-PROP-TYPES issue #231] — PropTypes retired in favor of TypeScript interfaces.
+        paths: [{
+          name: 'prop-types',
+          message: 'PropTypes is retired — use TypeScript interfaces (HARNESS-NO-PROP-TYPES, issue #231).',
+        }],
         patterns: [{
           group: ['../services/*', '../../services/*', '../../../services/*', '*/services/*'],
           message: 'Do not import services directly in components. Use hooks instead (see CLAUDE.md).',
