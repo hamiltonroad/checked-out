@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { WaitlistEntry, Patron, Book, sequelize } = require('../models');
+const { WaitlistEntry, Patron, Book, Copy, sequelize } = require('../models');
 const ApiError = require('../utils/ApiError');
 const logger = require('../config/logger');
 
@@ -94,13 +94,47 @@ class WaitlistService {
     });
   }
 
-  /** Get all waitlist entries for a patron */
+  /** Get all waitlist entries for a patron, enriched with queue size and total copies */
   // eslint-disable-next-line class-methods-use-this
   async getPatronWaitlist(patronId) {
-    return WaitlistEntry.findAll({
+    const entries = await WaitlistEntry.findAll({
       where: { patron_id: patronId, status: 'waiting' },
       include: [{ model: Book, as: 'book', attributes: ['id', 'title'] }],
       order: [['created_at', 'DESC']],
+    });
+
+    const pairs = [...new Set(entries.map((e) => `${e.book_id}:${e.format}`))];
+
+    const [queueCounts, copyCounts] = await Promise.all([
+      Promise.all(
+        pairs.map(async (pair) => {
+          const [bookId, format] = pair.split(':');
+          const count = await WaitlistEntry.count({
+            where: { book_id: bookId, format, status: 'waiting' },
+          });
+          return { key: pair, count };
+        })
+      ),
+      Promise.all(
+        pairs.map(async (pair) => {
+          const [bookId, format] = pair.split(':');
+          const count = await Copy.count({
+            where: { book_id: bookId, format },
+          });
+          return { key: pair, count };
+        })
+      ),
+    ]);
+
+    const queueMap = Object.fromEntries(queueCounts.map((q) => [q.key, q.count]));
+    const copyMap = Object.fromEntries(copyCounts.map((c) => [c.key, c.count]));
+
+    return entries.map((entry) => {
+      const plain = entry.toJSON();
+      const key = `${plain.book_id}:${plain.format}`;
+      plain.queue_size = queueMap[key] || 0;
+      plain.total_copies = copyMap[key] || 0;
+      return plain;
     });
   }
 

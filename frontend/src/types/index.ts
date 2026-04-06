@@ -206,6 +206,8 @@ export interface WaitlistEntryData {
   position: number;
   status: 'waiting' | 'notified' | 'fulfilled' | 'cancelled';
   created_at: string;
+  queue_size?: number;
+  total_copies?: number;
   patron?: {
     id: number;
     first_name: string;

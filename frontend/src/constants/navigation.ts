@@ -2,6 +2,7 @@ import type { SvgIconComponent } from '@mui/icons-material';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import QueueIcon from '@mui/icons-material/Queue';
 import PeopleIcon from '@mui/icons-material/People';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import type { PatronRole } from '../types';
@@ -51,6 +52,15 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     path: '/wishlist',
     disabled: false,
     ariaLabel: 'Navigate to My Wishlist',
+    requiresAuth: true,
+  },
+  {
+    id: 'my-waitlist',
+    label: 'My Waitlist',
+    icon: QueueIcon,
+    path: '/my-waitlist',
+    disabled: false,
+    ariaLabel: 'Navigate to My Waitlist',
     requiresAuth: true,
   },
   {
