@@ -22,9 +22,15 @@ const router = createBrowserRouter([
       { path: 'typography-test', element: <TypographyTestPage /> },
       {
         element: <ProtectedRoute />,
+        children: [{ path: 'wishlist', element: <WishlistPage /> }],
+      },
+      {
+        element: <ProtectedRoute requiredRole="librarian" />,
+        children: [{ path: 'checkouts', element: <CheckoutsPage /> }],
+      },
+      {
+        element: <ProtectedRoute requiredRole="admin" />,
         children: [
-          { path: 'checkouts', element: <CheckoutsPage /> },
-          { path: 'wishlist', element: <WishlistPage /> },
           { path: 'patrons', element: <PatronListPage /> },
           { path: 'patrons/:id', element: <PatronDetailPage /> },
         ],
