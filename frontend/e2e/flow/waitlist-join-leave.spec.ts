@@ -47,7 +47,11 @@ test.describe('Flow: waitlist join and leave', () => {
     const joinBtn = dialog.getByRole('button', { name: /^Join .+ Waitlist$/ }).first();
     await expect(joinBtn).toBeVisible();
     await joinBtn.click();
-    await expect(dialog.getByText(/in line for|You're next/)).toBeVisible();
+    // Match the exact confirmation phrasing from WaitlistSection.tsx:
+    // "You are #N in line for {format}" or "You're next! Check out now."
+    await expect(
+      dialog.getByText(/^(You are #\d+ in line for |You're next! Check out now\.)/)
+    ).toBeVisible();
 
     await dialog.getByRole('button', { name: 'Close', exact: true }).click();
     await dialog.waitFor({ state: 'hidden' });

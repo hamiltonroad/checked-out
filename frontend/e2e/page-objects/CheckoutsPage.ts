@@ -58,5 +58,4 @@ export class CheckoutsPage {
       })
       .toBeLessThan(before);
   }
-
 }

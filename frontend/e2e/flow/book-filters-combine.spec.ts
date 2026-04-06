@@ -20,6 +20,37 @@ async function getTotalCount(page: Page): Promise<number> {
   return match ? parseInt(match[1], 10) : 0;
 }
 
+/**
+ * Predicate factory for waitForResponse that matches a successful
+ * GET against the books listing endpoint, optionally requiring (or
+ * forbidding) specific query params. Parses the URL rather than doing
+ * substring matching so that future param renames (e.g., `genres[]`)
+ * cannot accidentally false-positive match.
+ */
+function booksListResponse(opts: {
+  withParams?: string[];
+  withoutParams?: string[];
+}) {
+  return (response: { url(): string; status(): number; request(): { method(): string } }) => {
+    if (response.status() !== 200) return false;
+    if (response.request().method() !== 'GET') return false;
+    let url: URL;
+    try {
+      url = new URL(response.url());
+    } catch {
+      return false;
+    }
+    if (!url.pathname.endsWith('/books')) return false;
+    for (const p of opts.withParams ?? []) {
+      if (!url.searchParams.has(p)) return false;
+    }
+    for (const p of opts.withoutParams ?? []) {
+      if (url.searchParams.has(p)) return false;
+    }
+    return true;
+  };
+}
+
 test.describe('Flow: combined book filters', () => {
   test('genre + author + rating filters combine and clear', async ({ page }) => {
     const books = new BooksPage(page);
@@ -29,18 +60,14 @@ test.describe('Flow: combined book filters', () => {
     expect(initial).toBeGreaterThan(0);
 
     // Genre filter
-    const genreResp = page.waitForResponse(
-      (r) => r.url().includes('/books') && r.url().includes('genre') && r.status() === 200
-    );
+    const genreResp = page.waitForResponse(booksListResponse({ withParams: ['genre'] }));
     await page.getByLabel('Genre').click();
     await page.getByRole('option', { name: 'Fantasy' }).click();
     await page.keyboard.press('Escape');
     await genreResp;
 
     // Min rating filter
-    const ratingResp = page.waitForResponse(
-      (r) => r.url().includes('/books') && r.url().includes('minRating') && r.status() === 200
-    );
+    const ratingResp = page.waitForResponse(booksListResponse({ withParams: ['minRating'] }));
     await page.getByLabel('Minimum Rating').click();
     await page.getByRole('option', { name: '3+ Stars' }).click();
     await ratingResp;
@@ -50,11 +77,7 @@ test.describe('Flow: combined book filters', () => {
 
     // Clear all
     const clearResp = page.waitForResponse(
-      (r) =>
-        r.url().includes('/books') &&
-        !r.url().includes('genre') &&
-        !r.url().includes('minRating') &&
-        r.status() === 200
+      booksListResponse({ withoutParams: ['genre', 'minRating'] })
     );
     await page.getByRole('button', { name: /Clear all filters/i }).click();
     await clearResp;

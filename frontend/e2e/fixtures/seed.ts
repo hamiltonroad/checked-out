@@ -1,10 +1,11 @@
-import { withApiSession } from './api';
+import { withApiSession, ApiSession } from './api';
 
 /**
  * Seed/cleanup helpers for flow-layer tests. Test isolation otherwise
  * relies on the database seed; these helpers cover state preconditions
  * that the seed cannot guarantee (e.g., a book with zero available
- * copies for the waitlist flow).
+ * copies for the waitlist flow, or a single copy that the librarian
+ * can actually check out via the UI).
  *
  * Each helper opens a single librarian session (one login) and reuses
  * it for every request, minimizing pressure on the strict rate limiter
@@ -30,6 +31,10 @@ interface BooksListResponse {
   books: BookSummary[];
 }
 
+interface WaitlistEntry {
+  format: string;
+}
+
 /**
  * Result of finding a book the librarian can fully check out: the book
  * itself plus the checkout IDs created (so the test can release them).
@@ -37,6 +42,16 @@ interface BooksListResponse {
 export interface SeedTargetBook {
   book: BookSummary;
   checkoutIds: number[];
+}
+
+/**
+ * Result of finding a single copy that is provably checkoutable by the
+ * librarian (no hold gating, no waitlist gating).
+ */
+export interface UngatedCopy {
+  book: BookSummary;
+  format: string;
+  copyId: number;
 }
 
 /**
@@ -50,14 +65,14 @@ export interface SeedTargetBook {
  * copies and no librarian-blocking holds.
  */
 export async function findAndDrainBook(): Promise<SeedTargetBook> {
-  return withApiSession('librarian', async ({ request }) => {
+  return withApiSession('librarian', async (session) => {
     for (let pageNum = 1; pageNum <= 6; pageNum += 1) {
-      const list = await request<BooksListResponse>(
+      const list = await session.request<BooksListResponse>(
         'GET',
         `books?page=${pageNum}&limit=12`
       );
       for (const book of list?.books ?? []) {
-        const data = await request<AvailableCopiesResponse>(
+        const data = await session.request<AvailableCopiesResponse>(
           'GET',
           `copies/book/${book.id}/available`
         );
@@ -67,7 +82,7 @@ export async function findAndDrainBook(): Promise<SeedTargetBook> {
         let aborted = false;
         for (const copy of copies) {
           try {
-            const checkout = await request<{ id: number }>('POST', 'checkouts', {
+            const checkout = await session.request<{ id: number }>('POST', 'checkouts', {
               copy_id: copy.id,
             });
             if (checkout?.id) created.push(checkout.id);
@@ -77,14 +92,7 @@ export async function findAndDrainBook(): Promise<SeedTargetBook> {
           }
         }
         if (aborted) {
-          // Roll back partial checkouts and try the next book
-          for (const id of [...created].reverse()) {
-            try {
-              await request('PUT', `checkouts/${id}/return`);
-            } catch {
-              // ignore
-            }
-          }
+          await rollback(session, created);
           continue;
         }
         return { book, checkoutIds: created };
@@ -95,27 +103,72 @@ export async function findAndDrainBook(): Promise<SeedTargetBook> {
 }
 
 /**
- * Check out every available copy of the given book as the librarian
- * seed user, returning the resulting checkout IDs in the order they
- * were created. Pair with `releaseCheckouts(ids)` in afterEach to
- * restore state even on failure.
+ * Find a single copy the librarian can definitely check out via the UI.
+ *
+ * Strategy: page the catalog, fetch each book's available copies and
+ * its waitlist, filter out waitlist-gated formats, then probe remaining
+ * candidates by creating + immediately returning a checkout via the
+ * API. A copy that survives the probe is provably free of hold gating
+ * AND waitlist gating, so the UI checkout will succeed.
+ *
+ * The probe is the only available signal: there is no read-only
+ * "is-checkoutable" endpoint (the holds-by-copy state is not exposed
+ * via GET), and the available-copies endpoint does not exclude copies
+ * held for another patron. Adding such an endpoint would let us replace
+ * the probe with a pure GET — see issue #220 follow-up notes.
+ *
+ * Each probe spends two strict-rate-limiter slots (POST + PUT). Tests
+ * using this helper should expect ~6 strict slots in worst case.
  */
-export async function ensureBookHasNoAvailableCopies(bookId: number): Promise<number[]> {
-  return withApiSession('librarian', async ({ request }) => {
-    const data = await request<AvailableCopiesResponse>(
-      'GET',
-      `copies/book/${bookId}/available`
-    );
-    const copies = data?.copies ?? [];
-    const checkoutIds: number[] = [];
-    for (const copy of copies) {
-      const checkout = await request<{ id: number }>('POST', 'checkouts', {
-        copy_id: copy.id,
-      });
-      if (checkout?.id) checkoutIds.push(checkout.id);
+export async function findUngatedCopy(): Promise<UngatedCopy> {
+  return withApiSession('librarian', async (session) => {
+    for (let pageNum = 1; pageNum <= 6; pageNum += 1) {
+      const list = await session.request<BooksListResponse>(
+        'GET',
+        `books?page=${pageNum}&limit=12`
+      );
+      for (const book of list?.books ?? []) {
+        const copiesData = await session.request<AvailableCopiesResponse>(
+          'GET',
+          `copies/book/${book.id}/available`
+        );
+        const copies = copiesData?.copies ?? [];
+        if (copies.length === 0) continue;
+        const waitlist =
+          (await session.request<WaitlistEntry[]>('GET', `books/${book.id}/waitlist`)) ?? [];
+        const gatedFormats = new Set(waitlist.map((w) => w.format));
+        const candidates = copies.filter((c) => !gatedFormats.has(c.format));
+        for (const candidate of candidates) {
+          try {
+            const checkout = await session.request<{ id: number }>('POST', 'checkouts', {
+              copy_id: candidate.id,
+            });
+            if (checkout?.id) {
+              try {
+                await session.request('PUT', `checkouts/${checkout.id}/return`);
+              } catch {
+                // best-effort revert
+              }
+            }
+            return { book, format: candidate.format, copyId: candidate.id };
+          } catch {
+            // Probe failed (likely hold-gated). Try the next candidate.
+          }
+        }
+      }
     }
-    return checkoutIds;
+    throw new Error('No ungated checkoutable copy found in catalog');
   });
+}
+
+async function rollback(session: ApiSession, ids: number[]): Promise<void> {
+  for (const id of [...ids].reverse()) {
+    try {
+      await session.request('PUT', `checkouts/${id}/return`);
+    } catch {
+      // ignore
+    }
+  }
 }
 
 /**
@@ -125,17 +178,7 @@ export async function ensureBookHasNoAvailableCopies(bookId: number): Promise<nu
  */
 export async function releaseCheckouts(checkoutIds: number[]): Promise<void> {
   if (checkoutIds.length === 0) return;
-  await withApiSession('librarian', async ({ request }) => {
-    for (const id of [...checkoutIds].reverse()) {
-      try {
-        await request('PUT', `checkouts/${id}/return`);
-      } catch {
-        // ignore — best-effort cleanup
-      }
-    }
+  await withApiSession('librarian', async (session) => {
+    await rollback(session, checkoutIds);
   });
 }
-
-// Backwards-compatible no-op exports for older callers.
-export async function seedTestData(): Promise<void> {}
-export async function cleanupTestData(): Promise<void> {}

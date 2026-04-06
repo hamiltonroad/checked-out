@@ -30,12 +30,6 @@ export class CheckoutDialog {
     return this.page.getByRole('dialog', { name: 'Check Out Book' });
   }
 
-  /** Select the Nth available copy radio. */
-  async selectCopy(index: number): Promise<void> {
-    const radios = this.dialog().getByRole('radio');
-    await radios.nth(index).check();
-  }
-
   /**
    * Select the radio for a specific copy id. CopyRadioGroup renders each
    * radio with value={String(copy.id)}, so we target by the value attribute.

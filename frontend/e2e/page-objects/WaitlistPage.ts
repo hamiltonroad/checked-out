@@ -20,7 +20,7 @@ export class WaitlistPage {
   /** Locator for a waitlist card containing the given book title. */
   cardForBook(bookTitle: string): Locator {
     return this.page
-      .locator('.MuiCard-root')
+      .getByTestId('waitlist-card')
       .filter({ has: this.page.getByRole('button', { name: bookTitle }) });
   }
 
