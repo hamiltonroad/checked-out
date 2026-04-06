@@ -89,6 +89,47 @@ Stop both backend and frontend services.
 
 ---
 
+### `smoke-test.sh`
+
+Run the Playwright **smoke** project — the cheap gate used by `/story-runner` and
+`/batch-runner`.
+
+```bash
+./scripts/smoke-test.sh              # assumes servers are already running
+./scripts/smoke-test.sh --start-servers   # launch backend + frontend first
+```
+
+**What it does:**
+- Runs `npx playwright test --project=smoke` against `frontend/e2e/smoke/`
+- Exits **0** on pass, **non-zero** on any failure (the contract the story/batch
+  runners rely on as a hard gate)
+- Optional `--start-servers` flag boots backend + frontend before the run and tears
+  them down after
+
+**Use when:** Pre-flight and post-flight checks during agent workflows, and any time
+you want a sub-30-second confidence check that the app still loads.
+
+---
+
+### `e2e-test.sh`
+
+Run the **full** E2E pyramid: smoke + flow + security.
+
+```bash
+./scripts/e2e-test.sh
+./scripts/e2e-test.sh --start-servers
+```
+
+**What it does:**
+- Runs the smoke, flow, and security Playwright projects from `frontend/e2e/`
+- Exits non-zero if any layer fails
+- Optional `--start-servers` flag boots backend + frontend before the run
+
+**Use when:** Locally before opening a PR that touches checkout, waitlist, auth, or
+any RBAC surface. This is the deep run; `smoke-test.sh` is the cheap gate.
+
+---
+
 ## Log Files
 
 All scripts create log files in the `logs/` directory:

@@ -75,6 +75,50 @@ npm run test:smoke
 
 **Note:** Smoke tests require both frontend and backend servers to be running. Use `./scripts/start-all.sh` first, or let the smoke test handle startup itself.
 
+## Pyramid E2E Layers
+
+The full Playwright suite under `frontend/e2e/` is organised as a three-layer pyramid.
+New tests should pick the **lowest** layer that can express the assertion.
+
+| Layer    | Directory                | What it is for                                                                |
+| -------- | ------------------------ | ----------------------------------------------------------------------------- |
+| smoke    | `frontend/e2e/smoke/`    | Fast sanity. Public pages render, app loads, no console errors. Mostly unauth. |
+| flow     | `frontend/e2e/flow/`     | Multi-step authenticated user journeys (checkout/return, waitlist join/leave). |
+| security | `frontend/e2e/security/` | Authorization guards, RBAC, body-spoofing. Asserts non-2xx contracts.          |
+
+**Decision rules — where does my test belong?**
+
+1. Does it need a logged-in user? If **no**, it is a **smoke** test.
+2. Does it assert a non-2xx HTTP contract or an authorization boundary? It is a **security** test.
+3. Otherwise it is a **flow** test.
+
+**Naming conventions**
+
+- Spec files use kebab-case: `<feature>-<action>.spec.ts` (e.g. `checkout-return.spec.ts`).
+- Page objects use PascalCase and live in `frontend/e2e/page-objects/` (e.g. `BooksPage.ts`).
+
+**Fixture-usage rules (mandatory)**
+
+- Authentication MUST go through `loginAs` from `frontend/e2e/fixtures/auth.ts`. Never
+  `page.goto('/login')` and fill the form, and never set the dev `X-Patron-Id` header.
+- API setup/teardown MUST use `apiRequest` (one-shot reads), `withApiSession` (batched
+  authenticated mutations — required to avoid ADR-031 rate-limit storms), or
+  `apiRequestRaw` (security tests asserting non-2xx). Never use raw `fetch`.
+- Any locator or interaction reused by **two or more specs** MUST be promoted to a
+  page object under `frontend/e2e/page-objects/`.
+
+**Run a single layer:**
+
+```bash
+npx playwright test --project=smoke
+npx playwright test --project=flow
+npx playwright test --project=security
+```
+
+**Full pyramid:** `./scripts/e2e-test.sh`. **Story-runner gate (smoke only):** `./scripts/smoke-test.sh`.
+
+See `frontend/e2e/README.md` for worked examples of every fixture and a page object.
+
 ## Code Quality
 
 **Always run before creating verification:**
