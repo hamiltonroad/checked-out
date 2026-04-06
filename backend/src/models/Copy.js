@@ -57,6 +57,11 @@ module.exports = (sequelize) => {
       foreignKey: 'copy_id',
       as: 'checkouts',
     });
+
+    Copy.hasMany(models.Hold, {
+      foreignKey: 'copy_id',
+      as: 'holds',
+    });
   };
 
   return Copy;

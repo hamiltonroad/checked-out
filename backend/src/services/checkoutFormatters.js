@@ -48,6 +48,7 @@ function formatOverdueCheckoutResponse(checkout) {
 function formatCheckoutResponse(checkout) {
   return {
     id: checkout.id,
+    copyId: checkout.copy_id,
     patronId: checkout.patron.id,
     patronName: `${checkout.patron.first_name} ${checkout.patron.last_name}`,
     bookTitle: checkout.copy.book.title,

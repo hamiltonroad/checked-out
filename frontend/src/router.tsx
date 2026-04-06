@@ -7,7 +7,7 @@ import PatronDetailPage from './pages/PatronDetailPage';
 import PatronListPage from './pages/PatronListPage';
 import LoginPage from './pages/LoginPage';
 import WishlistPage from './pages/WishlistPage';
-import MyWaitlistPage from './pages/MyWaitlistPage';
+import WaitlistHoldsPage from './pages/WaitlistHoldsPage';
 import TypographyTestPage from './pages/TypographyTestPage';
 import { ROLES } from './utils/roles';
 
@@ -26,7 +26,7 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: 'wishlist', element: <WishlistPage /> },
-          { path: 'my-waitlist', element: <MyWaitlistPage /> },
+          { path: 'waitlist-holds', element: <WaitlistHoldsPage /> },
         ],
       },
       {

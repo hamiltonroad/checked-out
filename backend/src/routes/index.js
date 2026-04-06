@@ -8,6 +8,7 @@ const copyRoutes = require('./copyRoutes');
 const patronRoutes = require('./patronRoutes');
 const wishlistRoutes = require('./wishlistRoutes');
 const waitlistRoutes = require('./waitlistRoutes');
+const holdRoutes = require('./holdRoutes');
 
 const router = express.Router();
 
@@ -26,5 +27,6 @@ router.use('/copies', copyRoutes);
 router.use('/patrons', patronRoutes);
 router.use('/', wishlistRoutes);
 router.use('/', waitlistRoutes);
+router.use('/', holdRoutes);
 
 module.exports = router;

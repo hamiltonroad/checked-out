@@ -55,12 +55,12 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     requiresAuth: true,
   },
   {
-    id: 'my-waitlist',
-    label: 'My Waitlist',
+    id: 'waitlist-holds',
+    label: 'Waitlist & Holds',
     icon: QueueIcon,
-    path: '/my-waitlist',
+    path: '/waitlist-holds',
     disabled: false,
-    ariaLabel: 'Navigate to My Waitlist',
+    ariaLabel: 'Navigate to Waitlist & Holds',
     requiresAuth: true,
   },
   {

@@ -1,7 +1,6 @@
 const { Op } = require('sequelize');
-const { Checkout, Patron, Copy, WaitlistEntry, sequelize } = require('../models');
+const { Checkout, Patron, Copy, Hold, WaitlistEntry, sequelize } = require('../models');
 const ApiError = require('../utils/ApiError');
-const logger = require('../config/logger');
 const {
   CHECKOUT_INCLUDES,
   OVERDUE_INCLUDES,
@@ -31,6 +30,14 @@ class CheckoutService {
     });
     if (activeCheckout) throw ApiError.conflict(`Copy ${copyId} is already checked out`);
 
+    // Hold gating: if an active hold exists on this copy, only the hold patron can checkout
+    const activeHold = await Hold.findOne({
+      where: { copy_id: copyId, status: 'active' },
+    });
+    if (activeHold && activeHold.patron_id !== patronId) {
+      throw ApiError.conflict('This copy is on hold for another patron.');
+    }
+
     // Waitlist gating: if a queue exists for this book+format, only front-of-line can checkout
     const frontOfLine = await WaitlistEntry.findOne({
       where: { book_id: copy.book_id, format: copy.format, position: 1, status: 'waiting' },
@@ -52,6 +59,11 @@ class CheckoutService {
       due_date: dueDate,
       return_date: null,
     });
+
+    // If the patron had a hold on this copy, fulfill it
+    if (activeHold && activeHold.patron_id === patronId) {
+      await activeHold.update({ status: 'fulfilled' });
+    }
 
     // If the patron was front-of-line, fulfill their waitlist entry and reorder queue
     if (frontOfLine && frontOfLine.patron_id === patronId) {
@@ -142,27 +154,6 @@ class CheckoutService {
 
     if (updatedCount === 0) throw ApiError.conflict('Checkout has already been returned');
     await checkout.reload();
-
-    // Notification seam: notify front-of-line patron for the returned copy's format
-    const returnedCopy = await Copy.findByPk(checkout.copy_id);
-    if (returnedCopy) {
-      const frontEntry = await WaitlistEntry.findOne({
-        where: {
-          book_id: returnedCopy.book_id,
-          format: returnedCopy.format,
-          position: 1,
-          status: 'waiting',
-        },
-      });
-      if (frontEntry) {
-        // NOTIFICATION SEAM: Plug in email/in-app notification delivery here.
-        logger.info('Waitlist notification: patron reached front of line', {
-          patronId: frontEntry.patron_id,
-          bookId: returnedCopy.book_id,
-          format: returnedCopy.format,
-        });
-      }
-    }
 
     return formatCheckoutResponse(checkout);
   }

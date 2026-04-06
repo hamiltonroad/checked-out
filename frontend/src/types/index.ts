@@ -198,6 +198,25 @@ export interface FieldError {
   message: string;
 }
 
+export interface HoldData {
+  id: number;
+  copy_id: number;
+  patron_id: number;
+  waitlist_entry_id: number | null;
+  expires_at: string;
+  status: 'active' | 'expired' | 'fulfilled';
+  created_at: string;
+  copy?: {
+    id: number;
+    book_id: number;
+    format: 'physical' | 'kindle';
+    book?: {
+      id: number;
+      title: string;
+    };
+  };
+}
+
 export interface WaitlistEntryData {
   id: number;
   patron_id: number;

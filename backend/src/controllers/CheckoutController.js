@@ -1,5 +1,6 @@
 const checkoutService = require('../services/CheckoutService');
 const patronCheckoutService = require('../services/PatronCheckoutService');
+const holdService = require('../services/HoldService');
 const ApiResponse = require('../utils/ApiResponse');
 const logger = require('../config/logger');
 
@@ -99,6 +100,18 @@ class CheckoutController {
       const { returnDate } = req.body || {};
 
       const checkout = await checkoutService.returnCheckout(id, returnDate || null);
+
+      // Orchestrate hold creation for front-of-line waitlist patron (ADR-008)
+      if (checkout.copyId) {
+        await holdService.expireStaleHolds([checkout.copyId]);
+        const hold = await holdService.createHoldForFrontOfLine(checkout.copyId);
+        if (hold) {
+          logger.info('Hold created on return for front-of-line patron', {
+            holdId: hold.id,
+            copyId: checkout.copyId,
+          });
+        }
+      }
 
       res.status(200).json(ApiResponse.success(checkout, 'Book returned successfully'));
     } catch (error) {

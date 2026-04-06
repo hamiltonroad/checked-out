@@ -60,6 +60,7 @@ export function useLeaveWaitlist() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['waitlist'] });
       queryClient.invalidateQueries({ queryKey: ['books'] });
+      queryClient.invalidateQueries({ queryKey: ['holds'] });
     },
   });
 }
