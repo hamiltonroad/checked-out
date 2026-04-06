@@ -8,18 +8,16 @@ const { hasMinimumRole } = require('../config/roles');
  * @param {string} minimumRole - The minimum role required (patron, librarian, admin)
  * @returns {import('express').RequestHandler} Express middleware
  */
-const requireRole = (minimumRole) => {
-  return (req, _res, next) => {
-    if (!req.patron) {
-      return next(ApiError.unauthorized('Authentication required'));
-    }
+const requireRole = (minimumRole) => (req, _res, next) => {
+  if (!req.patron) {
+    return next(ApiError.unauthorized('Authentication required'));
+  }
 
-    if (!hasMinimumRole(req.patron.role, minimumRole)) {
-      return next(ApiError.forbidden('Insufficient permissions'));
-    }
+  if (!hasMinimumRole(req.patron.role, minimumRole)) {
+    return next(ApiError.forbidden('Insufficient permissions'));
+  }
 
-    next();
-  };
+  next();
 };
 
 module.exports = requireRole;
