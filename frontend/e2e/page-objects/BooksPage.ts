@@ -10,12 +10,12 @@ export class BooksPage {
   constructor(private readonly page: Page) {}
 
   /**
-   * Navigate to the Books page and wait for network to settle so the
-   * book list query has resolved.
+   * Navigate to the Books page. Callers should await a specific element
+   * (e.g., `getBookCards().first()`) to confirm readiness — avoid
+   * `waitForLoadState('networkidle')` which is flaky with React Query.
    */
   async goto(): Promise<void> {
     await this.page.goto('/');
-    await this.page.waitForLoadState('networkidle');
   }
 
   /**
@@ -32,7 +32,6 @@ export class BooksPage {
    */
   async openBookDetail(index: number): Promise<Locator> {
     const card = this.getBookCards().nth(index);
-    await card.waitFor({ state: 'visible' });
     await card.click();
     const dialog = this.page.getByRole('dialog');
     await dialog.waitFor({ state: 'visible' });

@@ -6,34 +6,23 @@ import { BooksPage } from '../page-objects/BooksPage';
  * and produces no unexpected browser console errors.
  */
 
-const EXPECTED_ERROR_PATTERNS: RegExp[] = [/401/, /Unauthorized/, /auth/i];
-
-function isExpectedError(message: string): boolean {
-  return EXPECTED_ERROR_PATTERNS.some((pattern) => pattern.test(message));
-}
+// Anonymous visitors trigger a /auth/me probe that returns 401. That network
+// 401 is expected and benign; any other console error should fail the smoke.
+const EXPECTED_401 = /401 \(Unauthorized\)/;
 
 test.describe('Books page smoke', () => {
-  let consoleErrors: string[];
-
-  test.beforeEach(({ page }) => {
-    consoleErrors = [];
+  test('renders at least one book card with no console errors', async ({ page }) => {
+    const consoleErrors: string[] = [];
     page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        const text = msg.text();
-        if (!isExpectedError(text)) {
-          consoleErrors.push(text);
-        }
+      if (msg.type() === 'error' && !EXPECTED_401.test(msg.text())) {
+        consoleErrors.push(msg.text());
       }
     });
-  });
 
-  test('renders at least one book card with no console errors', async ({ page }) => {
     const booksPage = new BooksPage(page);
     await booksPage.goto();
 
-    const cards = booksPage.getBookCards();
-    await expect(cards.first()).toBeVisible();
-    expect(await cards.count()).toBeGreaterThan(0);
+    await expect(booksPage.getBookCards().first()).toBeVisible();
 
     expect(consoleErrors).toEqual([]);
   });

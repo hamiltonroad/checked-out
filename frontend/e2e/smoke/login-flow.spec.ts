@@ -13,13 +13,13 @@ test.describe('Login flow smoke', () => {
     await loginAs(page, 'patron');
 
     const cookies = await page.context().cookies();
-    const tokenCookie = cookies.find((c) => /token/i.test(c.name));
-    expect(tokenCookie, 'expected an auth token cookie to be set').toBeDefined();
+    const tokenCookie = cookies.find((c) => c.name === 'access_token');
+    expect(tokenCookie, 'expected access_token cookie to be set').toBeDefined();
 
     const booksPage = new BooksPage(page);
     await booksPage.goto();
 
-    expect(page.url()).toMatch(/\/$/);
+    expect(new URL(page.url()).pathname).toBe('/');
 
     // PatronNavLink renders as a link to /patrons/:id once authenticated.
     const patronNav = page.locator('a[href^="/patrons/"]').first();
