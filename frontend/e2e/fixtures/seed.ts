@@ -163,6 +163,78 @@ export async function findUngatedCopy(): Promise<UngatedCopy> {
   });
 }
 
+/**
+ * Seed a single available copy for a mutation test (issue #229 item #13).
+ *
+ * Wraps `findUngatedCopy` with a named, intention-revealing interface so
+ * spec files never have to write discovery loops or hardcode database
+ * ids. Returns the concrete ids the test needs to drive the UI or API.
+ *
+ * The underlying probe currently uses API discovery (there is no
+ * test-only seed endpoint); when one exists this helper is the single
+ * swap-in point.
+ */
+export async function seedAvailableCopy(): Promise<{
+  bookId: number;
+  copyId: number;
+  format: string;
+}> {
+  const ungated = await findUngatedCopy();
+  return { bookId: ungated.book.id, copyId: ungated.copyId, format: ungated.format };
+}
+
+/**
+ * Seed the "a patron already has holds on this book" precondition for
+ * waitlist / hold tests (issue #229 item #13).
+ *
+ * Implemented as a drain via `findAndDrainBook` so a returned book is
+ * guaranteed to have zero available copies, mimicking the state a
+ * patron with an existing hold would observe. Returns the book and the
+ * checkout ids the caller MUST pass to `releaseCheckouts()` during
+ * teardown.
+ *
+ * **Prefer the `patronWithHolds` Playwright fixture in `seedTest.ts`** —
+ * it wraps this helper and registers cleanup automatically. Call this
+ * function directly only if you cannot use the fixture API.
+ */
+export async function seedPatronWithHolds(): Promise<{
+  bookId: number;
+  checkoutIds: number[];
+}> {
+  const drained = await findAndDrainBook();
+  return { bookId: drained.book.id, checkoutIds: drained.checkoutIds };
+}
+
+/**
+ * Seed a checked-out copy for return-flow tests (issue #229 item #13).
+ *
+ * Discovers an ungated copy and immediately checks it out as the
+ * librarian, returning the checkout id so the spec can exercise the
+ * return path. Caller owns cleanup via `releaseCheckouts([checkoutId])`
+ * if the spec does not actually return the copy through the UI.
+ *
+ * **Prefer the `checkedOutCopy` Playwright fixture in `seedTest.ts`** —
+ * it wraps this helper and registers cleanup automatically. Call this
+ * function directly only if you cannot use the fixture API.
+ */
+export async function seedCheckedOutCopy(): Promise<{
+  bookId: number;
+  copyId: number;
+  checkoutId: number;
+}> {
+  const ungated = await findUngatedCopy();
+  const checkoutId = await withApiSession('librarian', async (session) => {
+    const created = await session.request<{ id: number }>('POST', 'checkouts', {
+      copy_id: ungated.copyId,
+    });
+    if (!created?.id) {
+      throw new Error('seedCheckedOutCopy: POST /checkouts returned no id');
+    }
+    return created.id;
+  });
+  return { bookId: ungated.book.id, copyId: ungated.copyId, checkoutId };
+}
+
 async function rollback(session: ApiSession, ids: number[]): Promise<void> {
   for (const id of [...ids].reverse()) {
     try {
