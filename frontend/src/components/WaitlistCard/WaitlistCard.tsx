@@ -30,7 +30,7 @@ function WaitlistCard({ entry, onBookClick, onLeave, isLeaving }: WaitlistCardPr
   };
 
   return (
-    <Card sx={{ mb: 2 }}>
+    <Card sx={{ mb: 2 }} data-testid="waitlist-card">
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
