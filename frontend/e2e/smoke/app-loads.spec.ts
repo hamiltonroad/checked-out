@@ -1,5 +1,4 @@
-// @ts-check
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * Smoke test: verifies the application starts and renders without
@@ -8,17 +7,18 @@ import { test, expect } from '@playwright/test';
  * Assumes servers are already running via ./scripts/start-all.sh.
  */
 
-const EXPECTED_ERROR_PATTERNS = [/401/, /Unauthorized/, /auth/i];
+const EXPECTED_ERROR_PATTERNS: RegExp[] = [/401/, /Unauthorized/, /auth/i];
 
-function isExpectedError(message) {
+function isExpectedError(message: string): boolean {
   return EXPECTED_ERROR_PATTERNS.some((pattern) => pattern.test(message));
 }
 
-async function safeGoto(page, path = '/') {
+async function safeGoto(page: Page, path = '/') {
   try {
     return await page.goto(path);
   } catch (error) {
-    if (error.message.includes('ECONNREFUSED') || error.message.includes('ERR_CONNECTION_REFUSED')) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes('ECONNREFUSED') || message.includes('ERR_CONNECTION_REFUSED')) {
       throw new Error(
         'Could not connect to http://localhost:5173 — are servers running? ' +
           'Use ./scripts/start-all.sh to start them.'
@@ -29,7 +29,7 @@ async function safeGoto(page, path = '/') {
 }
 
 test.describe('App smoke test', () => {
-  let consoleErrors;
+  let consoleErrors: string[];
 
   test.beforeEach(async ({ page }) => {
     consoleErrors = [];
@@ -48,7 +48,7 @@ test.describe('App smoke test', () => {
     const response = await safeGoto(page);
 
     expect(response).not.toBeNull();
-    expect(response.status()).toBe(200);
+    expect(response!.status()).toBe(200);
   });
 
   test('app renders visible content', async ({ page }) => {
@@ -57,7 +57,7 @@ test.describe('App smoke test', () => {
     const body = page.locator('body');
     await expect(body).not.toBeEmpty();
     const textContent = await body.textContent();
-    expect(textContent.trim().length).toBeGreaterThan(0);
+    expect((textContent ?? '').trim().length).toBeGreaterThan(0);
   });
 
   test('no unexpected console errors', async ({ page }) => {

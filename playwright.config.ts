@@ -1,8 +1,7 @@
-// @ts-check
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright configuration for smoke tests.
+ * Playwright configuration for layered e2e tests (smoke/flow/security).
  *
  * Assumes servers are already running (started via ./scripts/start-all.sh).
  * Does NOT configure webServer — tests fail fast if servers are down.
@@ -10,21 +9,31 @@ import { defineConfig, devices } from '@playwright/test';
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
-  testDir: './frontend/smoke',
-  timeout: 30000,
+  timeout: 30_000,
   retries: 0,
   reporter: 'list',
 
   use: {
-    baseURL: process.env.SMOKE_BASE_URL || 'http://localhost:5173',
+    baseURL: process.env.SMOKE_BASE_URL ?? 'http://localhost:5173',
     headless: true,
     screenshot: 'only-on-failure',
-    trace: 'off',
+    trace: 'retain-on-failure',
   },
 
   projects: [
     {
-      name: 'chromium',
+      name: 'smoke',
+      testDir: './frontend/e2e/smoke',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'flow',
+      testDir: './frontend/e2e/flow',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'security',
+      testDir: './frontend/e2e/security',
       use: { ...devices['Desktop Chrome'] },
     },
   ],

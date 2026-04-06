@@ -77,11 +77,14 @@ export default defineConfig([
       'no-restricted-imports': 'off',
     },
   },
-  // Smoke tests run in Node.js (Playwright)
+  // E2E tests run in Node.js (Playwright)
   {
-    files: ['smoke/**/*.{js,jsx}'],
+    files: ['e2e/**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
-      globals: globals.node,
+      globals: { ...globals.node, ...globals.browser },
+    },
+    rules: {
+      'max-lines': 'off',
     },
   },
 ])

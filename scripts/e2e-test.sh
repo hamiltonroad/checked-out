@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# Smoke test gate for Checked Out
-# Ensures servers are running, then runs Playwright smoke tests.
-# Usage: ./scripts/smoke-test.sh [--start-servers]
+# E2E test gate for Checked Out
+# Ensures servers are running, then runs Playwright tests across all projects
+# (smoke, flow, security).
+# Usage: ./scripts/e2e-test.sh [--start-servers]
 #   --start-servers  Start servers automatically if not running
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -15,7 +16,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 echo -e "${BLUE}================================================${NC}"
-echo -e "${BLUE}Checked Out - Smoke Test Gate${NC}"
+echo -e "${BLUE}Checked Out - E2E Test Gate${NC}"
 echo -e "${BLUE}================================================${NC}"
 
 # Check if servers are running
@@ -52,28 +53,28 @@ if [ "$FRONTEND_RUNNING" = false ] || [ "$BACKEND_RUNNING" = false ]; then
   fi
 fi
 
-# Run smoke tests
+# Run e2e tests across all projects
 echo ""
-echo -e "${BLUE}Running Playwright smoke tests...${NC}"
+echo -e "${BLUE}Running Playwright e2e tests (smoke + flow + security)...${NC}"
 echo ""
 
-cd "$PROJECT_DIR" && npx playwright test --project=smoke 2>&1
+cd "$PROJECT_DIR" && npx playwright test --project=smoke --project=flow --project=security 2>&1
 RESULT=$?
 
 echo ""
 if [ $RESULT -eq 0 ]; then
   echo -e "${GREEN}================================================${NC}"
-  echo -e "${GREEN}✓ Smoke test PASSED${NC}"
+  echo -e "${GREEN}✓ E2E test PASSED${NC}"
   echo -e "${GREEN}================================================${NC}"
 else
   echo -e "${RED}================================================${NC}"
-  echo -e "${RED}✗ Smoke test FAILED${NC}"
+  echo -e "${RED}✗ E2E test FAILED${NC}"
   echo -e "${RED}================================================${NC}"
   echo ""
   echo "Suggested actions:"
   echo "  1. Check server logs: logs/backend.log and logs/frontend.log"
   echo "  2. Check browser console for errors"
-  echo "  3. Fix the issue and re-run: ./scripts/smoke-test.sh"
+  echo "  3. Fix the issue and re-run: ./scripts/e2e-test.sh"
 fi
 
 exit $RESULT
