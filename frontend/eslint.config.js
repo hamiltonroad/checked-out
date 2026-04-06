@@ -77,15 +77,18 @@ export default defineConfig([
       'no-restricted-imports': 'off',
     },
   },
-  // Ban raw role string literals in router/navigation/guard config (Issue #228 Rec #2).
-  // Whitelisted: src/utils/roles.ts (the canonical source).
+  // Ban raw role string literals project-wide (Issue #228 Rec #2).
+  // Whitelisted: src/utils/roles.ts (the canonical source) and test files.
+  // Project-wide ban catches AppRouter.tsx, ProtectedRoute*, and any future guard-like file
+  // without requiring continual glob maintenance.
   {
-    files: [
-      '**/router.{ts,tsx}',
-      '**/router/**/*.{ts,tsx}',
-      '**/navigation/**/*.{ts,tsx}',
-      '**/guards/**/*.{ts,tsx}',
-      '**/constants/navigation*.{ts,tsx}',
+    files: ['**/*.{ts,tsx,js,jsx}'],
+    ignores: [
+      '**/utils/roles.ts',
+      '**/types/**/*.{ts,tsx}',
+      '**/*.test.{ts,tsx,js,jsx}',
+      '**/*.spec.{ts,tsx,js,jsx}',
+      '**/e2e/**',
     ],
     rules: {
       'no-restricted-syntax': [
@@ -106,16 +109,12 @@ export default defineConfig([
       'no-restricted-syntax': [
         'error',
         {
+          // Matches any `<expr>.data || <anything>` — Identifier, MemberExpression,
+          // ObjectExpression ({}), ArrayExpression ([]), CallExpression, Literal.
           selector:
-            "LogicalExpression[operator='||'][left.type='MemberExpression'][left.property.name='data'][right.type='Identifier']",
+            "LogicalExpression[operator='||'][left.type='MemberExpression'][left.property.name='data']",
           message:
-            'Do not fall back to the raw payload — trust the ApiResponse envelope or throw. See standards/quick-ref/backend-quick-ref.md ApiResponse section.',
-        },
-        {
-          selector:
-            "LogicalExpression[operator='||'][left.type='MemberExpression'][left.property.name='data'][right.type='MemberExpression']",
-          message:
-            'Do not fall back to the raw payload — trust the ApiResponse envelope or throw. See standards/quick-ref/backend-quick-ref.md ApiResponse section.',
+            'Do not fall back to a default when ApiResponse data is missing — trust the envelope or throw. See standards/quick-ref/backend-quick-ref.md ApiResponse section.',
         },
       ],
     },

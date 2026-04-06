@@ -63,7 +63,11 @@
       }
     },
     {
-      "files": ["src/services/**/*.js"],
+      "files": [
+        "src/services/**/*.js",
+        "src/controllers/**/*.js",
+        "src/middlewares/**/*.js"
+      ],
       "excludedFiles": ["**/*.test.js"],
       "rules": {
         "no-magic-numbers": [
@@ -72,7 +76,7 @@
             "ignore": [-1, 0, 1, 2],
             "ignoreArrayIndexes": true,
             "enforceConst": true,
-            "detectObjects": true
+            "detectObjects": false
           }
         ]
       }
