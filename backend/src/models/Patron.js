@@ -54,6 +54,14 @@ module.exports = (sequelize) => {
           isIn: [['active', 'inactive', 'suspended']],
         },
       },
+      role: {
+        type: DataTypes.STRING(20),
+        defaultValue: 'patron',
+        allowNull: false,
+        validate: {
+          isIn: [['patron', 'librarian', 'admin']],
+        },
+      },
       password_hash: {
         type: DataTypes.STRING(255),
         allowNull: true,

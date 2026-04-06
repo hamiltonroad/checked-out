@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { hasMinimumRole } from '../../utils/roles';
 import { NAVIGATION_ITEMS, DRAWER_WIDTH } from '../../constants/navigation';
 
 /**
@@ -39,7 +40,7 @@ import { NAVIGATION_ITEMS, DRAWER_WIDTH } from '../../constants/navigation';
 function AppDrawer() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, patron } = useAuth();
 
   return (
     <Drawer
@@ -59,7 +60,9 @@ function AppDrawer() {
       }}
     >
       <List>
-        {NAVIGATION_ITEMS.map((item) => {
+        {NAVIGATION_ITEMS.filter(
+          (item) => !item.requiredRole || hasMinimumRole(patron?.role, item.requiredRole)
+        ).map((item) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
           const authDisabled = item.requiresAuth && !isAuthenticated;

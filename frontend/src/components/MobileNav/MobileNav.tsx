@@ -1,8 +1,9 @@
 import type React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { hasMinimumRole } from '../../utils/roles';
 import { NAVIGATION_ITEMS } from '../../constants/navigation';
 
 /**
@@ -16,44 +17,43 @@ import { NAVIGATION_ITEMS } from '../../constants/navigation';
  * - Touch-friendly navigation for mobile devices
  * - Active route highlighting with state sync
  * - Syncs with browser navigation (back/forward buttons)
+ * - Role-based item filtering (items hidden when patron lacks required role)
  *
  * The mobile nav only displays on mobile devices (< md breakpoint).
  * On desktop, the AppDrawer component provides navigation instead.
  *
  * @returns {JSX.Element} MobileNav component with bottom navigation
- *
- * @example
- * // Used in Layout.jsx
- * <Layout>
- *   <AppBar>...</AppBar>
- *   <AppDrawer />
- *   <Container>...</Container>
- *   <MobileNav />
- * </Layout>
  */
 function MobileNav() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, patron } = useAuth();
 
-  // Determine current value based on route
+  const visibleItems = useMemo(
+    () =>
+      NAVIGATION_ITEMS.filter(
+        (item) => !item.requiredRole || hasMinimumRole(patron?.role, item.requiredRole)
+      ),
+    [patron?.role]
+  );
+
   const getCurrentValue = () => {
-    const index = NAVIGATION_ITEMS.findIndex((item) => item.path === location.pathname);
-    return index >= 0 ? index : 0; // Default to first item (Books) if no match
+    const index = visibleItems.findIndex((item) => item.path === location.pathname);
+    return index >= 0 ? index : 0;
   };
 
   const [value, setValue] = useState(getCurrentValue());
 
   // Sync state with location changes (e.g., browser back/forward buttons)
   useEffect(() => {
-    const index = NAVIGATION_ITEMS.findIndex((item) => item.path === location.pathname);
+    const index = visibleItems.findIndex((item) => item.path === location.pathname);
     setValue(index >= 0 ? index : 0);
-  }, [location.pathname]);
+  }, [location.pathname, visibleItems]);
 
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
 
-    const selectedItem = NAVIGATION_ITEMS[newValue];
+    const selectedItem = visibleItems[newValue];
     const authBlocked = selectedItem?.requiresAuth && !isAuthenticated;
     if (selectedItem && !selectedItem.disabled && !authBlocked) {
       navigate(selectedItem.path);
@@ -82,7 +82,7 @@ function MobileNav() {
           bgcolor: 'surface.main',
         }}
       >
-        {NAVIGATION_ITEMS.map((item) => {
+        {visibleItems.map((item) => {
           const Icon = item.icon;
           return (
             <BottomNavigationAction

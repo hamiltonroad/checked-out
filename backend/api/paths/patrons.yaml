@@ -31,6 +31,8 @@
                         $ref: '../components/schemas.yaml#/Patron'
       '401':
         $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
 
 /api/v1/patrons/search:
   get:
@@ -72,6 +74,8 @@
                         $ref: '../components/schemas.yaml#/Patron'
       '401':
         $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
 
 /api/v1/patrons/recent:
   get:
@@ -105,6 +109,8 @@
                         $ref: '../components/schemas.yaml#/Patron'
       '401':
         $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
 
 /api/v1/patrons/{id}:
   get:
@@ -135,5 +141,7 @@
                       $ref: '../components/schemas.yaml#/Patron'
       '401':
         $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
       '404':
         $ref: '../components/responses.yaml#/NotFound'

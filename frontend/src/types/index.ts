@@ -64,10 +64,13 @@ export interface Patron {
   last_name: string;
   card_number?: string;
   status: PatronStatus;
+  role: PatronRole;
   email?: string;
 }
 
 export type PatronStatus = 'active' | 'inactive' | 'suspended';
+
+export type PatronRole = 'patron' | 'librarian' | 'admin';
 
 export interface PatronDetail {
   id: number;
@@ -77,6 +80,7 @@ export interface PatronDetail {
   phone: string | null;
   card_number: string;
   status: PatronStatus;
+  role: PatronRole;
 }
 
 export interface PatronCheckout {
@@ -183,16 +187,6 @@ export type IconSize = 'small' | 'medium' | 'large';
 export type RatingSize = 'small' | 'medium' | 'large';
 
 export type ThemeMode = 'light' | 'dark';
-
-export interface NavigationItem {
-  id: string;
-  label: string;
-  icon: ComponentType;
-  path: string;
-  disabled: boolean;
-  ariaLabel: string;
-  requiresAuth: boolean;
-}
 
 export interface EmptyStateAction {
   label: string;

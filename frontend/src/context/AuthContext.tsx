@@ -1,10 +1,11 @@
 import { createContext, useState, useMemo, useCallback, useEffect, useContext } from 'react';
 import type { ReactNode } from 'react';
 import authService from '../services/authService';
-import type { Patron } from '../types';
+import type { Patron, PatronRole } from '../types';
 
 interface AuthContextValue {
   patron: Patron | null;
+  role: PatronRole | null;
   isAuthenticated: boolean;
   loading: boolean;
   login: (cardNumber: string, password: string) => Promise<Patron>;
@@ -90,6 +91,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value = useMemo(
     () => ({
       patron,
+      role: patron?.role ?? null,
       isAuthenticated: Boolean(patron),
       loading,
       login: handleLogin,
