@@ -17,6 +17,11 @@
     "db:migrate": "npm run db:migrate --workspace=backend",
     "db:seed": "npm run db:seed --workspace=backend",
     "test:smoke": "npx playwright test",
+    "harness:welcome123": "bash scripts/check-welcome123.sh",
+    "harness:check-overrides": "bash scripts/check-eslint-overrides.sh",
+    "harness:check-jsdoc": "bash scripts/check-orphan-jsdoc.sh",
+    "harness:health": "bash scripts/harness-health.sh",
+    "harness:all": "npm run harness:welcome123 && npm run harness:check-overrides && npm run harness:check-jsdoc && npm run harness:health",
     "prepare": "husky"
   },
   "lint-staged": {

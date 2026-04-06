@@ -7,7 +7,14 @@
     "no-console": "error",
     "consistent-return": "off",
     "no-underscore-dangle": ["error", { "allow": ["_id"] }],
-    "max-lines": ["warn", { "max": 200, "skipBlankLines": true, "skipComments": true }]
+    "max-lines": ["warn", { "max": 200, "skipBlankLines": true, "skipComments": true }],
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "Literal[value='welcome123']",
+        "message": "[HARNESS-DEV-PASSWORD-LITERAL issue #230] Import DEV_PASSWORD from backend/src/config/auth.js — do not repeat the literal."
+      }
+    ]
   },
   "overrides": [
     {
@@ -52,12 +59,28 @@
           {
             "selector": "Literal[value=/^(admin|librarian|patron|staff|system_admin)$/]",
             "message": "Use role constants from src/config/roles.js (ROLES.ADMIN, etc.) instead of raw role string literals."
+          },
+          {
+            "selector": "Literal[value='welcome123']",
+            "message": "[HARNESS-DEV-PASSWORD-LITERAL issue #230] Import DEV_PASSWORD from backend/src/config/auth.js — do not repeat the literal."
           }
         ]
       }
     },
     {
       "files": ["src/config/roles.js"],
+      "rules": {
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "Literal[value='welcome123']",
+            "message": "[HARNESS-DEV-PASSWORD-LITERAL issue #230] Import DEV_PASSWORD from backend/src/config/auth.js — do not repeat the literal."
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/config/auth.js"],
       "rules": {
         "no-restricted-syntax": "off"
       }

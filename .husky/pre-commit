@@ -1,2 +1,6 @@
 npx lint-staged
 ./scripts/check-test-ratio.sh
+./scripts/check-welcome123.sh
+./scripts/check-eslint-overrides.sh
+./scripts/check-orphan-jsdoc.sh
+./scripts/harness-health.sh

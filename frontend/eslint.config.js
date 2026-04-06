@@ -77,6 +77,23 @@ export default defineConfig([
       'no-restricted-imports': 'off',
     },
   },
+  // HARNESS-DEV-PASSWORD-LITERAL (issue #230)
+  // Ban the literal 'welcome123' anywhere except testData.ts (the single
+  // shared fixture re-exporting from backend/src/config/auth.js semantics).
+  {
+    files: ['**/*.{ts,tsx,js,jsx}'],
+    ignores: ['**/e2e/fixtures/testData.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "Literal[value='welcome123']",
+          message:
+            '[HARNESS-DEV-PASSWORD-LITERAL issue #230] Import DEV_PASSWORD from frontend/e2e/fixtures/testData.ts (the single shared source) — do not repeat the literal.',
+        },
+      ],
+    },
+  },
   // Ban raw role string literals project-wide (Issue #228 Rec #2).
   // Whitelisted: src/utils/roles.ts (the canonical source) and test files.
   // Project-wide ban catches AppRouter.tsx, ProtectedRoute*, and any future guard-like file
