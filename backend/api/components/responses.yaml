@@ -19,6 +19,13 @@ NotFound:
       schema:
         $ref: './schemas.yaml#/ApiErrorResponse'
 
+Forbidden:
+  description: Insufficient role or permissions
+  content:
+    application/json:
+      schema:
+        $ref: './schemas.yaml#/ApiErrorResponse'
+
 Conflict:
   description: Conflict (e.g. copy already checked out)
   content:

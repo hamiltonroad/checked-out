@@ -64,10 +64,13 @@ export interface Patron {
   last_name: string;
   card_number?: string;
   status: PatronStatus;
+  role: PatronRole;
   email?: string;
 }
 
 export type PatronStatus = 'active' | 'inactive' | 'suspended';
+
+export type PatronRole = 'patron' | 'librarian' | 'admin';
 
 export interface PatronDetail {
   id: number;
@@ -77,6 +80,7 @@ export interface PatronDetail {
   phone: string | null;
   card_number: string;
   status: PatronStatus;
+  role: PatronRole;
 }
 
 export interface PatronCheckout {
@@ -192,6 +196,7 @@ export interface NavigationItem {
   disabled: boolean;
   ariaLabel: string;
   requiresAuth: boolean;
+  requiredRole?: PatronRole;
 }
 
 export interface EmptyStateAction {
