@@ -1,5 +1,4 @@
-// @ts-check
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * Smoke tests for book filtering: author, rating, and genre filters.
@@ -9,11 +8,12 @@ import { test, expect } from '@playwright/test';
 const BOOKS_URL = 'http://localhost:5173';
 
 /** Extract the "of N" total from "Showing X of Y books" */
-async function getTotalCount(page) {
+async function getTotalCount(page: Page): Promise<number> {
   const showingText = page.locator('text=/Showing \\d+ of \\d+ books/');
   await expect(showingText).toBeVisible();
-  const text = await showingText.textContent();
-  return parseInt(text.match(/of (\d+)/)[1], 10);
+  const text = (await showingText.textContent()) ?? '';
+  const match = text.match(/of (\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
 }
 
 test.describe('Book filters', () => {
@@ -36,8 +36,9 @@ test.describe('Book filters', () => {
     await option.click();
 
     // Wait for API request with authorId param to complete
-    await page.waitForResponse((resp) =>
-      resp.url().includes('/books') && resp.url().includes('authorId') && resp.status() === 200
+    await page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/books') && resp.url().includes('authorId') && resp.status() === 200
     );
 
     const filteredTotal = await getTotalCount(page);
@@ -58,8 +59,9 @@ test.describe('Book filters', () => {
     await page.getByRole('option', { name: '4+ Stars' }).click();
 
     // Wait for API request with minRating param to complete
-    await page.waitForResponse((resp) =>
-      resp.url().includes('/books') && resp.url().includes('minRating') && resp.status() === 200
+    await page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/books') && resp.url().includes('minRating') && resp.status() === 200
     );
 
     const filteredTotal = await getTotalCount(page);
@@ -69,8 +71,9 @@ test.describe('Book filters', () => {
 
   test('genre filter narrows book results', async ({ page }) => {
     // Set up response listener BEFORE triggering the interaction
-    const genreResponse = page.waitForResponse((resp) =>
-      resp.url().includes('/books') && resp.url().includes('genre') && resp.status() === 200
+    const genreResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/books') && resp.url().includes('genre') && resp.status() === 200
     );
 
     // Open Genre dropdown and select "Fantasy"
@@ -98,8 +101,9 @@ test.describe('Book filters', () => {
     await option.click();
 
     // Wait for filtered results
-    await page.waitForResponse((resp) =>
-      resp.url().includes('/books') && resp.url().includes('authorId') && resp.status() === 200
+    await page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/books') && resp.url().includes('authorId') && resp.status() === 200
     );
 
     // Click "Clear all filters"
@@ -107,8 +111,9 @@ test.describe('Book filters', () => {
     await expect(clearAll).toBeVisible();
 
     // Set up response listener BEFORE clicking
-    const resetResponse = page.waitForResponse((resp) =>
-      resp.url().includes('/books') && !resp.url().includes('authorId') && resp.status() === 200
+    const resetResponse = page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/books') && !resp.url().includes('authorId') && resp.status() === 200
     );
     await clearAll.click();
 

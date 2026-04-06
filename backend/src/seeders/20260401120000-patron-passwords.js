@@ -1,13 +1,11 @@
 /* eslint-disable no-unused-vars */
 const bcrypt = require('bcrypt');
-const { SALT_ROUNDS } = require('../config/auth');
+const { SALT_ROUNDS, DEV_PASSWORD } = require('../config/auth');
 
 /**
  * Seed password hashes for existing demo patrons.
- * Default password for all dev patrons: "welcome123"
+ * Default password for all dev patrons comes from config/auth.js.
  */
-
-const DEV_PASSWORD = 'welcome123';
 
 module.exports = {
   /**

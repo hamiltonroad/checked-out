@@ -1,16 +1,14 @@
 /* eslint-disable no-unused-vars */
 const bcrypt = require('bcrypt');
-const { SALT_ROUNDS } = require('../config/auth');
+const { SALT_ROUNDS, DEV_PASSWORD } = require('../config/auth');
 const { FIRST_NAMES, LAST_NAMES } = require('./data/patron-names');
 
 /**
  * Bulk patron seeder — creates 5,000 realistic patron records for testing.
- * All patrons use password "welcome123" (bcrypt-hashed).
+ * All patrons use the canonical dev password from config/auth.js (bcrypt-hashed).
  * Card numbers use BULK-XXXXX format to avoid collision with demo patrons.
  * Idempotent: skips if bulk patrons already exist.
  */
-
-const DEV_PASSWORD = 'welcome123';
 const PATRON_COUNT = 5000;
 const BULK_CARD_PREFIX = 'BULK-';
 const IDEMPOTENCY_THRESHOLD = 100;
