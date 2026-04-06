@@ -23,9 +23,17 @@ test('patron role is denied on librarian/admin API routes', async ({ page }) => 
   expect(listPatrons.payload?.success).toBe(false);
   expect(typeof listPatrons.payload?.message).toBe('string');
 
+  // Middleware order on POST /checkouts (see backend/src/routes/checkoutRoutes.js):
+  //   strictLimiter -> authenticate -> requireRole(LIBRARIAN) -> validateRequest -> controller
+  // requireRole runs BEFORE validateRequest, so any well-formed body shape
+  // (even with a sentinel copy_id) returns 403 for a patron-role session
+  // — never 400 from Joi and never 404/409 from the service. We assert
+  // status === 403 explicitly so the test fails loudly if that ordering ever
+  // changes (e.g. validation moves ahead of role enforcement).
+  const SENTINEL_COPY_ID = 1;
   const createCheckout = await apiRequestRaw('POST', '/checkouts', {
     page,
-    body: { copy_id: 1 },
+    body: { copy_id: SENTINEL_COPY_ID },
   });
   expect(createCheckout.status).toBe(403);
   expect(createCheckout.payload?.success).toBe(false);

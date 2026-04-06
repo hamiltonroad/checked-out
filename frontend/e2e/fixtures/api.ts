@@ -16,8 +16,18 @@ interface ApiEnvelope<T> {
   error?: { message?: string };
 }
 
+/**
+ * Shared CSRF priming helper. Issues a safe GET so the backend sets the
+ * `_csrf` cookie via `setCsrfCookie` middleware, then reads the cookie value
+ * for use in the `X-CSRF-Token` header on subsequent state-changing requests.
+ *
+ * Single source of truth — both `apiRequest` and `apiRequestRaw` MUST use
+ * this helper so the priming endpoint and cookie name stay in lock-step.
+ */
 async function primeCsrf(ctx: APIRequestContext): Promise<string> {
-  await ctx.get('/books?limit=1');
+  // Use absolute URL so contexts without a configured baseURL (e.g. page.request)
+  // still hit the API.
+  await ctx.get(`${API_BASE_URL}/books?limit=1`);
   const state = await ctx.storageState();
   const cookie = state.cookies.find((c) => c.name === '_csrf');
   return cookie?.value ?? '';
@@ -66,21 +76,17 @@ export interface RawOptions {
   page?: Page;
 }
 
-async function primeCsrfFromCookies(ctx: APIRequestContext): Promise<string> {
-  await ctx.get(`${API_BASE_URL}/books?limit=1`);
-  const state = await ctx.storageState();
-  const cookie = state.cookies.find((c) => c.name === '_csrf');
-  return cookie?.value ?? '';
-}
-
 /**
  * Raw-mode API helper for security tests. Does NOT throw on non-2xx responses
  * or on `success: false` envelopes — returns the status and parsed payload so
  * tests can assert error contracts (401/403, etc).
  *
- * Pass `{ page }` to reuse a logged-in page's request context (cookies persist),
- * or `{ ctx }` to reuse an explicit APIRequestContext. Otherwise creates a fresh
- * unauthenticated context.
+ * Context precedence (highest to lowest):
+ *   1. `opts.ctx` — explicit APIRequestContext (e.g., from request.newContext)
+ *   2. `opts.page` — reuses `page.request` so logged-in cookies persist
+ *   3. fallback — creates a fresh unauthenticated context (disposed in finally)
+ *
+ * If both `ctx` and `page` are supplied, `ctx` wins.
  */
 export async function apiRequestRaw<T = unknown>(
   method: Method,
@@ -100,7 +106,7 @@ export async function apiRequestRaw<T = unknown>(
   try {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (method !== 'GET') {
-      headers['X-CSRF-Token'] = await primeCsrfFromCookies(ctx);
+      headers['X-CSRF-Token'] = await primeCsrf(ctx);
     }
     const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
     const response = await ctx.fetch(url, {
