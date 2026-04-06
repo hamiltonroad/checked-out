@@ -102,13 +102,13 @@ class CheckoutController {
       const checkout = await checkoutService.returnCheckout(id, returnDate || null);
 
       // Orchestrate hold creation for front-of-line waitlist patron (ADR-008)
-      if (checkout.copy_id) {
-        await holdService.expireStaleHolds([checkout.copy_id]);
-        const hold = await holdService.createHoldForFrontOfLine(checkout.copy_id);
+      if (checkout.copyId) {
+        await holdService.expireStaleHolds([checkout.copyId]);
+        const hold = await holdService.createHoldForFrontOfLine(checkout.copyId);
         if (hold) {
           logger.info('Hold created on return for front-of-line patron', {
             holdId: hold.id,
-            copyId: checkout.copy_id,
+            copyId: checkout.copyId,
           });
         }
       }

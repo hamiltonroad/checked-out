@@ -155,9 +155,7 @@ class CheckoutService {
     if (updatedCount === 0) throw ApiError.conflict('Checkout has already been returned');
     await checkout.reload();
 
-    const result = formatCheckoutResponse(checkout);
-    result.copy_id = checkout.copy_id;
-    return result;
+    return formatCheckoutResponse(checkout);
   }
 }
 

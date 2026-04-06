@@ -81,24 +81,6 @@ class HoldService {
     return staleHolds;
   }
 
-  /** Mark a hold as fulfilled (patron checked out the held copy) */
-  // eslint-disable-next-line class-methods-use-this
-  async fulfillHold(holdId) {
-    const hold = await Hold.findByPk(holdId);
-    if (!hold) throw ApiError.notFound('Hold not found');
-
-    await hold.update({ status: 'fulfilled' });
-    return hold;
-  }
-
-  /** Get the active hold on a specific copy, or null */
-  // eslint-disable-next-line class-methods-use-this
-  async getActiveHoldForCopy(copyId) {
-    return Hold.findOne({
-      where: { copy_id: copyId, status: 'active' },
-    });
-  }
-
   /** Get all active holds for a book+format combination */
   // eslint-disable-next-line class-methods-use-this
   async getActiveHoldsForBookFormat(bookId, format) {
