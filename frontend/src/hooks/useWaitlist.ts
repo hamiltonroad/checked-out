@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import waitlistService from '../services/waitlistService';
+import { useAuth } from './useAuth';
 
 /**
  * Hook for fetching the waitlist for a book (optionally filtered by format)
@@ -21,6 +22,14 @@ export function usePatronWaitlist(patronId: number | undefined) {
     queryFn: () => waitlistService.getPatronWaitlist(patronId!),
     enabled: Boolean(patronId),
   });
+}
+
+/**
+ * Hook for fetching the authenticated patron's own waitlist entries
+ */
+export function useMyWaitlist() {
+  const { patron } = useAuth();
+  return usePatronWaitlist(patron?.id);
 }
 
 /**
