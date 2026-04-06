@@ -21,9 +21,6 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-violations=0
-report=""
-
 scan_file() {
   local file="$1"
   awk '

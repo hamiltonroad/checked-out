@@ -26,12 +26,12 @@ When you add a mechanically-enforced harness rule:
 
 | Rule ID | Origin Issue | Enforcement Location | Marker String | Description |
 |---|---|---|---|---|
-| HARNESS-LINT-HOOK-TS | #230 | `.claude/settings.json` | `*.tsx` | PostToolUse hook runs `npx eslint` for `.ts/.tsx` files in addition to `.js/.jsx`. |
+| HARNESS-LINT-HOOK-TS | #230 | `.claude/settings.json` | `HARNESS-LINT-HOOK-TS` | PostToolUse hook runs `npx eslint` for `.ts/.tsx` files in addition to `.js/.jsx`. Sentinel embedded as a shell comment inside the hook `command` string (JSON disallows top-level comments). |
 | HARNESS-DEV-PASSWORD-LITERAL | #230 | `backend/.eslintrc.json` | `HARNESS-DEV-PASSWORD-LITERAL` | ESLint `no-restricted-syntax` blocks the literal `'welcome123'` outside `backend/src/config/auth.js`. Top-level + per-override merges. |
 | HARNESS-DEV-PASSWORD-LITERAL | #230 | `frontend/eslint.config.js` | `HARNESS-DEV-PASSWORD-LITERAL` | ESLint flat-config block bans `'welcome123'` outside `frontend/e2e/fixtures/testData.ts`. |
 | HARNESS-DEV-PASSWORD-LITERAL | #230 | `scripts/check-welcome123.sh` | `HARNESS-DEV-PASSWORD-LITERAL` | Authoritative grep check (belt-and-suspenders for the ESLint rule which can be silently shadowed by per-file override blocks). |
 | HARNESS-MAX-LINES-OVERRIDE-GUARD | #230 | `scripts/check-eslint-overrides.sh` | `HARNESS-MAX-LINES-OVERRIDE-GUARD` | Bash check fails if `'max-lines': 'off'` appears in any ESLint config outside the test/type/config/seeders allowlist. |
-| HARNESS-ENV-SINGLE-SOURCE | #230 | `CLAUDE.md` | `HARNESS-ENV-SINGLE-SOURCE` | Constraint: env-var defaults defined once per concern. **Documented only — mechanical enforcement deferred** because the existing duplications are scoped to e2e fixtures vs. frontend services and require a tsconfig path-mapping refactor. Tracked in issue #230 follow-up. |
+| HARNESS-ENV-SINGLE-SOURCE | #230 | `scripts/check-env-single-source.sh` | `HARNESS-ENV-SINGLE-SOURCE` | Bash grep: fails if any known env-var default literal appears in more than one source file. Shallow stand-in; the full tsconfig path-mapping refactor + `no-restricted-syntax` ban on direct `import.meta.env`/`process.env` access is tracked as the Rec #19 follow-up on issue #230. |
 | HARNESS-ORPHAN-JSDOC | #230 | `scripts/check-orphan-jsdoc.sh` | `HARNESS-ORPHAN-JSDOC` | Bash check flags JSDoc blocks separated from their declaration by 2+ blank lines. **Conservative implementation** — a real ESLint plugin walking the AST is the future enhancement. |
 | HARNESS-ROLE-LITERAL-BACKEND | #228 | `backend/.eslintrc.json` | `Use role constants from src/config/roles.js` | ESLint `no-restricted-syntax` bans raw role string literals in routes/middlewares. |
 | HARNESS-ROLE-LITERAL-FRONTEND | #228 | `frontend/eslint.config.js` | `Use role constants from src/utils/roles.ts` | ESLint flat-config block bans raw role literals project-wide except `utils/roles.ts` and tests. |

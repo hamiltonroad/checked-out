@@ -15,7 +15,14 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-ALLOWLIST_REGEX='^(backend/src/config/auth\.js|frontend/e2e/fixtures/testData\.ts|scripts/check-welcome123\.sh|backend/\.eslintrc\.json|frontend/eslint\.config\.js|standards/enforcement-registry\.md|CLAUDE\.md|code-review-results/.*|\.claude/temp/.*|\.claude/settings\.local\.json|\.husky/pre-commit|package\.json|package-lock\.json)$'
+# Allowlist is intentionally narrow. Canonical runtime sources are the
+# first two; the rest are harness/enforcement locations that must quote
+# the literal to enforce it. Documentation that discusses the rule
+# (CLAUDE.md, standards, code-review-results, .claude/temp) is allowed
+# because it is non-executing text — but package-lock.json, package.json,
+# and .husky/pre-commit are NOT allowed: a rotation must update those
+# out-of-band and the check should force a human review.
+ALLOWLIST_REGEX='^(backend/src/config/auth\.js|frontend/e2e/fixtures/testData\.ts|scripts/check-welcome123\.sh|backend/\.eslintrc\.json|frontend/eslint\.config\.js|standards/enforcement-registry\.md|CLAUDE\.md|code-review-results/.*|\.claude/temp/.*|\.claude/settings\.local\.json|\.husky/pre-commit|package\.json)$'
 
 # -F fixed string, -r recursive, -l files only, exclude common noise
 matches=$(grep -rlF 'welcome123' \
