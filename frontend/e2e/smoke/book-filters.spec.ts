@@ -18,8 +18,13 @@ async function getTotalCount(page: Page): Promise<number> {
 
 test.describe('Book filters', () => {
   test.beforeEach(async ({ page }) => {
+    // Wait for the initial books fetch instead of 'networkidle' (flaky with
+    // React Query background refetches).
+    const initialBooks = page.waitForResponse(
+      (resp) => resp.url().includes('/books') && resp.status() === 200
+    );
     await page.goto(BOOKS_URL);
-    await page.waitForLoadState('networkidle');
+    await initialBooks;
   });
 
   test('author filter narrows book results', async ({ page }) => {

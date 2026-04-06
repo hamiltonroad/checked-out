@@ -280,6 +280,36 @@ cd frontend && timeout 10 npm run dev || true
 **Timestamp:** <timestamp>
 ```
 
+### Step 9.5: AC Verification Table (MANDATORY — issue #229 item #15)
+
+Before committing, cross-check every acceptance criterion bullet from
+`.claude/temp/GH-ISSUE-<number>-REMOVE.md` against a concrete piece of
+evidence. Write the table into
+`.claude/temp/VERIFICATION-<number>-REMOVE.md` under a new
+`## AC Verification Table` heading:
+
+```markdown
+## AC Verification Table
+
+| # | Acceptance Criterion (verbatim) | Evidence (`expect(...)` call, file:line, or command output) | Status |
+|---|---|---|---|
+| 1 | <bullet copied verbatim from issue> | `expect(foo).toBe('bar')` in `path/to/test.ts:42` | PASS |
+| 2 | <bullet>                             | Manual verification only — flagged for human sign-off | MANUAL |
+```
+
+Rules:
+- Every AC bullet from the issue MUST appear as a row. No skipping.
+- Evidence MUST be either (a) a concrete `expect(...)` call with a
+  file:line reference, (b) a file:line pointing at the implementation
+  that satisfies the bullet when no assertion is applicable (e.g.
+  prose documentation requirements), or (c) the literal string
+  "Manual verification only" followed by a one-line reason.
+- Any row whose Status is `MANUAL` MUST also be repeated in the
+  "Additional Testing for Human" section of the verification doc AND
+  called out in the final SUCCESS message as "requires human sign-off".
+- If you cannot produce evidence for a bullet, the task is NOT DONE.
+  Fix the gap or ABORT with "Requirement unclear" per Step 6.
+
 ### Step 10: Commit Changes
 
 **Stage all changes:**

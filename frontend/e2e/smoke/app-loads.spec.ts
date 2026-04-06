@@ -1,17 +1,16 @@
 import { test, expect, Page } from '@playwright/test';
+import { isAllowlistedConsoleError } from '../config/console-allowlist';
 
 /**
  * Smoke test: verifies the application starts and renders without
  * unexpected browser console errors.
  *
  * Assumes servers are already running via ./scripts/start-all.sh.
+ *
+ * Console-error filtering delegates to `frontend/e2e/config/console-allowlist.ts`,
+ * which enforces exact-string (not substring, not regex) matching —
+ * see issue #229 item #8.
  */
-
-const EXPECTED_ERROR_PATTERNS: RegExp[] = [/401/, /Unauthorized/, /auth/i];
-
-function isExpectedError(message: string): boolean {
-  return EXPECTED_ERROR_PATTERNS.some((pattern) => pattern.test(message));
-}
 
 async function safeGoto(page: Page, path = '/') {
   try {
@@ -37,7 +36,7 @@ test.describe('App smoke test', () => {
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
         const text = msg.text();
-        if (!isExpectedError(text)) {
+        if (!isAllowlistedConsoleError(text)) {
           consoleErrors.push(text);
         }
       }
@@ -61,9 +60,13 @@ test.describe('App smoke test', () => {
   });
 
   test('no unexpected console errors', async ({ page }) => {
+    // Wait for the initial catalog fetch instead of 'networkidle'
+    // (flaky with React Query background refetches — issue #229 item #7).
+    const booksResponse = page.waitForResponse(
+      (resp) => resp.url().includes('/books') && resp.status() === 200
+    );
     await safeGoto(page);
-
-    await page.waitForLoadState('networkidle');
+    await booksResponse;
 
     if (consoleErrors.length > 0) {
       throw new Error(

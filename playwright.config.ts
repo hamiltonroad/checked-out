@@ -22,6 +22,13 @@ export default defineConfig({
 
   projects: [
     {
+      // Config guard tests (no browser / no server needed) — e.g. the
+      // console-error allowlist integrity check from issue #229 item #8.
+      name: 'config',
+      testDir: './frontend/e2e/config',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       name: 'smoke',
       testDir: './frontend/e2e/smoke',
       use: { ...devices['Desktop Chrome'] },

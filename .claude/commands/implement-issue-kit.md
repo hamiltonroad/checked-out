@@ -17,7 +17,14 @@
 3. Agent runs quality checks (from `CLAUDE.md`)
 4. Agent spawns code-review-agent to review changes
 5. Agent fixes Critical/High findings
-6. Agent creates verification document
+6. Agent creates verification document, including a mandatory
+   **AC Verification Table** that maps every acceptance criterion
+   bullet from the issue to a concrete `expect(...)` call (with
+   file:line), implementation reference, or an explicit
+   "Manual verification only" note flagged for human sign-off.
+   If any bullet has no evidence, the agent MUST NOT mark the task
+   done — it fixes the gap or aborts with "Requirement unclear".
+   (See `implement-agent.md` Step 9.5 — issue #229 item #15.)
 7. Agent commits and creates PR
 8. Returns PR URL with code review summary and unresolved findings
 
