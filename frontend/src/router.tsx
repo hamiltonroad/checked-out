@@ -7,6 +7,7 @@ import PatronDetailPage from './pages/PatronDetailPage';
 import PatronListPage from './pages/PatronListPage';
 import LoginPage from './pages/LoginPage';
 import WishlistPage from './pages/WishlistPage';
+import MyWaitlistPage from './pages/MyWaitlistPage';
 import TypographyTestPage from './pages/TypographyTestPage';
 import { ROLES } from './utils/roles';
 
@@ -23,7 +24,10 @@ const router = createBrowserRouter([
       { path: 'typography-test', element: <TypographyTestPage /> },
       {
         element: <ProtectedRoute />,
-        children: [{ path: 'wishlist', element: <WishlistPage /> }],
+        children: [
+          { path: 'wishlist', element: <WishlistPage /> },
+          { path: 'my-waitlist', element: <MyWaitlistPage /> },
+        ],
       },
       {
         element: <ProtectedRoute requiredRole={ROLES.LIBRARIAN} />,
