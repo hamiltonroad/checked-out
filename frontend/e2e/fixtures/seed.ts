@@ -192,6 +192,10 @@ export async function seedAvailableCopy(): Promise<{
  * patron with an existing hold would observe. Returns the book and the
  * checkout ids the caller MUST pass to `releaseCheckouts()` during
  * teardown.
+ *
+ * **Prefer the `patronWithHolds` Playwright fixture in `seedTest.ts`** —
+ * it wraps this helper and registers cleanup automatically. Call this
+ * function directly only if you cannot use the fixture API.
  */
 export async function seedPatronWithHolds(): Promise<{
   bookId: number;
@@ -208,6 +212,10 @@ export async function seedPatronWithHolds(): Promise<{
  * librarian, returning the checkout id so the spec can exercise the
  * return path. Caller owns cleanup via `releaseCheckouts([checkoutId])`
  * if the spec does not actually return the copy through the UI.
+ *
+ * **Prefer the `checkedOutCopy` Playwright fixture in `seedTest.ts`** —
+ * it wraps this helper and registers cleanup automatically. Call this
+ * function directly only if you cannot use the fixture API.
  */
 export async function seedCheckedOutCopy(): Promise<{
   bookId: number;

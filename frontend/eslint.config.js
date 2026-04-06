@@ -99,22 +99,56 @@ export default defineConfig([
             'networkidle is flaky — use waitForResponse against a specific endpoint or a Locator assertion (issue #229 item #7).',
         },
         {
+          // Identifier substring rule. Matches `cookieName.includes('csrf')`,
+          // `urlPath.includes('/foo')`, `pathname.includes('/foo')`, etc.
+          // Does NOT match `resp.url().includes(...)` because callee.object
+          // there is a CallExpression, not an Identifier — `waitForResponse`
+          // filter callbacks remain legal.
           selector:
-            "CallExpression[callee.property.name='includes'][callee.object.name=/^(url|cookie|pathname)$/i]",
+            "CallExpression[callee.property.name='includes'][callee.object.type='Identifier'][callee.object.name=/cookie|url|pathname/i]",
           message:
             'Identifier assertions (URLs, cookies, paths) must be exact-match, not substring .includes() (issue #229 item #9).',
         },
         {
+          // Shorthand property keys: `{ copy_id: 1 }` / `{ patronId: 5 }`.
           selector:
-            "Property[key.name=/_id$/i][value.type='Literal'][value.raw=/^[0-9]+$/]",
+            "Property[key.type='Identifier'][key.name=/_id$|Id$|ID$/][value.type='Literal'][value.raw=/^[0-9]+$/]",
           message:
             'Do not hardcode database ids in e2e specs. Use fixtures/seed.ts helpers (issue #229 item #12).',
         },
         {
+          // String-keyed property literals: `{ 'copy_id': 1 }`.
+          selector:
+            "Property[key.type='Literal'][key.value=/_id$|Id$|ID$/][value.type='Literal'][value.raw=/^[0-9]+$/]",
+          message:
+            'Do not hardcode database ids in e2e specs. Use fixtures/seed.ts helpers (issue #229 item #12).',
+        },
+        {
+          // Direct fetch() to mutation endpoints.
           selector:
             "CallExpression[callee.name='fetch'] > Literal[value=/^\\u002Fapi\\u002F(copies|patrons|checkouts)/]",
           message:
             'Specs must not call mutation APIs directly — use fixtures/seed.ts helpers (issue #229 item #13).',
+        },
+        {
+          // page.request.{post,put,patch,delete}('/api/...') — Playwright APIRequestContext.
+          selector:
+            "CallExpression[callee.type='MemberExpression'][callee.object.type='MemberExpression'][callee.object.property.name='request'][callee.property.name=/^(post|put|patch|delete)$/] > Literal:first-child[value=/(copies|patrons|checkouts)/]",
+          message:
+            'Specs must not call mutation APIs directly via page.request — use fixtures/seed.ts helpers (issue #229 item #13).',
+        },
+        {
+          // session.request('POST', 'checkouts', ...) — internal ApiSession helper.
+          selector:
+            "CallExpression[callee.type='MemberExpression'][callee.property.name='request'][arguments.0.type='Literal'][arguments.0.value=/^(POST|PUT|PATCH|DELETE)$/][arguments.1.type='Literal'][arguments.1.value=/(copies|patrons|checkouts)/]",
+          message:
+            'Specs must not call mutation APIs directly via ApiSession — use fixtures/seed.ts helpers (issue #229 item #13).',
+        },
+        {
+          // MUI class-name selectors in specs (also enforced in page-objects below).
+          selector: "Literal[value=/\\.Mui[A-Z]/]",
+          message:
+            'Do not select by MUI class names — use getByRole, labels, or data-testid (issue #229 item #11).',
         },
       ],
       'no-restricted-imports': [

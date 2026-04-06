@@ -22,12 +22,42 @@
 
 set -eu
 
+#
+# Modes:
+#   (default)   pre-commit — checks staged additions/renames/copies
+#   --ci BASE   CI mode    — checks files added/renamed/copied between
+#                            BASE and HEAD (e.g. `--ci origin/main`)
+#
+# `--diff-filter=ARC` covers Added, Renamed, and Copied so a file split
+# (one component refactored into two) is treated as a new file requiring
+# its own test.
+#
+
+mode="staged"
+base_ref=""
+if [ "${1:-}" = "--ci" ]; then
+  if [ -z "${2:-}" ]; then
+    echo "check-test-ratio: --ci requires a base ref (e.g., --ci origin/main)" >&2
+    exit 2
+  fi
+  mode="ci"
+  base_ref="$2"
+fi
+
 if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
   exit 0
 fi
 
+if [ "$mode" = "staged" ]; then
+  diff_cmd="git diff --cached --name-only --diff-filter=ARC"
+  staged_all_cmd="git diff --cached --name-only"
+else
+  diff_cmd="git diff --name-only --diff-filter=ARC ${base_ref}...HEAD"
+  staged_all_cmd="git diff --name-only ${base_ref}...HEAD"
+fi
+
 added=$(
-  git diff --cached --name-only --diff-filter=A 2>/dev/null \
+  $diff_cmd 2>/dev/null \
     | grep -E '^frontend/src/(pages|components)/.*\.(tsx|ts|jsx|js)$' \
     | grep -Ev '\.(test|spec)\.(tsx|ts|jsx|js)$' \
     || true
