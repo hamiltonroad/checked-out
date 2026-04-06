@@ -11,7 +11,7 @@ import PsychologyIcon from '@mui/icons-material/Psychology';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import CreateIcon from '@mui/icons-material/Create';
 
-export interface GenreStyle {
+interface GenreStyle {
   bgColor: string;
   iconColor: string;
   Icon: SvgIconComponent;

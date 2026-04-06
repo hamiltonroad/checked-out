@@ -23,7 +23,7 @@ cd "$ROOT"
 # Each entry: human label + baseline count + literal string.
 # Lower the baseline as refactors eliminate duplications.
 declare -a patterns=(
-  "VITE_API_BASE_URL default|3|http://localhost:3000/api/v1"
+  "VITE_API_BASE_URL default|2|http://localhost:3000/api/v1"
 )
 
 regressions=0

@@ -84,7 +84,7 @@
  *   },
  * }));
  */
-export const motion = {
+const motion = {
   /**
    * Duration tokens in milliseconds
    * Organized by speed: short (quick), medium (standard), long (complex)

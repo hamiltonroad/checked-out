@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import {
   RadioGroup,
   FormControlLabel,
@@ -82,22 +81,5 @@ function CopyRadioGroup({
     </Box>
   );
 }
-
-CopyRadioGroup.propTypes = {
-  copies: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      copy_number: PropTypes.number.isRequired,
-      format: PropTypes.string.isRequired,
-      barcode: PropTypes.string,
-      asin: PropTypes.string,
-    })
-  ).isRequired,
-  value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  disabled: PropTypes.bool,
-  totalCopies: PropTypes.number,
-  isLoading: PropTypes.bool,
-};
 
 export default CopyRadioGroup;

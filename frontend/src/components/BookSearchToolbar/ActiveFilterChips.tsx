@@ -1,5 +1,4 @@
 import { Chip, Button, Box } from '@mui/material';
-import PropTypes from 'prop-types';
 import type { AuthorSummary } from '../../types';
 import { AVAILABILITY_FILTERS, AVAILABILITY_FILTER_LABELS, FORMAT_OPTIONS } from './constants';
 
@@ -135,30 +134,5 @@ function ActiveFilterChips({
     </Box>
   );
 }
-
-ActiveFilterChips.propTypes = {
-  debouncedSearchTerm: PropTypes.string.isRequired,
-  onClearSearch: PropTypes.func.isRequired,
-  availabilityFilter: PropTypes.string.isRequired,
-  onAvailabilityChange: PropTypes.func.isRequired,
-  hideProfanity: PropTypes.bool.isRequired,
-  onHideProfanityChange: PropTypes.func.isRequired,
-  selectedGenres: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-  onGenresChange: PropTypes.func.isRequired,
-  selectedFormats: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-  onFormatsChange: PropTypes.func.isRequired,
-  minRating: PropTypes.number.isRequired,
-  onMinRatingChange: PropTypes.func.isRequired,
-  selectedAuthors: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      first_name: PropTypes.string.isRequired,
-      last_name: PropTypes.string.isRequired,
-    }).isRequired
-  ).isRequired,
-  onAuthorsChange: PropTypes.func.isRequired,
-  onClearAll: PropTypes.func.isRequired,
-  hasActiveFilters: PropTypes.bool.isRequired,
-};
 
 export default ActiveFilterChips;

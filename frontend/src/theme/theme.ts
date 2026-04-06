@@ -12,12 +12,7 @@
  * - components: Component style overrides (reserved for future use)
  *
  * Usage:
- * ```jsx
- * // Default light theme
- * import theme from './theme/theme';
- * <ThemeProvider theme={theme}>
- *
- * // Dynamic theme with mode switching
+ * ```tsx
  * import { getTheme } from './theme/theme';
  * const theme = getTheme('dark');
  * <ThemeProvider theme={theme}>
@@ -67,8 +62,7 @@ export const getTheme = (mode: 'light' | 'dark' = 'light') => {
     // Can be used as theme.spacing(2) for 16px
     spacing: 8,
 
-    // Custom spacing utilities (imported from spacing.js)
-    // Provides spacingScale array for direct pixel values
+    // Custom spacing utilities (imported from spacing.ts)
     customSpacing: {
       spacing,
     },
@@ -83,9 +77,3 @@ export const getTheme = (mode: 'light' | 'dark' = 'light') => {
     components,
   });
 };
-
-// Default theme (light mode) for backward compatibility
-// This ensures existing imports continue to work without changes
-const theme = getTheme('light');
-
-export default theme;

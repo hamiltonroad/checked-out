@@ -1,6 +1,6 @@
 import type { Copy } from '../types';
 
-export interface FormatAvailability {
+interface FormatAvailability {
   format: string;
   total: number;
   available: number;

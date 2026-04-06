@@ -1,5 +1,3 @@
-import type { ComponentType } from 'react';
-
 /**
  * Shared TypeScript types for the Checked Out frontend application
  */
@@ -14,25 +12,11 @@ export interface ApiResponse<T> {
   status?: string;
 }
 
-export interface PaginatedResponse<T> {
-  data: {
-    books: T[];
-    pagination: PaginationData;
-  };
-}
-
-export interface PaginationData {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-}
-
 // ============================================================================
 // Domain Types
 // ============================================================================
 
-export interface Author {
+interface Author {
   first_name: string;
   last_name: string;
 }
@@ -132,7 +116,7 @@ export interface OverdueCheckout {
 
 export type DueSeverity = 'error' | 'warning' | null;
 
-export interface CopyCheckout {
+interface CopyCheckout {
   id: number;
   return_date: string | null;
 }
@@ -185,8 +169,6 @@ export type ChipSize = 'small' | 'medium';
 export type IconSize = 'small' | 'medium' | 'large';
 
 export type RatingSize = 'small' | 'medium' | 'large';
-
-export type ThemeMode = 'light' | 'dark';
 
 export interface EmptyStateAction {
   label: string;

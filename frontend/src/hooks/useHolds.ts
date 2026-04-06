@@ -5,7 +5,7 @@ import { useAuth } from './useAuth';
 /**
  * Hook for fetching a patron's active holds
  */
-export function usePatronHolds(patronId: number | undefined) {
+function usePatronHolds(patronId: number | undefined) {
   return useQuery({
     queryKey: ['holds', 'patron', patronId],
     queryFn: () => holdService.getPatronHolds(patronId!),

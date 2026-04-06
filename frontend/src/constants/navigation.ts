@@ -8,7 +8,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import type { PatronRole } from '../types';
 import { ROLES } from '../utils/roles';
 
-export interface NavigationItem {
+interface NavigationItem {
   id: string;
   label: string;
   icon: SvgIconComponent;
