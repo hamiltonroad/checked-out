@@ -67,14 +67,16 @@ class HoldService {
 
     const staleHolds = await Hold.findAll({ where });
 
-    for (const hold of staleHolds) {
-      await hold.update({ status: 'expired' });
-      logger.info('Hold expired', {
-        holdId: hold.id,
-        copyId: hold.copy_id,
-        patronId: hold.patron_id,
-      });
-    }
+    await Promise.all(
+      staleHolds.map((hold) => {
+        logger.info('Hold expired', {
+          holdId: hold.id,
+          copyId: hold.copy_id,
+          patronId: hold.patron_id,
+        });
+        return hold.update({ status: 'expired' });
+      })
+    );
 
     return staleHolds;
   }

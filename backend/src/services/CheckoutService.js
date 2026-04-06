@@ -1,7 +1,6 @@
 const { Op } = require('sequelize');
 const { Checkout, Patron, Copy, Hold, WaitlistEntry, sequelize } = require('../models');
 const ApiError = require('../utils/ApiError');
-const logger = require('../config/logger');
 const {
   CHECKOUT_INCLUDES,
   OVERDUE_INCLUDES,
