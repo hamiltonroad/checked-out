@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import { API_BASE_URL } from './api';
 import { DEV_PASSWORD, SEED_PATRONS, PatronRole, SeedPatron } from './testData';
 
 /**
@@ -8,13 +9,12 @@ import { DEV_PASSWORD, SEED_PATRONS, PatronRole, SeedPatron } from './testData';
  */
 export async function loginAs(page: Page, role: PatronRole): Promise<SeedPatron> {
   const patron = SEED_PATRONS[role];
-  const apiBase = process.env.API_BASE_URL ?? 'http://localhost:3000/api/v1';
 
-  await page.request.get(`${apiBase}/books?limit=1`);
+  await page.request.get(`${API_BASE_URL}/books?limit=1`);
   const cookies = await page.context().cookies();
   const csrf = cookies.find((c) => c.name === '_csrf')?.value ?? '';
 
-  const res = await page.request.post(`${apiBase}/auth/login`, {
+  const res = await page.request.post(`${API_BASE_URL}/auth/login`, {
     data: { card_number: patron.cardNumber, password: DEV_PASSWORD },
     headers: { 'X-CSRF-Token': csrf, 'Content-Type': 'application/json' },
   });

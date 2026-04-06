@@ -6,7 +6,7 @@ import { request, APIRequestContext } from '@playwright/test';
  * through the browser page.
  */
 
-const API_BASE_URL = process.env.API_BASE_URL ?? 'http://localhost:3000/api/v1';
+export const API_BASE_URL = process.env.API_BASE_URL ?? 'http://localhost:3000/api/v1';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -48,7 +48,7 @@ export async function apiRequest<T = unknown>(
         `apiRequest ${method} ${path} envelope error: ${payload.error?.message ?? 'unknown'}`
       );
     }
-    return (payload.data ?? (payload as unknown)) as T;
+    return payload.data as T;
   } finally {
     await ctx.dispose();
   }

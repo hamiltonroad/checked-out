@@ -83,8 +83,5 @@ export default defineConfig([
     languageOptions: {
       globals: { ...globals.node, ...globals.browser },
     },
-    rules: {
-      'max-lines': 'off',
-    },
   },
 ])
