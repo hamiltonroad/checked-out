@@ -25,6 +25,7 @@ db.Patron = require('./Patron')(sequelize);
 db.Rating = require('./Rating')(sequelize);
 db.Wishlist = require('./Wishlist')(sequelize);
 db.WaitlistEntry = require('./WaitlistEntry')(sequelize);
+db.Hold = require('./Hold')(sequelize);
 
 // Define associations
 Object.keys(db).forEach((modelName) => {
