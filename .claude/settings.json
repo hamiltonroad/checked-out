@@ -62,7 +62,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'if [[ \"$CLAUDE_FILE_PATH\" == */frontend/src/*.js || \"$CLAUDE_FILE_PATH\" == */frontend/src/*.jsx || \"$CLAUDE_FILE_PATH\" == */frontend/src/*.ts || \"$CLAUDE_FILE_PATH\" == */frontend/src/*.tsx ]]; then cd frontend && npx eslint \"$CLAUDE_FILE_PATH\" 2>&1 | tail -20; elif [[ \"$CLAUDE_FILE_PATH\" == */backend/src/*.js || \"$CLAUDE_FILE_PATH\" == */backend/src/*.ts ]]; then cd backend && npx eslint \"$CLAUDE_FILE_PATH\" 2>&1 | tail -20; fi'"
+            "command": "bash -c '# HARNESS-LINT-HOOK-TS\nif [[ \"$CLAUDE_FILE_PATH\" == */frontend/src/*.js || \"$CLAUDE_FILE_PATH\" == */frontend/src/*.jsx || \"$CLAUDE_FILE_PATH\" == */frontend/src/*.ts || \"$CLAUDE_FILE_PATH\" == */frontend/src/*.tsx ]]; then cd frontend && npx eslint \"$CLAUDE_FILE_PATH\" 2>&1 | tail -20; elif [[ \"$CLAUDE_FILE_PATH\" == */backend/src/*.js || \"$CLAUDE_FILE_PATH\" == */backend/src/*.ts ]]; then cd backend && npx eslint \"$CLAUDE_FILE_PATH\" 2>&1 | tail -20; fi'"
           }
         ]
       },
@@ -71,7 +71,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'if [[ \"$CLAUDE_FILE_PATH\" == */frontend/src/*.js || \"$CLAUDE_FILE_PATH\" == */frontend/src/*.jsx || \"$CLAUDE_FILE_PATH\" == */frontend/src/*.ts || \"$CLAUDE_FILE_PATH\" == */frontend/src/*.tsx ]]; then cd frontend && npx eslint \"$CLAUDE_FILE_PATH\" 2>&1 | tail -20; elif [[ \"$CLAUDE_FILE_PATH\" == */backend/src/*.js || \"$CLAUDE_FILE_PATH\" == */backend/src/*.ts ]]; then cd backend && npx eslint \"$CLAUDE_FILE_PATH\" 2>&1 | tail -20; fi'"
+            "command": "bash -c '# HARNESS-LINT-HOOK-TS\nif [[ \"$CLAUDE_FILE_PATH\" == */frontend/src/*.js || \"$CLAUDE_FILE_PATH\" == */frontend/src/*.jsx || \"$CLAUDE_FILE_PATH\" == */frontend/src/*.ts || \"$CLAUDE_FILE_PATH\" == */frontend/src/*.tsx ]]; then cd frontend && npx eslint \"$CLAUDE_FILE_PATH\" 2>&1 | tail -20; elif [[ \"$CLAUDE_FILE_PATH\" == */backend/src/*.js || \"$CLAUDE_FILE_PATH\" == */backend/src/*.ts ]]; then cd backend && npx eslint \"$CLAUDE_FILE_PATH\" 2>&1 | tail -20; fi'"
           }
         ]
       },

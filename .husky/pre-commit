@@ -1,2 +1,8 @@
 npx lint-staged
 ./scripts/check-test-ratio.sh
+# Harness enforcement (issue #230)
+./scripts/check-welcome123.sh         # HARNESS-DEV-PASSWORD-LITERAL
+./scripts/check-eslint-overrides.sh   # HARNESS-MAX-LINES-OVERRIDE-GUARD
+./scripts/check-orphan-jsdoc.sh       # HARNESS-ORPHAN-JSDOC
+./scripts/check-env-single-source.sh  # HARNESS-ENV-SINGLE-SOURCE
+./scripts/harness-health.sh           # registry drift check
