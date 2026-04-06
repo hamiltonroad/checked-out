@@ -54,6 +54,12 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - Shared domain constants (status maps, color maps, label maps) MUST live in `frontend/src/constants/` — never duplicated across components.
 - When extracting a component to its own file, migrate all applicable tests to the new component's test file — do not silently drop test coverage.
 - Validators must not accept fields the controller ignores unless there is a documented migration plan with issue reference.
+- Do NOT write to the database based on aggregate reads (`MAX`, `COUNT`, `MIN`) without wrapping the read+write in a serializable transaction. Use `backend/src/utils/withSerializableTransaction.js`. Race-condition tests (`*.race.test.js`) are required for any service that performs aggregate-then-write.
+- Do NOT use raw role string literals (`'admin'`, `'librarian'`, `'patron'`, etc.) in routes, middleware, navigation, router config, or guards. Import constants from `backend/src/config/roles.js` (`ROLES.ADMIN`) or `frontend/src/utils/roles.ts`. Enforced by ESLint.
+- When implementing a feature referenced by a TODO or seam comment (e.g., "when role system is implemented"), update or remove that comment in the same PR.
+- Do NOT mutate objects returned by `ApiResponse.success()` / `ApiResponse.error()`. They are frozen in non-production and mutations throw at runtime. Use a separate return shape or extend the formatter.
+- Numeric literals used in multiple places or representing configuration MUST be extracted to named constants. Enforced by ESLint `no-magic-numbers` in services/hooks/pages.
+- Clients MUST NOT fall back to the raw payload if `data` is missing on an ApiResponse envelope. Patterns like `response.data || response` are forbidden — trust the envelope or throw. Enforced by ESLint in `frontend/src/services/**` and `frontend/src/hooks/**`.
 
 ## Conventions
 

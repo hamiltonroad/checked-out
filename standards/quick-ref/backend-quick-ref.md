@@ -104,6 +104,11 @@ const errorHandler = (err, req, res, next) => {
 };
 ```
 
+### ApiResponse envelope rules
+
+- **Server side:** Objects returned by `ApiResponse.success()` / `ApiResponse.error()` are frozen in non-production environments. Do not mutate them — extend the formatter or build a separate return shape.
+- **Client side (envelope fallback rule):** Clients MUST NOT fall back to the raw payload if `data` is missing on the envelope. Patterns like `response.data || response`, `res.data || res`, or `result.data || result` are **forbidden** — trust the envelope or throw. Enforced by ESLint `no-restricted-syntax` in `frontend/src/services/**` and `frontend/src/hooks/**`.
+
 ---
 
 ## Validation

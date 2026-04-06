@@ -45,6 +45,39 @@
       }
     },
     {
+      "files": ["src/routes/**/*.js", "src/middlewares/**/*.js"],
+      "rules": {
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "Literal[value=/^(admin|librarian|patron|staff|system_admin)$/]",
+            "message": "Use role constants from src/config/roles.js (ROLES.ADMIN, etc.) instead of raw role string literals."
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/config/roles.js"],
+      "rules": {
+        "no-restricted-syntax": "off"
+      }
+    },
+    {
+      "files": ["src/services/**/*.js"],
+      "excludedFiles": ["**/*.test.js"],
+      "rules": {
+        "no-magic-numbers": [
+          "warn",
+          {
+            "ignore": [-1, 0, 1, 2],
+            "ignoreArrayIndexes": true,
+            "enforceConst": true,
+            "detectObjects": true
+          }
+        ]
+      }
+    },
+    {
       "files": ["vitest.config.js"],
       "parserOptions": {
         "ecmaVersion": 2022,

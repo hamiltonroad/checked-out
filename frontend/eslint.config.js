@@ -77,6 +77,65 @@ export default defineConfig([
       'no-restricted-imports': 'off',
     },
   },
+  // Ban raw role string literals in router/navigation/guard config (Issue #228 Rec #2).
+  // Whitelisted: src/utils/roles.ts (the canonical source).
+  {
+    files: [
+      '**/router.{ts,tsx}',
+      '**/router/**/*.{ts,tsx}',
+      '**/navigation/**/*.{ts,tsx}',
+      '**/guards/**/*.{ts,tsx}',
+      '**/constants/navigation*.{ts,tsx}',
+    ],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "Literal[value=/^(admin|librarian|patron|staff|system_admin)$/]",
+          message:
+            'Use role constants from src/utils/roles.ts (ROLES.ADMIN, etc.) instead of raw role string literals.',
+        },
+      ],
+    },
+  },
+  // Ban envelope-fallback patterns (`res.data || res`) in services and hooks (Issue #228 Rec #5).
+  // Trust the ApiResponse envelope or throw — never fall back to the raw payload.
+  {
+    files: ['**/services/**/*.{ts,tsx,js,jsx}', '**/hooks/**/*.{ts,tsx,js,jsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "LogicalExpression[operator='||'][left.type='MemberExpression'][left.property.name='data'][right.type='Identifier']",
+          message:
+            'Do not fall back to the raw payload — trust the ApiResponse envelope or throw. See standards/quick-ref/backend-quick-ref.md ApiResponse section.',
+        },
+        {
+          selector:
+            "LogicalExpression[operator='||'][left.type='MemberExpression'][left.property.name='data'][right.type='MemberExpression']",
+          message:
+            'Do not fall back to the raw payload — trust the ApiResponse envelope or throw. See standards/quick-ref/backend-quick-ref.md ApiResponse section.',
+        },
+      ],
+    },
+  },
+  // Enforce no-magic-numbers in services/hooks/pages (Issue #228 Rec #6). Scoped narrowly + warn-only.
+  {
+    files: ['**/services/**/*.{ts,tsx,js,jsx}', '**/hooks/**/*.{ts,tsx,js,jsx}', '**/pages/**/*.{ts,tsx,js,jsx}'],
+    ignores: ['**/*.test.{ts,tsx,js,jsx}', '**/*.spec.{ts,tsx,js,jsx}'],
+    rules: {
+      'no-magic-numbers': [
+        'warn',
+        {
+          ignore: [-1, 0, 1, 2],
+          ignoreArrayIndexes: true,
+          enforceConst: true,
+          detectObjects: true,
+        },
+      ],
+    },
+  },
   // E2E tests run in Node.js (Playwright)
   {
     files: ['e2e/**/*.{js,jsx,ts,tsx}'],
