@@ -188,17 +188,6 @@ export type RatingSize = 'small' | 'medium' | 'large';
 
 export type ThemeMode = 'light' | 'dark';
 
-export interface NavigationItem {
-  id: string;
-  label: string;
-  icon: ComponentType;
-  path: string;
-  disabled: boolean;
-  ariaLabel: string;
-  requiresAuth: boolean;
-  requiredRole?: PatronRole;
-}
-
 export interface EmptyStateAction {
   label: string;
   onClick: () => void;

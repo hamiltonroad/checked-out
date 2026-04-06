@@ -1,5 +1,12 @@
 import type { PatronRole } from '../types';
 
+/** Role constants — use these instead of raw strings */
+export const ROLES: Record<string, PatronRole> = {
+  PATRON: 'patron',
+  LIBRARIAN: 'librarian',
+  ADMIN: 'admin',
+} as const;
+
 /**
  * Role hierarchy levels for comparison.
  * Higher number = more privileges.

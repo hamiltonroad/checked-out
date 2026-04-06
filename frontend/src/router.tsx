@@ -8,6 +8,7 @@ import PatronListPage from './pages/PatronListPage';
 import LoginPage from './pages/LoginPage';
 import WishlistPage from './pages/WishlistPage';
 import TypographyTestPage from './pages/TypographyTestPage';
+import { ROLES } from './utils/roles';
 
 const router = createBrowserRouter([
   {
@@ -25,11 +26,11 @@ const router = createBrowserRouter([
         children: [{ path: 'wishlist', element: <WishlistPage /> }],
       },
       {
-        element: <ProtectedRoute requiredRole="librarian" />,
+        element: <ProtectedRoute requiredRole={ROLES.LIBRARIAN} />,
         children: [{ path: 'checkouts', element: <CheckoutsPage /> }],
       },
       {
-        element: <ProtectedRoute requiredRole="admin" />,
+        element: <ProtectedRoute requiredRole={ROLES.ADMIN} />,
         children: [
           { path: 'patrons', element: <PatronListPage /> },
           { path: 'patrons/:id', element: <PatronDetailPage /> },

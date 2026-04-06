@@ -5,6 +5,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import PeopleIcon from '@mui/icons-material/People';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import type { PatronRole } from '../types';
+import { ROLES } from '../utils/roles';
 
 export interface NavigationItem {
   id: string;
@@ -41,7 +42,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     disabled: false,
     ariaLabel: 'Navigate to Checkouts',
     requiresAuth: true,
-    requiredRole: 'librarian',
+    requiredRole: ROLES.LIBRARIAN,
   },
   {
     id: 'wishlist',
@@ -60,7 +61,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     disabled: false,
     ariaLabel: 'Navigate to Patrons',
     requiresAuth: true,
-    requiredRole: 'admin',
+    requiredRole: ROLES.ADMIN,
   },
   {
     id: 'reports',
