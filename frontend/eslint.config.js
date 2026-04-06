@@ -36,7 +36,7 @@ export default defineConfig([
       // HARNESS-UNUSED-EXPORTS (issue #231) — catches unused imports + locals on save.
       'unused-imports/no-unused-imports': 'error',
       'unused-imports/no-unused-vars': [
-        'warn',
+        'error',
         {
           vars: 'all',
           varsIgnorePattern: '^_',
@@ -44,7 +44,7 @@ export default defineConfig([
           argsIgnorePattern: '^_',
         },
       ],
-      // [HARNESS-NO-PROP-TYPES issue #231] — explicit-module-boundary-types is a soft signal.
+      // explicit-module-boundary-types is a soft signal toward stronger types.
       '@typescript-eslint/explicit-module-boundary-types': 'warn',
       'react-hooks/exhaustive-deps': 'error',
       'max-lines': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
