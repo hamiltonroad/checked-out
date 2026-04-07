@@ -2,6 +2,9 @@
 
 A working 3-tier library management application built as a teaching tool for full-stack web development. This application was developed in approximately 8 hours to create a functional foundation demonstrating modern web technologies, best practices, and architectural patterns.
 
+Check out my book about building AI harnesses like the one used in this application:
+https://www.amazon.com/Harness-Engineering-Vibe-Coders-Crider/dp/B0GTMV3D3W/#
+
 ## About This Project
 
 **Purpose**: This is an intentionally simplified but fully functional application designed for teaching and learning. It provides a real-world codebase where students and developers can:
