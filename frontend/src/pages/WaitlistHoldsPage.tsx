@@ -55,7 +55,6 @@ function WaitlistHoldsPage() {
 
   const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [leavingKey, setLeavingKey] = useState<string | null>(null);
   const [checkingOutCopyId, setCheckingOutCopyId] = useState<number | null>(null);
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     open: false,
@@ -87,22 +86,14 @@ function WaitlistHoldsPage() {
     });
   };
 
-  const handleLeave = (bookId: number, format: string) => {
-    const key = `${bookId}:${format}`;
-    setLeavingKey(key);
-    leaveWaitlist.mutate(
-      { bookId, format },
-      {
-        onSuccess: () => {
-          setSnackbar({ open: true, message: 'Removed from waitlist', severity: 'success' });
-          setLeavingKey(null);
-        },
-        onError: () => {
-          setSnackbar({ open: true, message: 'Failed to leave waitlist', severity: 'error' });
-          setLeavingKey(null);
-        },
-      }
-    );
+  const handleLeave = async (bookId: number, format: string) => {
+    try {
+      await leaveWaitlist.mutateAsync({ bookId, format });
+      setSnackbar({ open: true, message: 'Removed from waitlist', severity: 'success' });
+    } catch (err) {
+      setSnackbar({ open: true, message: 'Failed to leave waitlist', severity: 'error' });
+      throw err;
+    }
   };
 
   const handleSnackbarClose = () => {
@@ -183,7 +174,6 @@ function WaitlistHoldsPage() {
                 entry={entry}
                 onBookClick={handleBookClick}
                 onLeave={handleLeave}
-                isLeaving={leavingKey === `${entry.book_id}:${entry.format}`}
               />
             ))}
           </Box>

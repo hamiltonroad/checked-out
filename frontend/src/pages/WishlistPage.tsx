@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Container, Typography, Box, Fade, Grid, CircularProgress, Alert } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useNavigate } from 'react-router-dom';
@@ -18,29 +18,28 @@ function WishlistPage() {
   const removeFromWishlist = useRemoveFromWishlist(patron?.id);
   const navigate = useNavigate();
   const [confirmBookId, setConfirmBookId] = useState<number | null>(null);
-
-  const { isSuccess: removeSucceeded, reset: resetRemove } = removeFromWishlist;
-  useEffect(() => {
-    if (confirmBookId !== null && removeSucceeded) {
-      setConfirmBookId(null);
-      resetRemove();
-    }
-  }, [confirmBookId, removeSucceeded, resetRemove]);
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const handleWishlistToggle = (bookId: number) => {
     setConfirmBookId(bookId);
   };
 
-  const handleConfirmRemove = () => {
-    if (confirmBookId !== null) {
-      removeFromWishlist.mutate(confirmBookId);
+  const handleConfirmRemove = async () => {
+    if (confirmBookId === null) return;
+    setIsRemoving(true);
+    try {
+      await removeFromWishlist.mutateAsync(confirmBookId);
+    } catch {
+      // hook surfaces the error via React Query state; no-op here
+    } finally {
+      setIsRemoving(false);
+      setConfirmBookId(null);
     }
   };
 
   const handleCancelRemove = () => {
-    if (!removeFromWishlist.isPending) {
-      setConfirmBookId(null);
-    }
+    if (isRemoving) return;
+    setConfirmBookId(null);
   };
 
   const handleBookClick = () => {
@@ -107,7 +106,7 @@ function WishlistPage() {
         title="Remove from wishlist?"
         description="This book will no longer appear on your wishlist."
         confirmLabel="Remove"
-        loading={removeFromWishlist.isPending}
+        loading={isRemoving}
         onConfirm={handleConfirmRemove}
         onCancel={handleCancelRemove}
       />

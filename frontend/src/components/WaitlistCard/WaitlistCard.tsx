@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, Box, Typography, Chip, Button, Stack } from '@mui/material';
 import QueueIcon from '@mui/icons-material/Queue';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
@@ -9,27 +9,18 @@ import { ConfirmDialog } from '../ConfirmDialog';
 interface WaitlistCardProps {
   entry: WaitlistEntryData;
   onBookClick: (bookId: number) => void;
-  onLeave: (bookId: number, format: string) => void;
-  isLeaving: boolean;
+  onLeave: (bookId: number, format: string) => Promise<void>;
 }
 
 /**
  * WaitlistCard displays a single waitlist entry with book info,
  * queue position, copy count, and a leave action.
  */
-function WaitlistCard({ entry, onBookClick, onLeave, isLeaving }: WaitlistCardProps) {
+function WaitlistCard({ entry, onBookClick, onLeave }: WaitlistCardProps) {
   const isNextInLine = entry.position === 1;
   const formatLabel = entry.format === 'kindle' ? 'Kindle' : 'Physical';
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
-
-  // Close dialog after the leave mutation completes (parent flips isLeaving back to false).
-  useEffect(() => {
-    if (confirmed && !isLeaving) {
-      setConfirmOpen(false);
-      setConfirmed(false);
-    }
-  }, [confirmed, isLeaving]);
+  const [isLeaving, setIsLeaving] = useState(false);
 
   const handleTitleClick = () => {
     if (entry.book?.id) {
@@ -41,12 +32,20 @@ function WaitlistCard({ entry, onBookClick, onLeave, isLeaving }: WaitlistCardPr
     setConfirmOpen(true);
   };
 
-  const handleConfirmLeave = () => {
-    setConfirmed(true);
-    onLeave(entry.book_id, entry.format);
+  const handleConfirmLeave = async () => {
+    setIsLeaving(true);
+    try {
+      await onLeave(entry.book_id, entry.format);
+    } catch {
+      // parent surfaces the error; just clear local pending state
+    } finally {
+      setIsLeaving(false);
+      setConfirmOpen(false);
+    }
   };
 
   const handleCancelLeave = () => {
+    if (isLeaving) return;
     setConfirmOpen(false);
   };
 

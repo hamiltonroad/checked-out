@@ -125,8 +125,8 @@ function PatronListPage() {
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
             <TextField
               fullWidth
-              label="Search"
-              placeholder="Search by name or card number"
+              label="Search patrons"
+              placeholder="Name or card number"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               slotProps={{

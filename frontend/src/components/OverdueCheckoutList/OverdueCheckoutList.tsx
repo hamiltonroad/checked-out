@@ -112,7 +112,7 @@ function OverdueCheckoutList({ checkouts, onReturn, isLoading }: OverdueCheckout
                   color="error"
                   size="small"
                   onClick={() => handleReturnClick(checkout.id)}
-                  disabled={returningId === checkout.id}
+                  disabled={returningId === checkout.id || confirmId === checkout.id}
                 >
                   Return
                 </Button>

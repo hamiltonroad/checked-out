@@ -55,7 +55,19 @@ export function ConfirmDialog({
   );
 
   return (
-    <Dialog open={open} onClose={loading ? undefined : onCancel} maxWidth="xs" fullWidth>
+    <Dialog
+      open={open}
+      onClose={(_event, reason) => {
+        // Block all close attempts (escape, backdrop click) while the action is in flight.
+        if (loading) return;
+        if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+          onCancel();
+        }
+      }}
+      disableEscapeKeyDown={loading}
+      maxWidth="xs"
+      fullWidth
+    >
       <DialogTitle component="h2">{title}</DialogTitle>
       <DialogContent>
         {typeof description === 'string' ? (

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import WaitlistCard from './WaitlistCard';
@@ -22,8 +22,7 @@ function makeEntry(overrides: Partial<WaitlistEntryData> = {}): WaitlistEntryDat
 
 const defaultProps = {
   onBookClick: vi.fn(),
-  onLeave: vi.fn(),
-  isLeaving: false,
+  onLeave: vi.fn().mockResolvedValue(undefined),
 };
 
 describe('WaitlistCard', () => {
@@ -103,11 +102,19 @@ describe('WaitlistCard', () => {
     expect(onLeave).not.toHaveBeenCalled();
   });
 
-  it('disables leave button and shows loading text when isLeaving is true', () => {
-    render(<WaitlistCard entry={makeEntry()} {...defaultProps} isLeaving={true} />);
+  it('disables the dialog confirm button while the leave mutation is in flight', async () => {
+    const user = userEvent.setup();
+    // Pending promise — never resolves during the test, so the in-flight state persists.
+    const pendingLeave = vi.fn(() => new Promise<void>(() => {}));
 
-    const button = screen.getByRole('button', { name: 'Leaving...' });
-    expect(button).toBeDisabled();
+    render(<WaitlistCard entry={makeEntry()} {...defaultProps} onLeave={pendingLeave} />);
+
+    await user.click(screen.getByRole('button', { name: 'Leave Waitlist' }));
+    const dialog = screen.getByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Leave' }));
+
+    expect(within(dialog).getByRole('button', { name: 'Leave' })).toBeDisabled();
+    expect(within(dialog).getByRole('button', { name: 'Cancel' })).toBeDisabled();
   });
 
   it('shows "Unknown Book" when book title is missing', () => {
