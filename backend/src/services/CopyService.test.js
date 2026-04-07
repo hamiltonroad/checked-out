@@ -92,7 +92,10 @@ describe('CopyService.findCheckoutable', () => {
     );
     expect(
       literals.some(
-        (s) => s.includes('waitlist_entries') && s.includes("status = 'waiting'") && s.includes('position = 1')
+        (s) =>
+          s.includes('waitlist_entries') &&
+          s.includes("status = 'waiting'") &&
+          s.includes('position = 1')
       )
     ).toBe(true);
   });
