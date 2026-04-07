@@ -15,7 +15,7 @@ export class PatronsPage {
   }
 
   searchInput(): Locator {
-    return this.page.getByPlaceholder('Search by name or card number');
+    return this.page.getByPlaceholder('Name or card number');
   }
 
   async search(name: string): Promise<void> {

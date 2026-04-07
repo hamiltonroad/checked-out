@@ -79,17 +79,18 @@ describe('CopyService.findCheckoutable', () => {
     expect(callArgs.limit).toBe(7);
   });
 
-  it('uses NOT EXISTS subqueries for checkout and waitlist gating', async () => {
+  it('uses NOT EXISTS subqueries for checkout, hold, and waitlist gating', async () => {
     mockCopy.findAll.mockResolvedValue([]);
 
     await copyService.findCheckoutable({});
 
-    // Two literal subqueries are constructed: one for checkouts, one for waitlist.
-    expect(mockSequelize.literal).toHaveBeenCalledTimes(2);
+    // Three literal subqueries: checkouts, holds, waitlist_entries.
+    expect(mockSequelize.literal).toHaveBeenCalledTimes(3);
     const literals = mockSequelize.literal.mock.calls.map((c) => c[0]);
     expect(literals.some((s) => s.includes('checkouts') && s.includes('return_date IS NULL'))).toBe(
       true
     );
+    expect(literals.some((s) => s.includes('holds') && s.includes("status = 'active'"))).toBe(true);
     expect(
       literals.some(
         (s) =>
