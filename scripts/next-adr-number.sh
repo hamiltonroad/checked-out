@@ -16,7 +16,8 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   exit 0
 fi
 
-ADR_DIR="$(dirname "$0")/../docs/adr"
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || (cd "$(dirname "$0")/.." && pwd))"
+ADR_DIR="$ROOT/docs/adr"
 
 max=0
 for f in "$ADR_DIR"/[0-9][0-9][0-9]-*.md; do

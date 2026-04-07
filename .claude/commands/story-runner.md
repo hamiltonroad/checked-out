@@ -34,18 +34,14 @@ Example: /story-runner 42
 
 ### Step 1.5: CLAUDE.md Size Warning
 
-Check the line count of `CLAUDE.md`:
+Run the shared size-check script (non-blocking; threshold 120 lines):
 
 ```bash
-wc -l < CLAUDE.md
+./scripts/check-claudemd-size.sh
 ```
 
-If the count exceeds 100, emit this warning (do NOT abort):
-
-```
-WARNING: CLAUDE.md is now <N> lines (>100). Time to consider pruning.
-See standards/harness-prune-checklist.md for the prune-cycle steps.
-```
+It prints a prune-reminder when `CLAUDE.md` exceeds the threshold. Do
+NOT abort on the warning — continue to Step 2.
 
 ### Step 2: Pre-Flight Smoke Test
 

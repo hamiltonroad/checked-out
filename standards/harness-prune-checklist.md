@@ -7,7 +7,7 @@ signal it provides.
 
 ## When to run
 
-- Quarterly, or whenever `CLAUDE.md` exceeds 100 lines (the
+- Quarterly, or whenever `CLAUDE.md` exceeds 120 lines (the
   `story-runner`/`batch-runner` warning will surface this).
 - Before any major release or hand-off.
 - After a burst of harness additions (3+ rules added in a single sprint).
@@ -33,7 +33,7 @@ signal it provides.
 
 ### 4. CLAUDE.md size delta
 - [ ] Record `wc -l CLAUDE.md` before and after the prune. Target: keep
-      under 100 lines. If growth is unavoidable, move detail into a
+      under 120 lines. If growth is unavoidable, move detail into a
       `standards/quick-ref/*.md` file and link it.
 
 ### 5. Registry retire-when checks
