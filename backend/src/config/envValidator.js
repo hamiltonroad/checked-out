@@ -35,6 +35,11 @@ const envSchema = Joi.object({
 
   // Profanity filter
   PROFANITY_WORDS_CUSTOM: Joi.string().optional(),
+
+  // Test harness flag — disables rate limiting at factory level for local
+  // automated test runs. MUST never be enabled outside local tests; the
+  // server exits at startup if TEST_MODE=true and NODE_ENV=production.
+  TEST_MODE: Joi.boolean().truthy('true').falsy('false').default(false),
 }).unknown(true);
 
 /**
@@ -57,6 +62,14 @@ function validateEnv() {
       logger.error(`  - ${detail.message}`);
     });
 
+    process.exit(1);
+  }
+
+  // HARNESS-TEST-MODE-PROD-GUARD (issue #240)
+  if (value.TEST_MODE === true && value.NODE_ENV === 'production') {
+    logger.error(
+      'TEST_MODE is forbidden in production. Refusing to start server with TEST_MODE=true and NODE_ENV=production.'
+    );
     process.exit(1);
   }
 

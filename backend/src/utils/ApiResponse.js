@@ -7,12 +7,33 @@
  * (small) overhead.
  */
 
-const deepFreeze = (obj) => {
+/**
+ * Recursively freeze plain data so accidental mutation throws. We intentionally
+ * do NOT recurse into Sequelize Model instances: their enumerable graph includes
+ * shared model options and association metadata, which (a) creates reference
+ * cycles that blow the call stack and (b) freezes shared library state that
+ * later queries rely on mutating. Services that want a frozen response shape
+ * should pass plain objects (e.g. via `.toJSON()` or explicit mapping).
+ */
+const isSequelizeInstance = (obj) =>
+  obj && typeof obj === 'object' && typeof obj.get === 'function' && 'dataValues' in obj;
+
+const deepFreeze = (obj, seen = new WeakSet()) => {
   if (obj === null || typeof obj !== 'object' || Object.isFrozen(obj)) {
     return obj;
   }
+  if (seen.has(obj)) {
+    return obj;
+  }
+  if (isSequelizeInstance(obj)) {
+    // Skip entirely — freezing the instance or its internals would corrupt
+    // shared model state and break subsequent queries/saves. Services that
+    // need mutation-safety should serialize to plain objects first.
+    return obj;
+  }
+  seen.add(obj);
   Object.values(obj).forEach((value) => {
-    deepFreeze(value);
+    deepFreeze(value, seen);
   });
   return Object.freeze(obj);
 };

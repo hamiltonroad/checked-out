@@ -38,8 +38,13 @@ test.describe('Flow: waitlist join and leave', () => {
     await books.goto();
     await expect(books.getBookCards().first()).toBeVisible();
 
-    // Open the target book's detail modal by accessible name.
-    await page.getByRole('button', { name: `View details for ${bookTitle}` }).click();
+    // Surface the target book regardless of catalog ordering / pagination —
+    // findAndDrainBook walks API pages and may pick a book that does not
+    // appear on the first UI page.
+    await page.getByPlaceholder(/Search by title/i).fill(bookTitle);
+    const targetCard = page.getByRole('button', { name: `View details for ${bookTitle}` });
+    await expect(targetCard).toBeVisible();
+    await targetCard.click();
     const dialog = page.getByRole('dialog');
     await dialog.waitFor({ state: 'visible' });
 

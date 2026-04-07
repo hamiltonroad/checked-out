@@ -52,6 +52,11 @@ export class CheckoutsPage {
     const before = await this.rowForBook(bookTitle, patronName).count();
     const row = this.rowForBook(bookTitle, patronName).first();
     await row.getByRole('button', { name: 'Return' }).click();
+    // UX audit (#238) added a confirm dialog before destructive return.
+    const confirmDialog = this.page.getByRole('dialog', { name: 'Return this book?' });
+    await confirmDialog.waitFor({ state: 'visible' });
+    await confirmDialog.getByRole('button', { name: 'Return' }).click();
+    await confirmDialog.waitFor({ state: 'hidden' });
     await expect
       .poll(async () => this.rowForBook(bookTitle, patronName).count(), {
         timeout: 5000,

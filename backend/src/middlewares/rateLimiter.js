@@ -40,8 +40,22 @@ const createRateLimiter = (tierConfig) =>
     },
   });
 
-const standardLimiter = createRateLimiter(STANDARD_TIER);
-const strictLimiter = createRateLimiter(STRICT_TIER);
+/**
+ * TEST_MODE: when set to the string 'true', both exported limiters are
+ * replaced at module-load time with a shared no-op middleware. This is a
+ * factory-level switch (not per-request) so there is zero hot-path branching.
+ * MUST only be enabled by local automated test scripts — see CLAUDE.md.
+ */
+const TEST_MODE = process.env.TEST_MODE === 'true';
+
+const noopLimiter = (req, res, next) => next();
+
+if (TEST_MODE) {
+  logger.warn('TEST_MODE active: rate limiting disabled (no-op middleware in place)');
+}
+
+const standardLimiter = TEST_MODE ? noopLimiter : createRateLimiter(STANDARD_TIER);
+const strictLimiter = TEST_MODE ? noopLimiter : createRateLimiter(STRICT_TIER);
 
 module.exports = {
   createRateLimiter,

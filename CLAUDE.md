@@ -63,6 +63,7 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - The literal `'welcome123'` MUST appear ONLY in `backend/src/config/auth.js` (the canonical `DEV_PASSWORD`) and `frontend/e2e/fixtures/testData.ts` (its e2e re-export). Enforced by ESLint `no-restricted-syntax` and `scripts/check-welcome123.sh` (HARNESS-DEV-PASSWORD-LITERAL).
 - ESLint rule overrides disabling `max-lines` are forbidden outside test files, type/theme/config globs, and seeders. Enforced by `scripts/check-eslint-overrides.sh` (HARNESS-MAX-LINES-OVERRIDE-GUARD).
 - Environment variable defaults (e.g., `API_BASE_URL`, `VITE_API_BASE_URL`) MUST be defined once per concern and imported — not duplicated across modules. Mechanical enforcement is deferred pending an env-config refactor; reviewers MUST flag duplications during code review (HARNESS-ENV-SINGLE-SOURCE).
+- `TEST_MODE` MUST never be set in development, staging, or production environments. It is set only by `scripts/e2e-test.sh` and `scripts/smoke-test.sh` during local automated test runs. The backend exits at startup if `TEST_MODE=true` and `NODE_ENV=production`.
 - JSDoc `/** ... */` blocks MUST immediately precede the declaration they document — no orphaned blocks separated from their declaration by multiple blank lines. Enforced by `scripts/check-orphan-jsdoc.sh` (HARNESS-ORPHAN-JSDOC).
 - Every mechanically-enforced harness rule MUST be registered in `standards/enforcement-registry.md` with a marker string. `scripts/harness-health.sh` runs in pre-commit and fails if any registered marker is missing.
 

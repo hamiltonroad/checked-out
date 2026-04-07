@@ -8,6 +8,13 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$SCRIPT_DIR/.."
 
+# TEST_MODE disables backend rate limiting for parallel Playwright workers.
+# MUST never be enabled outside local automated tests. The backend exits
+# at startup if TEST_MODE=true and NODE_ENV=production. See CLAUDE.md and
+# frontend/e2e/README.md for details. NOTE: an already-running backend
+# will NOT pick this up — restart with ./scripts/stop-all.sh first.
+export TEST_MODE=true
+
 # Color output
 GREEN='\033[0;32m'
 RED='\033[0;31m'
