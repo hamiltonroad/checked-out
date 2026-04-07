@@ -47,8 +47,8 @@ interface SnackbarState {
  * (ready for checkout) and waitlist entries (in queue) in a unified view.
  */
 function WaitlistHoldsPage() {
-  const { data: holds, isLoading: holdsLoading } = useMyHolds();
-  const { data: entries, isLoading: waitlistLoading } = useMyWaitlist();
+  const { data: holds, isLoading: holdsLoading, error: holdsError } = useMyHolds();
+  const { data: entries, isLoading: waitlistLoading, error: waitlistError } = useMyWaitlist();
   const leaveWaitlist = useLeaveWaitlist();
   const checkoutHold = useCheckoutHold();
   const navigate = useNavigate();
@@ -128,6 +128,11 @@ function WaitlistHoldsPage() {
       <Typography variant="h5" component="h2" sx={{ mb: 2, mt: 3 }}>
         Ready for Checkout
       </Typography>
+      {holdsError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Couldn&apos;t load your holds.
+        </Alert>
+      )}
       {holdsLoading && <SkeletonCards />}
       {!holdsLoading && holdsList.length === 0 && (
         <EmptyState
@@ -155,6 +160,11 @@ function WaitlistHoldsPage() {
       <Typography variant="h5" component="h2" sx={{ mb: 2, mt: 4 }}>
         In Queue
       </Typography>
+      {waitlistError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Couldn&apos;t load your waitlist.
+        </Alert>
+      )}
       {waitlistLoading && <SkeletonCards />}
       {!waitlistLoading && waitlistEntries.length === 0 && (
         <EmptyState

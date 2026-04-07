@@ -147,6 +147,7 @@ describe('WaitlistHoldsPage', () => {
     renderPage(<WaitlistHoldsPage />);
 
     await user.click(screen.getByRole('button', { name: 'Leave Waitlist' }));
+    await user.click(screen.getByRole('button', { name: 'Leave' }));
     expect(mockLeaveMutate).toHaveBeenCalledWith(
       { bookId: 100, format: 'physical' },
       expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })

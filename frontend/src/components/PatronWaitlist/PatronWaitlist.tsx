@@ -7,6 +7,7 @@ import {
   TableRow,
   Paper,
   Skeleton,
+  Alert,
 } from '@mui/material';
 import QueueIcon from '@mui/icons-material/Queue';
 import EmptyState from '../EmptyState';
@@ -20,7 +21,11 @@ interface PatronWaitlistProps {
  * PatronWaitlist displays a patron's active waitlist entries
  */
 function PatronWaitlist({ patronId }: PatronWaitlistProps) {
-  const { data: entries = [], isLoading } = usePatronWaitlist(patronId);
+  const { data: entries = [], isLoading, error } = usePatronWaitlist(patronId);
+
+  if (error) {
+    return <Alert severity="error">Couldn&apos;t load this patron&apos;s waitlist entries.</Alert>;
+  }
 
   if (isLoading) {
     return (

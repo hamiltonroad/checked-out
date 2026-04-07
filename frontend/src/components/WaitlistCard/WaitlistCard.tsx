@@ -1,8 +1,10 @@
+import { useEffect, useState } from 'react';
 import { Card, CardContent, Box, Typography, Chip, Button, Stack } from '@mui/material';
 import QueueIcon from '@mui/icons-material/Queue';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import type { WaitlistEntryData } from '../../types';
 import { formatDate } from '../../utils/checkoutUtils';
+import { ConfirmDialog } from '../ConfirmDialog';
 
 interface WaitlistCardProps {
   entry: WaitlistEntryData;
@@ -18,6 +20,16 @@ interface WaitlistCardProps {
 function WaitlistCard({ entry, onBookClick, onLeave, isLeaving }: WaitlistCardProps) {
   const isNextInLine = entry.position === 1;
   const formatLabel = entry.format === 'kindle' ? 'Kindle' : 'Physical';
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+
+  // Close dialog after the leave mutation completes (parent flips isLeaving back to false).
+  useEffect(() => {
+    if (confirmed && !isLeaving) {
+      setConfirmOpen(false);
+      setConfirmed(false);
+    }
+  }, [confirmed, isLeaving]);
 
   const handleTitleClick = () => {
     if (entry.book?.id) {
@@ -25,8 +37,17 @@ function WaitlistCard({ entry, onBookClick, onLeave, isLeaving }: WaitlistCardPr
     }
   };
 
-  const handleLeave = () => {
+  const handleLeaveClick = () => {
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmLeave = () => {
+    setConfirmed(true);
     onLeave(entry.book_id, entry.format);
+  };
+
+  const handleCancelLeave = () => {
+    setConfirmOpen(false);
   };
 
   return (
@@ -49,6 +70,11 @@ function WaitlistCard({ entry, onBookClick, onLeave, isLeaving }: WaitlistCardPr
                   font: 'inherit',
                   textAlign: 'left',
                   '&:hover': { textDecoration: 'underline' },
+                  '&:focus-visible': {
+                    outline: '2px solid',
+                    outlineColor: 'primary.main',
+                    outlineOffset: '2px',
+                  },
                 }}
               >
                 {entry.book?.title || 'Unknown Book'}
@@ -81,7 +107,7 @@ function WaitlistCard({ entry, onBookClick, onLeave, isLeaving }: WaitlistCardPr
             variant="outlined"
             color="error"
             size="small"
-            onClick={handleLeave}
+            onClick={handleLeaveClick}
             disabled={isLeaving}
             sx={{ ml: 2, flexShrink: 0 }}
           >
@@ -89,6 +115,15 @@ function WaitlistCard({ entry, onBookClick, onLeave, isLeaving }: WaitlistCardPr
           </Button>
         </Box>
       </CardContent>
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Leave waitlist?"
+        description="You will lose your place in line."
+        confirmLabel="Leave"
+        loading={isLeaving}
+        onConfirm={handleConfirmLeave}
+        onCancel={handleCancelLeave}
+      />
     </Card>
   );
 }

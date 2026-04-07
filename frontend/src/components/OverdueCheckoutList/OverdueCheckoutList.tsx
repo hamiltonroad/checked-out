@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   Table,
@@ -17,6 +17,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import EmptyState from '../EmptyState';
 import { formatDate } from '../../utils/checkoutUtils';
 import type { OverdueCheckout } from '../../types';
+import { ConfirmDialog } from '../ConfirmDialog';
 
 const EM_DASH = '\u2014';
 
@@ -31,10 +32,28 @@ interface OverdueCheckoutListProps {
  */
 function OverdueCheckoutList({ checkouts, onReturn, isLoading }: OverdueCheckoutListProps) {
   const [returningId, setReturningId] = useState<number | null>(null);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
 
-  const handleReturn = (id: number) => {
-    setReturningId(id);
-    onReturn(id);
+  useEffect(() => {
+    if (returningId !== null && !checkouts.some((c) => c.id === returningId)) {
+      setReturningId(null);
+      setConfirmId(null);
+    }
+  }, [checkouts, returningId]);
+
+  const handleReturnClick = (id: number) => {
+    setConfirmId(id);
+  };
+
+  const handleConfirmReturn = () => {
+    if (confirmId === null) return;
+    setReturningId(confirmId);
+    onReturn(confirmId);
+  };
+
+  const handleCancelReturn = () => {
+    if (returningId !== null) return;
+    setConfirmId(null);
   };
 
   if (isLoading) {
@@ -91,7 +110,7 @@ function OverdueCheckoutList({ checkouts, onReturn, isLoading }: OverdueCheckout
                   variant="contained"
                   color="error"
                   size="small"
-                  onClick={() => handleReturn(checkout.id)}
+                  onClick={() => handleReturnClick(checkout.id)}
                   disabled={returningId === checkout.id}
                 >
                   Return
@@ -101,6 +120,15 @@ function OverdueCheckoutList({ checkouts, onReturn, isLoading }: OverdueCheckout
           ))}
         </TableBody>
       </Table>
+      <ConfirmDialog
+        open={confirmId !== null}
+        title="Return this book?"
+        description="The patron's overdue checkout will be closed."
+        confirmLabel="Return"
+        loading={returningId !== null}
+        onConfirm={handleConfirmReturn}
+        onCancel={handleCancelReturn}
+      />
     </TableContainer>
   );
 }

@@ -1,4 +1,13 @@
-import { Card, CardContent, Box, Typography, Chip, Button } from '@mui/material';
+import {
+  Card,
+  CardContent,
+  Box,
+  Typography,
+  Chip,
+  Button,
+  Tooltip,
+  CircularProgress,
+} from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import type { HoldData } from '../../types';
 
@@ -72,6 +81,11 @@ function HoldCard({ hold, onBookClick, onCheckout, isCheckingOut }: HoldCardProp
                   font: 'inherit',
                   textAlign: 'left',
                   '&:hover': { textDecoration: 'underline' },
+                  '&:focus-visible': {
+                    outline: '2px solid',
+                    outlineColor: 'primary.main',
+                    outlineOffset: '2px',
+                  },
                 }}
               >
                 {bookTitle}
@@ -92,16 +106,32 @@ function HoldCard({ hold, onBookClick, onCheckout, isCheckingOut }: HoldCardProp
             </Box>
           </Box>
 
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={handleCheckout}
-            disabled={isCheckingOut}
-            sx={{ ml: 2, flexShrink: 0 }}
-          >
-            {isCheckingOut ? 'Checking Out...' : 'Check Out'}
-          </Button>
+          {isCheckingOut ? (
+            <Tooltip title="Processing…">
+              <Box component="span" sx={{ ml: 2, flexShrink: 0 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={handleCheckout}
+                  disabled
+                  startIcon={<CircularProgress size={16} color="inherit" />}
+                >
+                  Checking Out...
+                </Button>
+              </Box>
+            </Tooltip>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={handleCheckout}
+              sx={{ ml: 2, flexShrink: 0 }}
+            >
+              Check Out
+            </Button>
+          )}
         </Box>
       </CardContent>
     </Card>

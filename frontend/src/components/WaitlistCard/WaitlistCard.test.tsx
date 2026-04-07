@@ -78,14 +78,29 @@ describe('WaitlistCard', () => {
     expect(onBookClick).toHaveBeenCalledWith(100);
   });
 
-  it('calls onLeave when Leave Waitlist button is clicked', async () => {
+  it('opens confirm dialog and calls onLeave after confirming', async () => {
     const user = userEvent.setup();
     const onLeave = vi.fn();
 
     render(<WaitlistCard entry={makeEntry()} {...defaultProps} onLeave={onLeave} />);
 
     await user.click(screen.getByRole('button', { name: 'Leave Waitlist' }));
+    expect(screen.getByRole('heading', { name: 'Leave waitlist?', level: 2 })).toBeInTheDocument();
+    expect(onLeave).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Leave' }));
     expect(onLeave).toHaveBeenCalledWith(100, 'physical');
+  });
+
+  it('cancels the confirm dialog without calling onLeave', async () => {
+    const user = userEvent.setup();
+    const onLeave = vi.fn();
+
+    render(<WaitlistCard entry={makeEntry()} {...defaultProps} onLeave={onLeave} />);
+
+    await user.click(screen.getByRole('button', { name: 'Leave Waitlist' }));
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(onLeave).not.toHaveBeenCalled();
   });
 
   it('disables leave button and shows loading text when isLeaving is true', () => {
