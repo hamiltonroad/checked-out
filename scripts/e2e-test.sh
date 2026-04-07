@@ -12,9 +12,14 @@ PROJECT_DIR="$SCRIPT_DIR/.."
 # TEST_MODE disables backend rate limiting for parallel Playwright workers.
 # MUST never be enabled outside local automated tests. The backend exits
 # at startup if TEST_MODE=true and NODE_ENV=production. See CLAUDE.md and
-# frontend/e2e/README.md for details. NOTE: an already-running backend
-# will NOT pick this up — restart with ./scripts/stop-all.sh first.
+# frontend/e2e/README.md for details. The ensure_test_mode_backend helper
+# below auto-restarts an already-running backend if it wasn't started with
+# TEST_MODE=true, so the "already-running backend gotcha" can't silently
+# re-enable rate limits under this script.
 export TEST_MODE=true
+
+# shellcheck source=lib/ensure-test-mode.sh
+source "$SCRIPT_DIR/lib/ensure-test-mode.sh"
 
 # Color output
 GREEN='\033[0;32m'
@@ -26,39 +31,20 @@ echo -e "${BLUE}================================================${NC}"
 echo -e "${BLUE}Checked Out - E2E Test Gate${NC}"
 echo -e "${BLUE}================================================${NC}"
 
-# Check if servers are running
-FRONTEND_RUNNING=false
-BACKEND_RUNNING=false
+# Ensure backend is running with TEST_MODE=true (restart if drifted).
+ensure_test_mode_backend "$1" || exit $?
 
-if lsof -Pi :5173 -sTCP:LISTEN -t >/dev/null 2>&1; then
-  FRONTEND_RUNNING=true
-  echo -e "${GREEN}✓${NC} Frontend running on port 5173"
-else
-  echo -e "${RED}✗${NC} Frontend NOT running on port 5173"
-fi
-
-if lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
-  BACKEND_RUNNING=true
-  echo -e "${GREEN}✓${NC} Backend running on port 3000"
-else
-  echo -e "${RED}✗${NC} Backend NOT running on port 3000"
-fi
-
-# Start servers if needed and --start-servers flag is set
-if [ "$FRONTEND_RUNNING" = false ] || [ "$BACKEND_RUNNING" = false ]; then
+# Verify frontend separately — helper only manages the backend TEST_MODE state.
+if ! lsof -Pi :5173 -sTCP:LISTEN -t >/dev/null 2>&1; then
   if [ "$1" = "--start-servers" ]; then
-    echo ""
-    echo -e "${BLUE}Starting servers...${NC}"
-    "$SCRIPT_DIR/start-all.sh"
-    echo ""
+    "$SCRIPT_DIR/start-frontend.sh"
   else
-    echo ""
-    echo -e "${RED}Servers are not running.${NC}"
-    echo "Run with --start-servers to start them automatically, or:"
-    echo "  ./scripts/start-all.sh"
+    echo -e "${RED}Frontend NOT running on port 5173.${NC}"
+    echo "Run with --start-servers to start it automatically."
     exit 1
   fi
 fi
+echo -e "${GREEN}✓${NC} Frontend running on port 5173"
 
 # Run e2e tests across all projects
 echo ""

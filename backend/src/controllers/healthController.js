@@ -17,6 +17,10 @@ class HealthController {
         {
           status: 'ok',
           timestamp: new Date().toISOString(),
+          // Exposed so test wrappers (scripts/e2e-test.sh, scripts/smoke-test.sh)
+          // can detect an already-running backend that was started without
+          // TEST_MODE and auto-restart it. See CLAUDE.md TEST_MODE rule.
+          testMode: process.env.TEST_MODE === 'true',
         },
         'Application is alive'
       )
