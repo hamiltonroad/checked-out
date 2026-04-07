@@ -121,11 +121,13 @@ describe('CurrentCheckoutsTab', () => {
     expect(mockOnReturn).toHaveBeenCalledWith(1);
   });
 
-  it('should disable Return button after confirming to prevent duplicates', async () => {
+  it('should disable Return button while the mutation is in flight', async () => {
     const user = userEvent.setup();
+    // Pending promise — never resolves during the test, so the in-flight state persists.
+    const pendingReturn = vi.fn(() => new Promise<void>(() => {}));
     render(
       <MemoryRouter>
-        <CurrentCheckoutsTab checkouts={mockCheckouts} onReturn={mockOnReturn} isLoading={false} />
+        <CurrentCheckoutsTab checkouts={mockCheckouts} onReturn={pendingReturn} isLoading={false} />
       </MemoryRouter>
     );
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   Table,
@@ -23,7 +23,7 @@ const EM_DASH = '\u2014';
 
 interface OverdueCheckoutListProps {
   checkouts: OverdueCheckout[];
-  onReturn: (id: number) => void;
+  onReturn: (id: number) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -34,21 +34,22 @@ function OverdueCheckoutList({ checkouts, onReturn, isLoading }: OverdueCheckout
   const [returningId, setReturningId] = useState<number | null>(null);
   const [confirmId, setConfirmId] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (returningId !== null && !checkouts.some((c) => c.id === returningId)) {
-      setReturningId(null);
-      setConfirmId(null);
-    }
-  }, [checkouts, returningId]);
-
   const handleReturnClick = (id: number) => {
     setConfirmId(id);
   };
 
-  const handleConfirmReturn = () => {
+  const handleConfirmReturn = async () => {
     if (confirmId === null) return;
-    setReturningId(confirmId);
-    onReturn(confirmId);
+    const id = confirmId;
+    setReturningId(id);
+    try {
+      await onReturn(id);
+    } catch {
+      // parent surfaces the error; just clear local pending state
+    } finally {
+      setReturningId(null);
+      setConfirmId(null);
+    }
   };
 
   const handleCancelReturn = () => {

@@ -40,17 +40,21 @@ function CheckoutsPage() {
     severity: 'success',
   });
 
-  const handleReturn = (id: number) => {
-    returnMutation.mutate(id, {
-      onSuccess: (response: { message?: string }) => {
-        const message = response?.message || 'Book returned successfully';
-        setSnackbar({ open: true, message, severity: 'success' });
-      },
-      onError: (err: { response?: { data?: { message?: string } } }) => {
-        const message = err?.response?.data?.message || 'Failed to return book';
-        setSnackbar({ open: true, message, severity: 'error' });
-      },
-    });
+  const handleReturn = async (id: number) => {
+    try {
+      const response = (await returnMutation.mutateAsync(id)) as { message?: string };
+      setSnackbar({
+        open: true,
+        message: response?.message || 'Book returned successfully',
+        severity: 'success',
+      });
+    } catch (err) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Failed to return book';
+      setSnackbar({ open: true, message, severity: 'error' });
+      throw err;
+    }
   };
 
   const handleSnackbarClose = () => {

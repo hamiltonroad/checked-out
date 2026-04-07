@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Table,
@@ -23,7 +23,7 @@ import { ConfirmDialog } from '../ConfirmDialog';
 
 interface CurrentCheckoutsTabProps {
   checkouts: CurrentCheckout[];
-  onReturn: (id: number) => void;
+  onReturn: (id: number) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -34,22 +34,22 @@ function CurrentCheckoutsTab({ checkouts, onReturn, isLoading }: CurrentCheckout
   const [returningId, setReturningId] = useState<number | null>(null);
   const [confirmId, setConfirmId] = useState<number | null>(null);
 
-  // Clear returning state once the row no longer exists in the list (mutation succeeded).
-  useEffect(() => {
-    if (returningId !== null && !checkouts.some((c) => c.id === returningId)) {
-      setReturningId(null);
-      setConfirmId(null);
-    }
-  }, [checkouts, returningId]);
-
   const handleReturnClick = (id: number) => {
     setConfirmId(id);
   };
 
-  const handleConfirmReturn = () => {
+  const handleConfirmReturn = async () => {
     if (confirmId === null) return;
-    setReturningId(confirmId);
-    onReturn(confirmId);
+    const id = confirmId;
+    setReturningId(id);
+    try {
+      await onReturn(id);
+    } catch {
+      // parent surfaces the error; just clear local pending state
+    } finally {
+      setReturningId(null);
+      setConfirmId(null);
+    }
   };
 
   const handleCancelReturn = () => {

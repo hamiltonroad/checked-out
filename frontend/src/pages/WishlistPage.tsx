@@ -19,12 +19,13 @@ function WishlistPage() {
   const navigate = useNavigate();
   const [confirmBookId, setConfirmBookId] = useState<number | null>(null);
 
+  const { isSuccess: removeSucceeded, reset: resetRemove } = removeFromWishlist;
   useEffect(() => {
-    if (confirmBookId !== null && removeFromWishlist.isSuccess) {
+    if (confirmBookId !== null && removeSucceeded) {
       setConfirmBookId(null);
-      removeFromWishlist.reset();
+      resetRemove();
     }
-  }, [confirmBookId, removeFromWishlist]);
+  }, [confirmBookId, removeSucceeded, resetRemove]);
 
   const handleWishlistToggle = (bookId: number) => {
     setConfirmBookId(bookId);
