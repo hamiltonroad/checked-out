@@ -21,6 +21,26 @@ class CopyController {
       next(error);
     }
   }
+
+  /**
+   * Get checkoutable copies (free + not waitlist-gated)
+   * GET /api/v1/copies/checkoutable?bookId&format&limit
+   */
+  async getCheckoutable(req, res, next) {
+    try {
+      const { bookId, format, limit } = req.query;
+      const result = await copyService.findCheckoutable({
+        bookId: bookId !== undefined ? parseInt(bookId, 10) : undefined,
+        format,
+        limit: limit !== undefined ? parseInt(limit, 10) : undefined,
+      });
+      res
+        .status(200)
+        .json(ApiResponse.success(result, 'Checkoutable copies retrieved successfully'));
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new CopyController();

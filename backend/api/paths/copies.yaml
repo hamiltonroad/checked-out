@@ -1,6 +1,62 @@
 # Copies — Physical and Kindle copy availability
 # Base path: /api/v1/copies
 
+/api/v1/copies/checkoutable:
+  get:
+    tags: [Copies]
+    summary: Find copies currently checkoutable (not held, not waitlist-gated)
+    description: |
+      Read-only discovery hint returning copies that have no active checkout
+      AND are not blocked by a front-of-line waitlist entry for the same
+      (book, format). NOT a reservation — results may race with concurrent
+      writes. Used by the e2e harness and future "next available copy" UI.
+    operationId: getCheckoutableCopies
+    parameters:
+      - name: bookId
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+        description: Optional book filter
+      - name: format
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [physical, kindle]
+        description: Optional format filter
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+        description: Maximum number of copies to return
+    responses:
+      '200':
+        description: Checkoutable copies with count
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../components/schemas.yaml#/ApiSuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        copies:
+                          type: array
+                          items:
+                            $ref: '../components/schemas.yaml#/Copy'
+                        count:
+                          type: integer
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+
 /api/v1/copies/book/{bookId}/available:
   get:
     tags: [Copies]

@@ -152,6 +152,66 @@ export interface ApiSession {
  * reused for every request the callback makes, dramatically reducing
  * strict-rate-limiter pressure compared to logging in fresh per call.
  */
+/**
+ * Response shape for GET /api/v1/copies/checkoutable — kept local to the
+ * fixture since it is only consumed by test helpers.
+ */
+interface CheckoutableCopyRow {
+  id: number;
+  copy_number: number | null;
+  format: string;
+  barcode: string | null;
+  asin: string | null;
+  book: { id: number; title: string } | null;
+}
+
+interface CheckoutableCopiesData {
+  copies: CheckoutableCopyRow[];
+  count: number;
+}
+
+export interface CheckoutableCopy {
+  bookId: number;
+  copyId: number;
+  format: string;
+  bookTitle: string;
+}
+
+/**
+ * Fetch a single checkoutable copy via the read-only discovery endpoint.
+ * Replaces the legacy `findUngatedCopy` probe loop (which burned strict
+ * rate-limiter slots by creating+reverting real checkouts). Uses a
+ * librarian session so the response is never gated on patron identity.
+ *
+ * Throws if the endpoint returns zero results — callers should treat that
+ * as a hard failure (the seed catalog is expected to always contain at
+ * least one checkoutable copy).
+ */
+export async function getCheckoutableCopy(
+  opts: { bookId?: number; format?: string } = {}
+): Promise<CheckoutableCopy> {
+  return withApiSession('librarian', async (session) => {
+    const qs = new URLSearchParams();
+    qs.set('limit', '1');
+    if (opts.bookId !== undefined) qs.set('bookId', String(opts.bookId));
+    if (opts.format !== undefined) qs.set('format', opts.format);
+    const data = await session.request<CheckoutableCopiesData>(
+      'GET',
+      `copies/checkoutable?${qs.toString()}`
+    );
+    const row = data?.copies?.[0];
+    if (!row || !row.book) {
+      throw new Error('getCheckoutableCopy: no checkoutable copy returned by API');
+    }
+    return {
+      bookId: row.book.id,
+      copyId: row.id,
+      format: row.format,
+      bookTitle: row.book.title,
+    };
+  });
+}
+
 export async function withApiSession<T>(
   role: PatronRole,
   fn: (session: ApiSession) => Promise<T>

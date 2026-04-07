@@ -127,3 +127,41 @@ See `frontend/e2e/page-objects/` for the full surface.
 - **Flaky waits.** Never use `page.waitForTimeout()`. Use Locator assertions
   (`await expect(locator).toBeVisible()`) or `waitForSelector` / `waitForLoadState`.
   This is enforced by CLAUDE.md.
+
+## TEST_MODE
+
+`TEST_MODE` is a backend environment flag that replaces both rate-limiter
+tiers with a no-op middleware at module load time. It exists so the six
+parallel Playwright workers — all hitting the backend from a single IP —
+do not exhaust the strict tier (20 requests / 15 minutes) during a flow
+or security run.
+
+**Who sets it:**
+
+- `scripts/e2e-test.sh` — exports `TEST_MODE=true` before any work
+- `scripts/smoke-test.sh` — same
+
+Those are the only two writers. `TEST_MODE` must never be set in dev,
+staging, or production. The backend exits at startup if `TEST_MODE=true`
+and `NODE_ENV=production`.
+
+**Gotcha: already-running backend:** the flag is read once at module
+load. If a backend is already running on port 3000, `start-backend.sh`
+will not restart it and your fresh `export TEST_MODE=true` will have no
+effect. Restart first:
+
+```sh
+./scripts/stop-all.sh
+./scripts/e2e-test.sh --start-servers
+```
+
+**How to verify it is active:** the backend logs a single warning line
+at startup:
+
+```sh
+grep TEST_MODE logs/backend.log
+# -> "TEST_MODE active: rate limiting disabled (no-op middleware in place)"
+```
+
+If you do not see that line, the running backend is NOT in TEST_MODE and
+your flow/security run will flake on 429s.

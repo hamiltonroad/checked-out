@@ -1,15 +1,15 @@
 import { test, expect } from '@playwright/test';
 import { loginAs } from '../fixtures/auth';
-import { findUngatedCopy } from '../fixtures/seed';
+import { getCheckoutableCopy } from '../fixtures/api';
 import { SEED_PATRONS } from '../fixtures/testData';
 import { BooksPage, CheckoutDialog, CheckoutsPage } from '../page-objects';
 
 /**
  * Flow 1 — Checkout to return round-trip.
  *
- * Logs in as librarian, picks a copy that the `findUngatedCopy` seed
- * helper has provably confirmed is checkoutable (no hold gating, no
- * waitlist gating), opens the book detail modal, checks out that exact
+ * Logs in as librarian, picks a copy that the `getCheckoutableCopy`
+ * API helper has confirmed is not actively checked out and not
+ * waitlist-gated, opens the book detail modal, checks out that exact
  * copy through the UI, then verifies the checkout appears in Current
  * and moves to History after returning it via the CheckoutsPage page
  * object.
@@ -18,8 +18,8 @@ import { BooksPage, CheckoutDialog, CheckoutsPage } from '../page-objects';
 test.describe('Flow: checkout and return round-trip', () => {
   test.setTimeout(90_000);
   test('librarian can check out and return a copy', async ({ page }) => {
-    const target = await findUngatedCopy();
-    const bookTitle = target.book.title;
+    const target = await getCheckoutableCopy();
+    const bookTitle = target.bookTitle;
     await loginAs(page, 'librarian');
 
     const books = new BooksPage(page);
