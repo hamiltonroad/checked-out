@@ -95,7 +95,7 @@ function RatingInput({
 
   return (
     <Dialog open maxWidth="sm" fullWidth onClose={onClose}>
-      <DialogTitle>
+      <DialogTitle component="h2">
         {existingRating ? 'Update Your Rating' : 'Rate This Book'}
         <Typography variant="body2" color="text.secondary">
           {bookTitle}

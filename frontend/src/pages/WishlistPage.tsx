@@ -1,10 +1,12 @@
-import { Container, Typography, Box, Fade, Grid, CircularProgress } from '@mui/material';
+import { useState } from 'react';
+import { Container, Typography, Box, Fade, Grid, CircularProgress, Alert } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useWishlist, useRemoveFromWishlist } from '../hooks/useWishlist';
 import BookCard from '../components/BookCard';
 import EmptyState from '../components/EmptyState';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 /**
  * WishlistPage displays the authenticated patron's wishlisted books
@@ -12,12 +14,32 @@ import EmptyState from '../components/EmptyState';
  */
 function WishlistPage() {
   const { patron } = useAuth();
-  const { data: wishlistEntries, isLoading } = useWishlist(patron?.id);
+  const { data: wishlistEntries, isLoading, error } = useWishlist(patron?.id);
   const removeFromWishlist = useRemoveFromWishlist(patron?.id);
   const navigate = useNavigate();
+  const [confirmBookId, setConfirmBookId] = useState<number | null>(null);
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const handleWishlistToggle = (bookId: number) => {
-    removeFromWishlist.mutate(bookId);
+    setConfirmBookId(bookId);
+  };
+
+  const handleConfirmRemove = async () => {
+    if (confirmBookId === null) return;
+    setIsRemoving(true);
+    try {
+      await removeFromWishlist.mutateAsync(confirmBookId);
+    } catch {
+      // hook surfaces the error via React Query state; no-op here
+    } finally {
+      setIsRemoving(false);
+      setConfirmBookId(null);
+    }
+  };
+
+  const handleCancelRemove = () => {
+    if (isRemoving) return;
+    setConfirmBookId(null);
   };
 
   const handleBookClick = () => {
@@ -50,7 +72,12 @@ function WishlistPage() {
           </Typography>
         </Box>
       </Fade>
-      {entries.length === 0 && (
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Couldn&apos;t load your wishlist.
+        </Alert>
+      )}
+      {entries.length === 0 && !error && (
         <EmptyState
           icon={<FavoriteBorderIcon sx={{ fontSize: 'inherit' }} />}
           title="Your wishlist is empty"
@@ -74,6 +101,15 @@ function WishlistPage() {
           </Grid>
         </Fade>
       )}
+      <ConfirmDialog
+        open={confirmBookId !== null}
+        title="Remove from wishlist?"
+        description="This book will no longer appear on your wishlist."
+        confirmLabel="Remove"
+        loading={isRemoving}
+        onConfirm={handleConfirmRemove}
+        onCancel={handleCancelRemove}
+      />
     </Container>
   );
 }

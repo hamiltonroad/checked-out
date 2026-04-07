@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import CurrentCheckoutsTab from './CurrentCheckoutsTab';
@@ -99,7 +99,7 @@ describe('CurrentCheckoutsTab', () => {
     expect(returnButtons).toHaveLength(3);
   });
 
-  it('should call onReturn when Return button is clicked', async () => {
+  it('should call onReturn after confirming the dialog', async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter>
@@ -109,11 +109,38 @@ describe('CurrentCheckoutsTab', () => {
 
     const returnButtons = screen.getAllByRole('button', { name: /return/i });
     await user.click(returnButtons[0]);
+
+    expect(mockOnReturn).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole('heading', { name: 'Return this book?', level: 2 })
+    ).toBeInTheDocument();
+
+    const dialog = screen.getByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Return' }));
 
     expect(mockOnReturn).toHaveBeenCalledWith(1);
   });
 
-  it('should disable Return button after click to prevent duplicates', async () => {
+  it('should disable Return button while the mutation is in flight', async () => {
+    const user = userEvent.setup();
+    // Pending promise — never resolves during the test, so the in-flight state persists.
+    const pendingReturn = vi.fn(() => new Promise<void>(() => {}));
+    render(
+      <MemoryRouter>
+        <CurrentCheckoutsTab checkouts={mockCheckouts} onReturn={pendingReturn} isLoading={false} />
+      </MemoryRouter>
+    );
+
+    const returnButtons = screen.getAllByRole('button', { name: /return/i });
+    await user.click(returnButtons[0]);
+    const dialog = screen.getByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Return' }));
+
+    const rowButtonsAfter = screen.getAllByRole('button', { name: /return/i });
+    expect(rowButtonsAfter[0]).toBeDisabled();
+  });
+
+  it('should not call onReturn when the dialog is cancelled', async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter>
@@ -123,8 +150,9 @@ describe('CurrentCheckoutsTab', () => {
 
     const returnButtons = screen.getAllByRole('button', { name: /return/i });
     await user.click(returnButtons[0]);
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
-    expect(returnButtons[0]).toBeDisabled();
+    expect(mockOnReturn).not.toHaveBeenCalled();
   });
 
   it('should render empty state when checkouts array is empty', () => {

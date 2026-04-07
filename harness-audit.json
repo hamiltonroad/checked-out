@@ -1,0 +1,419 @@
+{
+  "version": "0.1.0",
+  "timestamp": "2026-04-07T17:32:31.168Z",
+  "projectRoot": "/Users/jmcrider/vscode/checked-out",
+  "detectedStack": "Web — TypeScript",
+  "overallScore": 71,
+  "overallTier": "minimal",
+  "totalPoints": 41,
+  "maxPoints": 58,
+  "categories": [
+    {
+      "category": "instructions",
+      "name": "Instructions & Knowledge",
+      "score": 76,
+      "earnedPoints": 16,
+      "maxPoints": 21,
+      "passCount": 7,
+      "partialCount": 1,
+      "failCount": 2,
+      "skipCount": 1
+    },
+    {
+      "category": "verification",
+      "name": "Verification & Hooks",
+      "score": 64,
+      "earnedPoints": 9,
+      "maxPoints": 14,
+      "passCount": 5,
+      "partialCount": 0,
+      "failCount": 3,
+      "skipCount": 1
+    },
+    {
+      "category": "constraints",
+      "name": "Constraints & Guardrails",
+      "score": 100,
+      "earnedPoints": 6,
+      "maxPoints": 6,
+      "passCount": 4,
+      "partialCount": 0,
+      "failCount": 0,
+      "skipCount": 0
+    },
+    {
+      "category": "context",
+      "name": "Context Management",
+      "score": 75,
+      "earnedPoints": 3,
+      "maxPoints": 4,
+      "passCount": 3,
+      "partialCount": 0,
+      "failCount": 1,
+      "skipCount": 0
+    },
+    {
+      "category": "tools",
+      "name": "Tools & Permissions",
+      "score": 100,
+      "earnedPoints": 2,
+      "maxPoints": 2,
+      "passCount": 1,
+      "partialCount": 0,
+      "failCount": 0,
+      "skipCount": 2
+    },
+    {
+      "category": "continuity",
+      "name": "Session Continuity",
+      "score": 60,
+      "earnedPoints": 3,
+      "maxPoints": 5,
+      "passCount": 2,
+      "partialCount": 0,
+      "failCount": 2,
+      "skipCount": 1
+    },
+    {
+      "category": "architecture",
+      "name": "Architecture & Layering",
+      "score": 33,
+      "earnedPoints": 2,
+      "maxPoints": 6,
+      "passCount": 1,
+      "partialCount": 1,
+      "failCount": 2,
+      "skipCount": 0
+    }
+  ],
+  "rules": [
+    {
+      "ruleId": "instructions.claude-md-exists",
+      "status": "pass",
+      "message": "CLAUDE.md exists at project root"
+    },
+    {
+      "ruleId": "instructions.claude-md-length",
+      "status": "fail",
+      "message": "CLAUDE.md is 103 lines — too long",
+      "evidence": [
+        "103 lines"
+      ],
+      "fix": "Split CLAUDE.md into a concise root file and subdirectory CLAUDE.md files for detailed guidance."
+    },
+    {
+      "ruleId": "instructions.has-tech-stack",
+      "status": "pass",
+      "message": "Tech stack section found in CLAUDE.md"
+    },
+    {
+      "ruleId": "instructions.has-architecture",
+      "status": "pass",
+      "message": "Architecture section found with path references"
+    },
+    {
+      "ruleId": "instructions.has-constraints",
+      "status": "pass",
+      "message": "Constraint/prohibition language found in CLAUDE.md"
+    },
+    {
+      "ruleId": "instructions.specificity",
+      "status": "pass",
+      "message": "No vague phrases detected"
+    },
+    {
+      "ruleId": "instructions.subdirectory-files",
+      "status": "skip",
+      "message": "No major directories found in project"
+    },
+    {
+      "ruleId": "instructions.stale-references",
+      "status": "partial",
+      "message": "6 of 32 referenced path(s) missing",
+      "evidence": [
+        "Missing: sequelize.fn",
+        "Missing: sequelize.col",
+        "Missing: req.body",
+        "Missing: req.query",
+        "Missing: req.params",
+        "Missing: ROLES.ADMIN"
+      ],
+      "fix": "Update or remove stale path references in CLAUDE.md."
+    },
+    {
+      "ruleId": "instructions.contradictions",
+      "status": "pass",
+      "message": "No obvious contradictions detected"
+    },
+    {
+      "ruleId": "instructions.cross-file-consistency",
+      "status": "pass",
+      "message": "Harness artifacts consistent across 15 file(s)"
+    },
+    {
+      "ruleId": "instructions.discoverability",
+      "status": "fail",
+      "message": "34 of 36 harness artifact(s) not reachable from CLAUDE.md",
+      "evidence": [
+        "Unreachable: QUICK_START.md",
+        "Unreachable: README.md",
+        "Unreachable: RUNNING.md",
+        "Unreachable: harness.md",
+        "Unreachable: standards/code-review.md",
+        "Unreachable: standards/e2e-testing.md",
+        "Unreachable: standards/harness-prune-checklist.md",
+        "Unreachable: standards/issue-authoring-guide-kit.md",
+        "Unreachable: standards/full/backend-standards.md",
+        "Unreachable: standards/full/craftsmanship.md",
+        "Unreachable: standards/full/frontend-standards.md",
+        "Unreachable: standards/full/harness-standard-kit.md",
+        "Unreachable: standards/full/tech-stack.md",
+        "Unreachable: standards/full/ux-standards.md",
+        "Unreachable: standards/quick-ref/backend-quick-ref.md",
+        "Unreachable: standards/quick-ref/craftsmanship-kit.md",
+        "Unreachable: standards/quick-ref/craftsmanship-quick-ref.md",
+        "Unreachable: standards/quick-ref/database-guide.md",
+        "Unreachable: standards/quick-ref/enterprise-patterns-quick-ref.md",
+        "Unreachable: standards/quick-ref/frontend-quick-ref.md",
+        "Unreachable: standards/quick-ref/harness-standard-kit.md",
+        "Unreachable: standards/quick-ref/tech-stack-quick-ref.md",
+        "Unreachable: standards/quick-ref/ux-quick-ref.md",
+        "Unreachable: knowledge/agent-operations-kit.md",
+        "Unreachable: knowledge/architecture-kit.md",
+        "Unreachable: knowledge/audit-checklist-kit.md",
+        "Unreachable: knowledge/claude-md-kit.md",
+        "Unreachable: knowledge/claude-md-sample-kit.md",
+        "Unreachable: knowledge/concepts-kit.md",
+        "Unreachable: knowledge/context-management-kit.md",
+        "Unreachable: knowledge/hooks-kit.md",
+        "Unreachable: knowledge/sample-files-kit.md",
+        "Unreachable: knowledge/subagents-kit.md",
+        "Unreachable: knowledge/tools-and-trust-kit.md"
+      ],
+      "fix": "CLAUDE.md should reference or link to key harness artifacts so agents can discover them."
+    },
+    {
+      "ruleId": "verification.hooks-configured",
+      "status": "pass",
+      "message": "Hooks are configured in .claude/settings.json"
+    },
+    {
+      "ruleId": "verification.hook-scripts-exist",
+      "status": "skip",
+      "message": "No script file references found in hook commands"
+    },
+    {
+      "ruleId": "verification.lint-hook",
+      "status": "pass",
+      "message": "Lint hook detected",
+      "evidence": [
+        "Detected linter: \"eslint\""
+      ]
+    },
+    {
+      "ruleId": "verification.test-hook",
+      "status": "pass",
+      "message": "Test hook detected",
+      "evidence": [
+        "Detected test command: \"vitest\""
+      ]
+    },
+    {
+      "ruleId": "verification.forbidden-patterns",
+      "status": "pass",
+      "message": "Forbidden pattern enforcement detected in hooks"
+    },
+    {
+      "ruleId": "verification.clear-feedback",
+      "status": "pass",
+      "message": "No exit codes found in hook commands (hooks may use implicit exit)"
+    },
+    {
+      "ruleId": "verification.ci-configured",
+      "status": "fail",
+      "message": "No CI/CD configuration detected",
+      "fix": "Add a CI pipeline (e.g., .github/workflows/ci.yml) that runs your test, lint, and build commands."
+    },
+    {
+      "ruleId": "constraints.permissions-configured",
+      "status": "pass",
+      "message": "Both allow and deny permission rules are configured"
+    },
+    {
+      "ruleId": "constraints.deny-rules",
+      "status": "pass",
+      "message": "Deny rules exist for high-risk operations",
+      "evidence": [
+        "Blocks: \"rm -rf\""
+      ]
+    },
+    {
+      "ruleId": "constraints.off-limits-files",
+      "status": "pass",
+      "message": "Sensitive file protection found",
+      "evidence": [
+        "Protected: \".env\"",
+        "Protected: \"credentials\"",
+        "Protected: \"production\""
+      ]
+    },
+    {
+      "ruleId": "constraints.scope-rules",
+      "status": "pass",
+      "message": "Scope constraints found in CLAUDE.md"
+    },
+    {
+      "ruleId": "context.session-scoping",
+      "status": "pass",
+      "message": "Session scoping guidance present in CLAUDE.md"
+    },
+    {
+      "ruleId": "context.compact-guidance",
+      "status": "fail",
+      "message": "No compact guidance found in CLAUDE.md",
+      "fix": "Add guidance on when to compact or restart sessions (e.g., \"Use /compact when context grows large\")."
+    },
+    {
+      "ruleId": "context.subagent-guidance",
+      "status": "pass",
+      "message": "Sub-agent guidance found in CLAUDE.md"
+    },
+    {
+      "ruleId": "context.harness-complexity",
+      "status": "pass",
+      "message": "Harness complexity: 59 artifacts, 11379 lines (ratio N/A (no source files))",
+      "details": "Harness: 59 artifacts, 11379 lines\nSource: 0 files, 0 lines\nRatio: N/A (no source files)\nBreakdown:\n  instruction: 1 files, 103 lines\n  enforcement: 1 files, 99 lines\n  reference: 32 files, 5773 lines\n  workflow: 25 files, 5404 lines"
+    },
+    {
+      "ruleId": "tools.mcp-configured",
+      "status": "skip",
+      "message": "No MCP configuration found — project likely does not use MCP"
+    },
+    {
+      "ruleId": "tools.mcp-count",
+      "status": "skip",
+      "message": "No MCP configuration found"
+    },
+    {
+      "ruleId": "tools.self-verification",
+      "status": "pass",
+      "message": "2 verification commands available",
+      "evidence": [
+        "Detected: test",
+        "Detected: lint"
+      ]
+    },
+    {
+      "ruleId": "continuity.memory-curated",
+      "status": "fail",
+      "message": "No cross-session continuity mechanism found",
+      "fix": "Add decision documentation (adr/ directory, DECISIONS.md, or CHANGELOG.md)."
+    },
+    {
+      "ruleId": "continuity.onboarding-quality",
+      "status": "pass",
+      "message": "All onboarding elements present in CLAUDE.md",
+      "evidence": [
+        "Present: tech-stack",
+        "Present: architecture",
+        "Present: commands",
+        "Present: conventions"
+      ]
+    },
+    {
+      "ruleId": "continuity.critical-decisions-documented",
+      "status": "fail",
+      "message": "No decision documentation mechanism found",
+      "fix": "Create an adr/ or decisions/ directory, or add a DECISIONS.md file."
+    },
+    {
+      "ruleId": "continuity.code-review-results",
+      "status": "pass",
+      "message": "Code review results directory found with 68 entry/entries",
+      "evidence": [
+        "Directory: code-review-results/",
+        "Entries: 68"
+      ]
+    },
+    {
+      "ruleId": "continuity.structure-drift",
+      "status": "skip",
+      "message": "No structure.json found — project does not use structure tracking"
+    },
+    {
+      "ruleId": "architecture.enforcement-level",
+      "status": "partial",
+      "message": "Architecture documented but not enforced (Level 1). Consider adding an architecture linter.",
+      "details": "Create a linter script (scripts/architecture-lint) to reach Level 2.",
+      "evidence": [
+        "Architecture documentation found in CLAUDE.md"
+      ]
+    },
+    {
+      "ruleId": "architecture.config-exists",
+      "status": "fail",
+      "message": "No architecture configuration file found",
+      "fix": "Create an architecture.json defining layers, allowed dependencies, and banned patterns."
+    },
+    {
+      "ruleId": "architecture.banned-patterns",
+      "status": "pass",
+      "message": "Banned patterns referenced in CLAUDE.md",
+      "evidence": [
+        "Anti-pattern keywords found in CLAUDE.md"
+      ]
+    },
+    {
+      "ruleId": "stack.typescript.strict-mode",
+      "status": "fail",
+      "message": "No tsconfig.json found.",
+      "fix": "Create a tsconfig.json with `strict: true`."
+    },
+    {
+      "ruleId": "stack.typescript.eslint-config",
+      "status": "fail",
+      "message": "No ESLint configuration found.",
+      "fix": "Create an eslint.config.js or .eslintrc.json file."
+    },
+    {
+      "ruleId": "stack.typescript.type-check-hook",
+      "status": "fail",
+      "message": "No `tsc --noEmit` hook found in settings or delegated scripts.",
+      "fix": "Add a PostToolUse hook that runs `tsc --noEmit` after Edit/Write operations."
+    }
+  ],
+  "tierBreakdown": [
+    {
+      "tierId": "minimal",
+      "tier": "minimal",
+      "passCount": 1,
+      "failCount": 1,
+      "totalCount": 2,
+      "achieved": false
+    },
+    {
+      "tierId": "structured",
+      "tier": "structured",
+      "passCount": 8,
+      "failCount": 2,
+      "totalCount": 10,
+      "achieved": false
+    },
+    {
+      "tierId": "verified",
+      "tier": "verified",
+      "passCount": 11,
+      "failCount": 4,
+      "totalCount": 15,
+      "achieved": false
+    },
+    {
+      "tierId": "self-correcting",
+      "tier": "self-correcting",
+      "passCount": 5,
+      "failCount": 3,
+      "totalCount": 8,
+      "achieved": false
+    }
+  ]
+}

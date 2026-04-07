@@ -59,13 +59,16 @@ function renderPage(ui: React.ReactElement) {
   );
 }
 
-const mockLeaveMutate = vi.fn();
+const mockLeaveMutateAsync = vi.fn();
 const mockCheckoutMutate = vi.fn();
 
 describe('WaitlistHoldsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useLeaveWaitlist as ReturnType<typeof vi.fn>).mockReturnValue({ mutate: mockLeaveMutate });
+    mockLeaveMutateAsync.mockResolvedValue(undefined);
+    (useLeaveWaitlist as ReturnType<typeof vi.fn>).mockReturnValue({
+      mutateAsync: mockLeaveMutateAsync,
+    });
     (useCheckoutHold as ReturnType<typeof vi.fn>).mockReturnValue({ mutate: mockCheckoutMutate });
   });
 
@@ -147,10 +150,8 @@ describe('WaitlistHoldsPage', () => {
     renderPage(<WaitlistHoldsPage />);
 
     await user.click(screen.getByRole('button', { name: 'Leave Waitlist' }));
-    expect(mockLeaveMutate).toHaveBeenCalledWith(
-      { bookId: 100, format: 'physical' },
-      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
-    );
+    await user.click(screen.getByRole('button', { name: 'Leave' }));
+    expect(mockLeaveMutateAsync).toHaveBeenCalledWith({ bookId: 100, format: 'physical' });
   });
 
   it('calls checkoutHold.mutate when Check Out is clicked', async () => {
