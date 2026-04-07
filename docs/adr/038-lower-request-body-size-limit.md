@@ -1,4 +1,4 @@
-# ADR-025: Lower Request Body Size Limit to 1MB
+# ADR-038: Lower Request Body Size Limit to 1MB
 
 **Status:** Accepted
 **Date:** 2026-04-01

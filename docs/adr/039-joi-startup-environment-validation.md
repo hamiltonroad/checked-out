@@ -1,4 +1,4 @@
-# ADR-028: Joi Startup Environment Validation
+# ADR-039: Joi Startup Environment Validation
 
 **Status:** Accepted
 **Date:** 2026-04-01

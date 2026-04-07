@@ -60,6 +60,17 @@ Ensure on main branch:
 git branch --show-current
 ```
 
+### Step 2.5: CLAUDE.md Size Warning
+
+Run the shared size-check script (non-blocking; threshold 120 lines):
+
+```bash
+./scripts/check-claudemd-size.sh
+```
+
+It prints a prune-reminder when `CLAUDE.md` exceeds the threshold. Do
+NOT abort on the warning — continue to Step 3.
+
 ### Step 3: Pre-Flight Smoke Test
 
 Run the smoke test script (starts servers if needed):

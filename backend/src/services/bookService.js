@@ -39,7 +39,6 @@ class BookService {
    * @param {Array<Object>} copies - Copy objects with nested checkouts
    * @returns {string} 'available', 'checked_out', or 'no_copies'
    */
-  // eslint-disable-next-line class-methods-use-this
   calculateBookStatus(copies) {
     try {
       if (!copies || !Array.isArray(copies) || copies.length === 0) {
@@ -79,7 +78,6 @@ class BookService {
   }
 
   /** Build Sequelize where clause from filter params */
-  // eslint-disable-next-line class-methods-use-this
   buildWhereClause(filters) {
     const { genre, profanity } = filters;
     const bookWhere = {};
@@ -97,7 +95,6 @@ class BookService {
   }
 
   /** Build ID-based pre-filters for search, authorId, format, and minRating */
-  // eslint-disable-next-line class-methods-use-this
   async buildIdFilters(filters) {
     const idSets = [];
     if (filters.search) {

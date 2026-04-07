@@ -21,7 +21,6 @@ class CheckoutController {
    * Create a new checkout
    * POST /api/v1/checkouts
    */
-  // eslint-disable-next-line class-methods-use-this
   async createCheckout(req, res, next) {
     try {
       const { copy_id: copyId } = req.body;
@@ -44,7 +43,6 @@ class CheckoutController {
    * Get current (active) checkouts
    * GET /api/v1/checkouts/current
    */
-  // eslint-disable-next-line class-methods-use-this
   async getCurrentCheckouts(req, res, next) {
     try {
       const checkouts = await checkoutService.getCurrentCheckouts();
@@ -61,7 +59,6 @@ class CheckoutController {
    * Get overdue checkouts
    * GET /api/v1/checkouts/overdue
    */
-  // eslint-disable-next-line class-methods-use-this
   async getOverdueCheckouts(req, res, next) {
     try {
       const checkouts = await checkoutService.getOverdueCheckouts();
@@ -78,7 +75,6 @@ class CheckoutController {
    * Get all checkouts
    * GET /api/v1/checkouts
    */
-  // eslint-disable-next-line class-methods-use-this
   async getAllCheckouts(req, res, next) {
     try {
       const checkouts = await checkoutService.getAllCheckouts();
@@ -93,7 +89,6 @@ class CheckoutController {
    * Return a checked-out book
    * PUT /api/v1/checkouts/:id/return
    */
-  // eslint-disable-next-line class-methods-use-this
   async returnCheckout(req, res, next) {
     try {
       const id = parseInt(req.params.id, 10);
@@ -124,7 +119,6 @@ class CheckoutController {
    * Get checkouts for a specific patron
    * GET /api/v1/checkouts/patron/:id
    */
-  // eslint-disable-next-line class-methods-use-this
   async getCheckoutsByPatron(req, res, next) {
     try {
       const patronId = parseInt(req.params.id, 10);

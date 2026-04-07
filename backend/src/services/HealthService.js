@@ -12,7 +12,6 @@ class HealthService {
    * @param {number} timeoutMs - Maximum time to wait for DB response
    * @returns {Promise<Object>} Database health status
    */
-  // eslint-disable-next-line class-methods-use-this
   async checkDatabase(timeoutMs = DEFAULT_TIMEOUT_MS) {
     const start = Date.now();
 

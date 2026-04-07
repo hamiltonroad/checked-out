@@ -6,7 +6,6 @@ class CopyController {
    * Get available copies for a book
    * GET /api/v1/copies/book/:bookId/available
    */
-  // eslint-disable-next-line class-methods-use-this
   async getAvailableCopies(req, res, next) {
     try {
       const bookId = parseInt(req.params.bookId, 10);

@@ -90,6 +90,7 @@ Detailed versions of the quick-ref guides. Consult when the quick-ref lacks suff
 | File | Purpose | Consult when... |
 |------|---------|-----------------|
 | `code-review.md` | Code review checklist and process | Performing code reviews |
+| `harness-prune-checklist.md` | Periodic prune-cycle checklist for harness rot | Running a quarterly harness prune |
 | `issue-authoring-guide-kit.md` *(kit)* | Guide for writing GitHub issues | Authoring new issues |
 
 ## ADRs (`docs/adr/`)

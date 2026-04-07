@@ -10,7 +10,6 @@ class PatronController {
    * List patrons, optionally filtered by status
    * GET /api/v1/patrons?status=active
    */
-  // eslint-disable-next-line class-methods-use-this
   async listPatrons(req, res, next) {
     try {
       const { status } = req.query;
@@ -26,7 +25,6 @@ class PatronController {
    * Search patrons by partial name or card number
    * GET /api/v1/patrons/search?q=xxx&limit=10
    */
-  // eslint-disable-next-line class-methods-use-this
   async searchPatrons(req, res, next) {
     try {
       const { q, limit } = req.query;
@@ -41,7 +39,6 @@ class PatronController {
    * Get recently checked-out-to patrons for the authenticated user
    * GET /api/v1/patrons/recent?limit=5
    */
-  // eslint-disable-next-line class-methods-use-this
   async getRecentPatrons(req, res, next) {
     try {
       const { limit } = req.query;
@@ -56,7 +53,6 @@ class PatronController {
    * Get a single patron by ID
    * GET /api/v1/patrons/:id
    */
-  // eslint-disable-next-line class-methods-use-this
   async getPatronById(req, res, next) {
     try {
       const id = parseInt(req.params.id, 10);

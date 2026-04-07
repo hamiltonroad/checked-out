@@ -11,7 +11,6 @@ const {
 
 class CheckoutService {
   /** Create a new checkout record */
-  // eslint-disable-next-line class-methods-use-this
   async createCheckout({ patronId, copyId }) {
     const patron = await Patron.findByPk(patronId);
     if (!patron) throw ApiError.notFound(`Patron with id ${patronId} not found`);
@@ -85,7 +84,6 @@ class CheckoutService {
   }
 
   /** Get only currently active checkouts (not yet returned) with due-date info */
-  // eslint-disable-next-line class-methods-use-this
   async getCurrentCheckouts() {
     const checkouts = await Checkout.findAll({
       where: { return_date: null },
@@ -101,7 +99,6 @@ class CheckoutService {
    * days_overdue computed via DATEDIFF at query time — never stored.
    * NOTE: DATEDIFF uses MySQL server timezone; assumes UTC.
    */
-  // eslint-disable-next-line class-methods-use-this
   async getOverdueCheckouts() {
     const daysOverdueAttr = [sequelize.literal('DATEDIFF(CURDATE(), due_date)'), 'daysOverdue'];
     const checkouts = await Checkout.findAll({
@@ -118,7 +115,6 @@ class CheckoutService {
   }
 
   /** Get all checkout records with patron and book details */
-  // eslint-disable-next-line class-methods-use-this
   async getAllCheckouts() {
     const checkouts = await Checkout.findAll({
       include: CHECKOUT_INCLUDES,
@@ -129,7 +125,6 @@ class CheckoutService {
   }
 
   /** Mark a checkout as returned */
-  // eslint-disable-next-line class-methods-use-this
   async returnCheckout(id, returnDate = null) {
     const checkout = await Checkout.findByPk(id, { include: CHECKOUT_INCLUDES });
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const bcrypt = require('bcrypt');
 const { SALT_ROUNDS, DEV_PASSWORD } = require('../config/auth');
 
@@ -21,7 +20,7 @@ module.exports = {
     );
 
     if (patrons.length === 0) {
-      console.log('No patrons need password hashes.'); // eslint-disable-line no-console
+      console.log('No patrons need password hashes.');
       return;
     }
 
@@ -32,7 +31,7 @@ module.exports = {
       { replacements: { hash, ids } }
     );
 
-    console.log(`Set password hash for ${patrons.length} patron(s). Dev password: ${DEV_PASSWORD}`); // eslint-disable-line no-console
+    console.log(`Set password hash for ${patrons.length} patron(s). Dev password: ${DEV_PASSWORD}`);
   },
 
   /**

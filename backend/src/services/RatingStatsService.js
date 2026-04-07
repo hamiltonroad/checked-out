@@ -4,7 +4,6 @@ class RatingStatsService {
   /**
    * Get rating statistics for a book
    */
-  // eslint-disable-next-line class-methods-use-this
   async getBookRatingStats(bookId) {
     const stats = await Rating.findOne({
       where: { book_id: bookId },
@@ -46,7 +45,6 @@ class RatingStatsService {
   /**
    * Get books with their average ratings
    */
-  // eslint-disable-next-line class-methods-use-this
   async getBooksWithRatings(options = {}) {
     const { limit = 20, offset = 0, minRating = null, sortBy = 'average_rating' } = options;
 

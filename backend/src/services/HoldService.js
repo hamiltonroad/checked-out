@@ -6,7 +6,6 @@ const logger = require('../config/logger');
 
 class HoldService {
   /** Create a hold on a specific copy for a patron */
-  // eslint-disable-next-line class-methods-use-this
   async createHold(copyId, patronId, waitlistEntryId = null) {
     const copy = await Copy.findByPk(copyId);
     if (!copy) throw ApiError.notFound(`Copy with id ${copyId} not found`);
@@ -37,7 +36,6 @@ class HoldService {
   }
 
   /** Get active holds for a patron with lazy expiration check */
-  // eslint-disable-next-line class-methods-use-this
   async getPatronHolds(patronId) {
     await this.expireStaleHolds();
 
@@ -55,7 +53,6 @@ class HoldService {
   }
 
   /** Find and expire holds past their expiration date */
-  // eslint-disable-next-line class-methods-use-this
   async expireStaleHolds(copyIds = null) {
     const where = {
       status: 'active',
@@ -82,7 +79,6 @@ class HoldService {
   }
 
   /** Get all active holds for a book+format combination */
-  // eslint-disable-next-line class-methods-use-this
   async getActiveHoldsForBookFormat(bookId, format) {
     return Hold.findAll({
       where: { status: 'active' },
@@ -100,7 +96,6 @@ class HoldService {
    * Create a hold for the front-of-line waitlist patron on a returned copy.
    * Updates the waitlist entry status to 'notified'.
    */
-  // eslint-disable-next-line class-methods-use-this
   async createHoldForFrontOfLine(copyId) {
     const copy = await Copy.findByPk(copyId);
     if (!copy) return null;

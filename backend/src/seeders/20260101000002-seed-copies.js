@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-
 /**
  * Seed copies for comprehensive test data.
  * Creates 12 copies (8 physical + 4 kindle) across 8 books.

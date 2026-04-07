@@ -7,7 +7,6 @@ class RatingController {
   /**
    * Submit or update a rating
    */
-  // eslint-disable-next-line class-methods-use-this
   async submitRating(req, res, next) {
     try {
       const { bookId, rating, reviewText } = req.body;
@@ -33,7 +32,6 @@ class RatingController {
   /**
    * Get all ratings for a specific book
    */
-  // eslint-disable-next-line class-methods-use-this
   async getBookRatings(req, res, next) {
     try {
       const { id: bookId } = req.params;
@@ -55,7 +53,6 @@ class RatingController {
   /**
    * Get rating statistics for a book
    */
-  // eslint-disable-next-line class-methods-use-this
   async getBookRatingStats(req, res, next) {
     try {
       const { id: bookId } = req.params;
@@ -70,7 +67,6 @@ class RatingController {
   /**
    * Get current patron's ratings
    */
-  // eslint-disable-next-line class-methods-use-this
   async getMyRatings(req, res, next) {
     try {
       const patronId = req.patron && req.patron.id;
@@ -95,7 +91,6 @@ class RatingController {
   /**
    * Get a specific rating by the current patron for a book
    */
-  // eslint-disable-next-line class-methods-use-this
   async getMyRatingForBook(req, res, next) {
     try {
       const { bookId } = req.params;
@@ -116,7 +111,6 @@ class RatingController {
   /**
    * Delete a rating
    */
-  // eslint-disable-next-line class-methods-use-this
   async deleteRating(req, res, next) {
     try {
       const { bookId } = req.params;
@@ -137,7 +131,6 @@ class RatingController {
   /**
    * Get top-rated books
    */
-  // eslint-disable-next-line class-methods-use-this
   async getTopRatedBooks(req, res, next) {
     try {
       const { limit = 20, offset = 0, minRating = null, sortBy = 'average_rating' } = req.query;
@@ -158,7 +151,6 @@ class RatingController {
   /**
    * Get all ratings for a patron (admin only)
    */
-  // eslint-disable-next-line class-methods-use-this
   async getPatronRatings(req, res, next) {
     try {
       const { patronId } = req.params;

@@ -4,7 +4,6 @@ const ApiError = require('../utils/ApiError');
 
 class HoldController {
   /** Get active holds for a patron (patron can only access their own) */
-  // eslint-disable-next-line class-methods-use-this
   async getPatronHolds(req, res, next) {
     try {
       const { id } = req.params;

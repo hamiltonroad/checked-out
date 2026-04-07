@@ -6,7 +6,6 @@ class WishlistController {
   /**
    * Add a book to the authenticated patron's wishlist
    */
-  // eslint-disable-next-line class-methods-use-this
   async addToWishlist(req, res, next) {
     try {
       const { book_id: bookId } = req.body;
@@ -23,7 +22,6 @@ class WishlistController {
   /**
    * Remove a book from the authenticated patron's wishlist
    */
-  // eslint-disable-next-line class-methods-use-this
   async removeFromWishlist(req, res, next) {
     try {
       const { book_id: bookId } = req.body;
@@ -40,7 +38,6 @@ class WishlistController {
   /**
    * Get the wishlist for a specific patron (patron can only access their own)
    */
-  // eslint-disable-next-line class-methods-use-this
   async getPatronWishlist(req, res, next) {
     try {
       const { id } = req.params;

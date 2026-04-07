@@ -1,4 +1,4 @@
-# ADR-022: JavaScript Default Parameters Over defaultProps
+# ADR-037: JavaScript Default Parameters Over defaultProps
 
 **Status:** Accepted
 **Date:** 2026-04-01

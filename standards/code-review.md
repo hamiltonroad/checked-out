@@ -34,7 +34,7 @@ Reviews bucket changed files into the categories below. Categorization determine
 | Backend validator | `backend/src/validators/**` | Joi schemas only; does not accept fields the controller ignores |
 | Backend middleware | `backend/src/middlewares/**` | Single responsibility; no business logic; auth constants imported from `config/auth.js` |
 | Backend migration | `backend/src/migrations/**` | Reversible (`up` and `down`); descriptive timestamp name; foreign keys declared; no destructive drops without explicit comment |
-| Backend seeder | `backend/src/seeders/**` | Data extracted to `seeders/data/` if file exceeds 200 lines; uses `DEV_PASSWORD` from `config/auth.js`; never the literal `'welcome123'` |
+| Backend seeder | `backend/src/seeders/**` | Data extracted to `seeders/data/` if file exceeds 200 lines; uses `DEV_PASSWORD` from `config/auth.js`; never the dev-password literal (must come from `DEV_PASSWORD`) |
 | Backend config | `backend/src/config/**` | Single source of truth for the concern; environment-validated; no duplication across files |
 | Backend utils | `backend/src/utils/**` | Pure functions; reusable across services; no peer service imports |
 | Backend test | `backend/src/**/*.test.js`, `backend/src/test-utils/**` | Real database (no mocks for integration); shared setup extracted when used 3+ times; race tests for aggregate-then-write services |
@@ -52,7 +52,7 @@ Reviews bucket changed files into the categories below. Categorization determine
 | E2E smoke spec | `frontend/e2e/smoke/**` | No `waitForTimeout`; no `networkidle`; no MUI class selectors; no hardcoded DB ids; no direct mutation API calls; under 150 lines |
 | E2E flow spec | `frontend/e2e/flow/**` | Same rules as smoke; uses fixtures from `e2e/fixtures/`; no `helpers/auth` or `helpers/csrf` imports |
 | E2E security spec | `frontend/e2e/security/**` | Same rules as flow; identifier assertions are exact-match (no `.includes()`) |
-| E2E fixtures/page-objects | `frontend/e2e/fixtures/**`, `frontend/e2e/page-objects/**` | `welcome123` literal allowed only in `fixtures/testData.ts`; no spec-side selectors leaking in |
+| E2E fixtures/page-objects | `frontend/e2e/fixtures/**`, `frontend/e2e/page-objects/**` | dev-password literal allowed only in `fixtures/testData.ts`; no spec-side selectors leaking in |
 | OpenAPI | `backend/api/**` | New paths added to `openapi.yaml`; schemas in `components/schemas.yaml`; matches actual route behavior |
 | ADR | `docs/adr/**` | Unique number; status set; supersedes/superseded-by linked if reversing a prior decision |
 | Harness — agents/commands | `.claude/agents/**`, `.claude/commands/**` | Project files (no `-kit` suffix) are canonical; `-kit` files must not be edited; flag drift between project version and its kit counterpart |
@@ -96,7 +96,7 @@ These are checks the universal agent (`.claude/agents/code-review-kit.md`) canno
 - When extracting a component to its own file, applicable tests must migrate with it.
 
 ### Security
-- The literal `'welcome123'` may appear ONLY in `backend/src/config/auth.js` and `frontend/e2e/fixtures/testData.ts`. Anywhere else is a Critical finding.
+- The dev-password literal may appear ONLY in `backend/src/config/auth.js` and `frontend/e2e/fixtures/testData.ts`. Anywhere else is a Critical finding.
 - Auth constants (`SALT_ROUNDS`, token expiry) must come from `backend/src/config/auth.js` — never redefined locally.
 - Role checks must use constants from `config/roles.js` (backend) or `utils/roles.ts` (frontend) — never raw string literals.
 - No interpolation of user-supplied values into `sequelize.literal()`.
