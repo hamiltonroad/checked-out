@@ -1,106 +1,159 @@
 # Code Craftsmanship Standards
 
-## DRY (Don't Repeat Yourself)
+Core principles for writing maintainable, professional code. The quick-ref summarizes this file; this file is canonical.
+
+---
+
+## DRY — Don't Repeat Yourself
 
 **Principle:** Every piece of knowledge should have a single, unambiguous representation within a system.
 
-**Key Points:**
-- Avoid duplicating code, logic, or data
+**Apply:**
 - Extract repeated code into reusable functions, classes, or modules
 - Use abstraction to eliminate redundancy
 - Changes should only need to be made in one place
 
-**Benefits:**
-- Easier maintenance and updates
-- Reduced risk of inconsistencies
-- Improved code readability
-- Less code to test and debug
+**Benefits:** Easier maintenance, fewer inconsistencies, less code to test and debug.
 
-## KISS (Keep It Simple, Stupid)
+**Caveat:** Premature abstraction is worse than duplication. Three similar lines of code is usually better than a wrong abstraction. Wait until the duplication has shown its true shape before extracting.
+
+---
+
+## KISS — Keep It Simple, Stupid
 
 **Principle:** Systems work best when they are kept simple rather than made complex.
 
-**Key Points:**
-- Favor simplicity over cleverness
-- Write code that is easy to understand and maintain
-- Avoid unnecessary complexity and over-engineering
+**Apply:**
+- Favor clarity over cleverness
 - Use straightforward solutions when possible
+- Avoid over-engineering and speculative flexibility
+- Write for the next human (or agent) who will read it
 
-**Benefits:**
-- Easier for others (and future you) to understand
-- Fewer bugs due to reduced complexity
-- Faster development and debugging
-- Lower cognitive load for developers
+**Benefits:** Lower cognitive load, fewer bugs, faster debugging.
+
+---
 
 ## SOLID Principles
 
-### S - Single Responsibility Principle (SRP)
+### S — Single Responsibility Principle (SRP)
 
-**Principle:** A class should have only one reason to change.
+**Principle:** A class or module should have one, and only one, reason to change.
 
-**Key Points:**
-- Each class or module should have one, and only one, responsibility
-- If a class has multiple responsibilities, split it into separate classes
-- A responsibility is a reason to change
+If a class has multiple responsibilities, split it. A responsibility is a reason to change — when two reasons live together, they pull the code in opposing directions.
 
-**Benefits:**
-- Easier to understand and maintain
-- Reduces coupling between different parts of the system
-- Changes are isolated and less risky
+```javascript
+// BAD: Multiple responsibilities
+class BookManager {
+  saveBook() { /* database logic */ }
+  validateBook() { /* validation logic */ }
+  sendNotification() { /* email logic */ }
+}
 
-### O - Open/Closed Principle (OCP)
+// GOOD: Separate responsibilities
+class BookService { saveBook() {} }
+class BookValidator { validateBook() {} }
+class NotificationService { sendNotification() {} }
+```
+
+### O — Open/Closed Principle (OCP)
 
 **Principle:** Software entities should be open for extension but closed for modification.
 
-**Key Points:**
-- Design classes that can be extended without modifying existing code
-- Use abstraction and polymorphism to allow new behavior
-- Avoid modifying tested, working code
+Design for extension via abstraction and polymorphism so new behavior can be added without editing tested, working code.
 
-**Benefits:**
-- Reduces risk of breaking existing functionality
-- Promotes code reuse
-- Enables flexible, maintainable systems
+```javascript
+// GOOD: Extend without modifying
+class Discount {
+  calculate(amount) { return amount; }
+}
 
-### L - Liskov Substitution Principle (LSP)
+class StudentDiscount extends Discount {
+  calculate(amount) { return amount * 0.9; }
+}
+```
 
-**Principle:** Objects of a superclass should be replaceable with objects of a subclass without affecting the correctness of the program.
+### L — Liskov Substitution Principle (LSP)
 
-**Key Points:**
-- Subclasses must honor the contract of their parent class
-- Derived classes should extend, not replace, base class behavior
-- Client code should work correctly with any subclass
+**Principle:** Subclasses must be substitutable for their base class without breaking correctness.
 
-**Benefits:**
-- Ensures proper inheritance hierarchies
-- Prevents unexpected behavior from polymorphism
-- Promotes reliable, predictable code
+Subclasses must honor the contract of their parent. Derived classes should *extend*, not contradict, base behavior.
 
-### I - Interface Segregation Principle (ISP)
+```javascript
+// BAD: Breaks substitution
+class Bird { fly() { /* ... */ } }
+class Penguin extends Bird {
+  fly() { throw new Error("Can't fly!"); }
+}
+
+// GOOD: Model the actual hierarchy
+class Bird { move() { /* ... */ } }
+class FlyingBird extends Bird { move() { this.fly(); } }
+class Penguin extends Bird { move() { this.swim(); } }
+```
+
+### I — Interface Segregation Principle (ISP)
 
 **Principle:** Clients should not be forced to depend on interfaces they do not use.
 
-**Key Points:**
-- Create focused, specific interfaces rather than large, general ones
-- Split large interfaces into smaller, more specific ones
-- Classes should only implement methods they actually need
+Prefer focused, specific interfaces over large general ones. Classes should only implement methods they actually need.
 
-**Benefits:**
-- Reduces coupling between classes
-- Prevents bloated interfaces
-- Makes code more flexible and maintainable
+```javascript
+// BAD: Fat interface
+interface Worker { work(); eat(); sleep(); }
 
-### D - Dependency Inversion Principle (DIP)
+// GOOD: Segregated interfaces
+interface Workable { work(); }
+interface Eatable { eat(); }
+interface Sleepable { sleep(); }
+
+class Robot implements Workable {}
+class Human implements Workable, Eatable, Sleepable {}
+```
+
+### D — Dependency Inversion Principle (DIP)
 
 **Principle:** High-level modules should not depend on low-level modules. Both should depend on abstractions.
 
-**Key Points:**
-- Depend on abstractions (interfaces) rather than concrete implementations
-- High-level policy should not depend on low-level details
-- Use dependency injection to manage dependencies
+Depend on interfaces, not concrete implementations. Use dependency injection to manage dependencies — this is what makes code testable.
 
-**Benefits:**
-- Reduces coupling between modules
-- Makes code more testable
-- Enables easier swapping of implementations
-- Promotes flexible, maintainable architecture
+```javascript
+// BAD: Depends on concrete class
+class BookService {
+  constructor() { this.database = new MySQLDatabase(); }
+}
+
+// GOOD: Depends on injected abstraction
+class BookService {
+  constructor(database) { this.database = database; }
+}
+
+const service = new BookService(new MySQLDatabase());
+const testService = new BookService(new MockDatabase());
+```
+
+---
+
+## Application Checklist
+
+Before writing or reviewing code, ask:
+
+1. **DRY** — Am I repeating myself? (And: is the duplication mature enough to abstract?)
+2. **KISS** — Is this the simplest solution that works?
+3. **SRP** — Does this do ONE thing?
+4. **OCP** — Can I extend without modifying?
+5. **LSP** — Can subtypes replace base types without surprises?
+6. **ISP** — Are my interfaces focused?
+7. **DIP** — Am I depending on abstractions?
+
+---
+
+## Red Flags
+
+- Copy-pasted code blocks
+- Functions over ~30 lines
+- Classes with "and" in their name
+- Deep inheritance hierarchies (more than 2 levels is usually wrong)
+- Modifying working code to add a feature instead of extending it
+- Giant interfaces that nobody fully implements
+- Direct instantiation of dependencies inside constructors
+- Names that describe *how* instead of *what*
