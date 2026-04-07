@@ -1,4 +1,4 @@
-# ADR-034: npm Workspaces for Monorepo Structure
+# ADR-040: npm Workspaces for Monorepo Structure
 
 **Status:** Accepted
 **Date:** 2026-04-01

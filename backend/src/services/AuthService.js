@@ -47,7 +47,6 @@ class AuthService {
    * @param {Object} patron - Patron model instance
    * @returns {string} JWT access token
    */
-  // eslint-disable-next-line class-methods-use-this
   generateAccessToken(patron) {
     return jwt.sign({ sub: patron.id, cardNumber: patron.card_number }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN || '15m',
@@ -59,7 +58,6 @@ class AuthService {
    * @param {Object} patron - Patron model instance
    * @returns {string} JWT refresh token
    */
-  // eslint-disable-next-line class-methods-use-this
   generateRefreshToken(patron) {
     return jwt.sign(
       { sub: patron.id, type: 'refresh' },
@@ -73,7 +71,6 @@ class AuthService {
    * @param {string} token - JWT access token
    * @returns {Object} Decoded token payload
    */
-  // eslint-disable-next-line class-methods-use-this
   verifyAccessToken(token) {
     try {
       return jwt.verify(token, process.env.JWT_SECRET);
@@ -121,7 +118,6 @@ class AuthService {
    * @param {string} password - Plain-text password
    * @returns {string} Bcrypt hash
    */
-  // eslint-disable-next-line class-methods-use-this
   async hashPassword(password) {
     return bcrypt.hash(password, SALT_ROUNDS);
   }
@@ -131,7 +127,6 @@ class AuthService {
    * @param {Object} patron - Patron model instance
    * @returns {Object} Patron without password_hash
    */
-  // eslint-disable-next-line class-methods-use-this
   sanitizePatron(patron) {
     const data = patron.toJSON();
     delete data.password_hash;

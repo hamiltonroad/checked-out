@@ -11,7 +11,6 @@ class HealthController {
    * @param {Object} _req - Express request (unused)
    * @param {Object} res - Express response
    */
-  // eslint-disable-next-line class-methods-use-this
   liveness(_req, res) {
     res.json(
       ApiResponse.success(
@@ -32,7 +31,6 @@ class HealthController {
    * @param {Object} res - Express response
    * @param {Function} next - Express next middleware
    */
-  // eslint-disable-next-line class-methods-use-this
   async readiness(_req, res, next) {
     try {
       const dbStatus = await healthService.checkDatabase();

@@ -66,7 +66,6 @@ class PatronCheckoutService {
    * @returns {Promise<Array>} Array of formatted patron checkout records
    * @throws {ApiError} 404 if patron does not exist
    */
-  // eslint-disable-next-line class-methods-use-this
   async getByPatronId(patronId, status = null) {
     const patron = await Patron.findByPk(patronId);
     if (!patron) {
@@ -98,7 +97,6 @@ class PatronCheckoutService {
    * @param {number} [limit=5] - Maximum patrons to return
    * @returns {Promise<Array>} Recent patron records
    */
-  // eslint-disable-next-line class-methods-use-this
   async getRecentPatrons(currentPatronId, limit = 5) {
     const recentCheckouts = await Checkout.findAll({
       where: { patron_id: { [Op.ne]: currentPatronId } },

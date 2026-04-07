@@ -5,7 +5,6 @@ const logger = require('../config/logger');
 
 class WaitlistService {
   /** Add a patron to the waitlist for a specific book+format */
-  // eslint-disable-next-line class-methods-use-this
   async joinQueue(patronId, bookId, format) {
     const book = await Book.findByPk(bookId);
     if (!book) throw ApiError.notFound('Book not found');
@@ -39,7 +38,6 @@ class WaitlistService {
   }
 
   /** Remove a patron from the waitlist and reorder remaining positions */
-  // eslint-disable-next-line class-methods-use-this
   async leaveQueue(patronId, bookId, format) {
     const entry = await WaitlistEntry.findOne({
       where: { patron_id: patronId, book_id: bookId, format, status: 'waiting' },
@@ -69,7 +67,6 @@ class WaitlistService {
   }
 
   /** Get the position of a patron in the waitlist for a book+format */
-  // eslint-disable-next-line class-methods-use-this
   async getPosition(patronId, bookId, format) {
     const entry = await WaitlistEntry.findOne({
       where: { patron_id: patronId, book_id: bookId, format, status: 'waiting' },
@@ -79,7 +76,6 @@ class WaitlistService {
   }
 
   /** Get all waiting entries for a book, optionally filtered by format */
-  // eslint-disable-next-line class-methods-use-this
   async getQueueForBook(bookId, format = null) {
     const where = { book_id: bookId, status: 'waiting' };
     if (format) where.format = format;
@@ -95,7 +91,6 @@ class WaitlistService {
   }
 
   /** Get all waitlist entries for a patron, enriched with queue size and total copies */
-  // eslint-disable-next-line class-methods-use-this
   async getPatronWaitlist(patronId) {
     const entries = await WaitlistEntry.findAll({
       where: { patron_id: patronId, status: 'waiting' },
@@ -142,7 +137,6 @@ class WaitlistService {
    * Notify the front-of-line patron that a copy is available.
    * NOTIFICATION SEAM: Plug in email/in-app notification delivery here.
    */
-  // eslint-disable-next-line class-methods-use-this
   async notifyFrontOfLine(patronId, bookId, format) {
     logger.info('Waitlist notification: patron reached front of line', {
       patronId,
@@ -155,7 +149,6 @@ class WaitlistService {
   }
 
   /** After a return, check if someone is next in line and notify them */
-  // eslint-disable-next-line class-methods-use-this
   async advanceQueue(bookId, format) {
     const frontEntry = await WaitlistEntry.findOne({
       where: { book_id: bookId, format, position: 1, status: 'waiting' },

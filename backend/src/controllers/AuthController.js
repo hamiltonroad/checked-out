@@ -42,7 +42,6 @@ class AuthController {
   /**
    * POST /api/v1/auth/login
    */
-  // eslint-disable-next-line class-methods-use-this
   async login(req, res, next) {
     try {
       const { card_number: cardNumber, password } = req.body;
@@ -60,7 +59,6 @@ class AuthController {
   /**
    * POST /api/v1/auth/logout
    */
-  // eslint-disable-next-line class-methods-use-this
   async logout(req, res) {
     clearTokenCookies(res);
     res.status(200).json(ApiResponse.success(null, 'Logout successful'));
@@ -69,7 +67,6 @@ class AuthController {
   /**
    * POST /api/v1/auth/refresh
    */
-  // eslint-disable-next-line class-methods-use-this
   async refresh(req, res, next) {
     try {
       const token = req.cookies[REFRESH_COOKIE];
@@ -92,7 +89,6 @@ class AuthController {
   /**
    * GET /api/v1/auth/me
    */
-  // eslint-disable-next-line class-methods-use-this
   async me(req, res) {
     res.status(200).json(ApiResponse.success(req.patron, 'Patron retrieved'));
   }

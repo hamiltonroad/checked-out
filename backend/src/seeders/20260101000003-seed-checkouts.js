@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-
 /**
  * Seed checkouts for comprehensive test data.
  * Creates 21 checkouts covering all scenarios:

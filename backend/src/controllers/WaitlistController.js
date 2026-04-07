@@ -4,7 +4,6 @@ const ApiError = require('../utils/ApiError');
 
 class WaitlistController {
   /** Join the waitlist for a book+format */
-  // eslint-disable-next-line class-methods-use-this
   async joinWaitlist(req, res, next) {
     try {
       const { book_id: bookId, format } = req.body;
@@ -19,7 +18,6 @@ class WaitlistController {
   }
 
   /** Leave the waitlist for a book+format */
-  // eslint-disable-next-line class-methods-use-this
   async leaveWaitlist(req, res, next) {
     try {
       const { book_id: bookId, format } = req.body;
@@ -34,7 +32,6 @@ class WaitlistController {
   }
 
   /** Get the waitlist for a specific book, optionally filtered by format */
-  // eslint-disable-next-line class-methods-use-this
   async getBookWaitlist(req, res, next) {
     try {
       const { id } = req.params;
@@ -49,7 +46,6 @@ class WaitlistController {
   }
 
   /** Get waitlist entries for a specific patron (patron can only access their own) */
-  // eslint-disable-next-line class-methods-use-this
   async getPatronWaitlist(req, res, next) {
     try {
       const { id } = req.params;

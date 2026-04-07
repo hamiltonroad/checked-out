@@ -60,6 +60,21 @@ Ensure on main branch:
 git branch --show-current
 ```
 
+### Step 2.5: CLAUDE.md Size Warning
+
+Check the line count of `CLAUDE.md`:
+
+```bash
+wc -l < CLAUDE.md
+```
+
+If the count exceeds 100, emit this warning (do NOT abort):
+
+```
+WARNING: CLAUDE.md is now <N> lines (>100). Time to consider pruning.
+See standards/harness-prune-checklist.md for the prune-cycle steps.
+```
+
 ### Step 3: Pre-Flight Smoke Test
 
 Run the smoke test script (starts servers if needed):

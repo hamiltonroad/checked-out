@@ -13,7 +13,6 @@ class PatronService {
    * @param {string} [options.status] - Filter by patron status (e.g. 'active')
    * @returns {Promise<Array>} Array of patron objects with id, first_name, last_name, card_number, status
    */
-  // eslint-disable-next-line class-methods-use-this
   async getActivePatrons({ status } = {}) {
     const where = {};
     if (status) {
@@ -36,7 +35,6 @@ class PatronService {
    * @param {number} [limit=10] - Maximum results to return
    * @returns {Promise<Array>} Matching active patrons
    */
-  // eslint-disable-next-line class-methods-use-this
   async searchPatrons(query, limit = 10) {
     const escaped = escapeLikeWildcards(query);
     return Patron.findAll({
@@ -63,7 +61,6 @@ class PatronService {
    * @returns {Promise<Object>} Patron object with all public fields
    * @throws {ApiError} 404 if patron not found
    */
-  // eslint-disable-next-line class-methods-use-this
   async getPatronById(id) {
     const patron = await Patron.findByPk(id, {
       attributes: ['id', 'first_name', 'last_name', 'email', 'phone', 'card_number', 'status'],

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const bcrypt = require('bcrypt');
 const { SALT_ROUNDS, DEV_PASSWORD } = require('../config/auth');
 const { FIRST_NAMES, LAST_NAMES } = require('./data/patron-names');
@@ -42,7 +41,6 @@ function formatCardNumber(index) {
  * @returns {string} Phone in 555-XXX-XXXX format
  */
 function formatPhone(index) {
-  const areaCode = String(100 + Math.floor(index / 10000)).slice(-3);
   const prefix = String(index % 10000)
     .padStart(4, '0')
     .slice(0, 3);
@@ -63,7 +61,6 @@ module.exports = {
     const patronCount = parseInt(results[0].count, 10);
 
     if (patronCount > IDEMPOTENCY_THRESHOLD) {
-      // eslint-disable-next-line no-console
       console.log(
         `Skipping bulk patron seed: ${patronCount} patrons already exist (threshold: ${IDEMPOTENCY_THRESHOLD}).`
       );
@@ -98,11 +95,10 @@ module.exports = {
 
     await queryInterface.bulkInsert('patrons', patrons);
 
-    // eslint-disable-next-line no-console
     console.log(
       `Seeded ${PATRON_COUNT} bulk patrons (card numbers ${BULK_CARD_PREFIX}00001 to ${BULK_CARD_PREFIX}05000).`
     );
-    console.log(`Dev password for all bulk patrons: ${DEV_PASSWORD}`); // eslint-disable-line no-console
+    console.log(`Dev password for all bulk patrons: ${DEV_PASSWORD}`);
   },
 
   /**
@@ -113,6 +109,6 @@ module.exports = {
     await queryInterface.bulkDelete('patrons', {
       card_number: { [Sequelize.Op.like]: `${BULK_CARD_PREFIX}%` },
     });
-    console.log('Removed all bulk patron records.'); // eslint-disable-line no-console
+    console.log('Removed all bulk patron records.');
   },
 };

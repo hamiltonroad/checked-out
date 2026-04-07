@@ -11,7 +11,6 @@ class AuthorController {
    * @param {Object} res - Express response
    * @param {Function} next - Express next middleware
    */
-  // eslint-disable-next-line class-methods-use-this
   async getAllAuthors(req, res, next) {
     try {
       const authors = await authorService.getAllAuthors();

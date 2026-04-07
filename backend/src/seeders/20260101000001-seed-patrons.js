@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-
 /**
  * Seed patrons for comprehensive test data.
  * Card numbers use SEED- prefix to avoid collision with demo (LIB) and bulk (BULK-) patrons.

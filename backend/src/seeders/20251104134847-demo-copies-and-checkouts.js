@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars, no-console */
 /**
  * Seed copies and checkouts for testing availability filter
  * Creates scenarios:

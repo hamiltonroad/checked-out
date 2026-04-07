@@ -7,7 +7,6 @@ class CopyService {
    * @param {number} bookId - ID of the book
    * @returns {Promise<Array>} Array of available copy objects
    */
-  // eslint-disable-next-line class-methods-use-this
   async getAvailableCopiesByBook(bookId) {
     const book = await Book.findByPk(bookId);
     if (!book) {

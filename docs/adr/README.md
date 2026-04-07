@@ -28,18 +28,21 @@ This directory contains Architecture Decision Records (ADRs) for the Checked Out
 | [020](020-sequelize-migrations-with-timestamp-naming.md) | Sequelize Migrations with Timestamp Naming | Accepted |
 | [021](021-middleware-ordering.md) | Middleware Ordering | Accepted |
 | [022](022-error-responses-through-apiresponse.md) | Error Responses Through ApiResponse | Accepted |
-| [023](022-default-parameters-over-defaultprops.md) | Default Parameters over defaultProps | Accepted |
 | [024](024-no-console-eslint-enforcement.md) | No-Console ESLint Enforcement | Accepted |
 | [025](025-comprehensive-graceful-shutdown.md) | Comprehensive Graceful Shutdown | Accepted |
-| [026](025-lower-request-body-size-limit.md) | Lower Request Body Size Limit | Accepted |
 | [027](027-deep-health-check-with-database-connectivity.md) | Deep Health Check with Database Connectivity | Accepted |
 | [028](028-standardized-validation-error-format.md) | Standardized Validation Error Format | Accepted |
-| [029](028-joi-startup-environment-validation.md) | Joi Startup Environment Validation | Accepted |
 | [030](030-cors-environment-configuration.md) | CORS Environment Configuration | Accepted |
 | [031](031-tiered-rate-limiting.md) | Tiered Rate Limiting | Accepted |
 | [032](032-server-side-filtering-and-pagination.md) | Server-Side Filtering and Pagination | Accepted |
 | [033](033-jwt-authentication-httponly-cookies.md) | JWT Authentication in httpOnly Cookies | Accepted |
 | [034](034-standardize-on-vitest.md) | Standardize on Vitest for Backend and Frontend Testing | Accepted |
+| [035](035-typescript-frontend-migration.md) | TypeScript Frontend Migration | Accepted |
+| [036](036-react-hook-form.md) | React Hook Form for Form State | Accepted |
+| [037](037-default-parameters-over-defaultprops.md) | Default Parameters over defaultProps | Accepted |
+| [038](038-lower-request-body-size-limit.md) | Lower Request Body Size Limit | Accepted |
+| [039](039-joi-startup-environment-validation.md) | Joi Startup Environment Validation | Accepted |
+| [040](040-npm-workspaces-monorepo.md) | npm Workspaces Monorepo | Accepted |
 
 ## Format
 

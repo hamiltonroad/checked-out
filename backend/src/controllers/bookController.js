@@ -21,7 +21,6 @@ class BookController {
    * @param {Object} res - Express response
    * @param {Function} next - Express next middleware
    */
-  // eslint-disable-next-line class-methods-use-this
   async getAllBooks(req, res, next) {
     try {
       const filters = {
@@ -53,7 +52,6 @@ class BookController {
    * @param {Object} res - Express response
    * @param {Function} next - Express next middleware
    */
-  // eslint-disable-next-line class-methods-use-this
   async getBookById(req, res, next) {
     try {
       const { id } = req.params;
