@@ -124,5 +124,6 @@ The following are handled elsewhere — do not restate them here, and do not ext
 | Frontend tech-stack and pattern detail | `standards/full/frontend-standards.md` |
 | E2E testing rules in detail | `standards/e2e-testing.md` |
 | Craftsmanship principles in detail | `standards/full/craftsmanship.md` |
+| UX principles, heuristics, and review checklist | `standards/full/ux-standards.md` |
 
 If a rule belongs in two places, this file is the wrong one.

@@ -83,6 +83,7 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - Backend code: `backend/src/` — see [backend-quick-ref.md](standards/quick-ref/backend-quick-ref.md)
 - Frontend code: `frontend/src/` — see [frontend-quick-ref.md](standards/quick-ref/frontend-quick-ref.md)
 - Craftsmanship: [craftsmanship-quick-ref.md](standards/quick-ref/craftsmanship-quick-ref.md)
+- UX standards: [ux-quick-ref.md](standards/quick-ref/ux-quick-ref.md) (full: [ux-standards.md](standards/full/ux-standards.md))
 - Database guide: [database-guide.md](standards/quick-ref/database-guide.md)
 - Testing guide: [testing-guide.md](standards/quick-ref/testing-guide.md)
 - E2E pyramid (smoke / flow / security): `frontend/e2e/README.md` — see "Pyramid E2E Layers" in [testing-guide.md](standards/quick-ref/testing-guide.md)
