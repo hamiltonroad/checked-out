@@ -65,6 +65,7 @@ function validateEnv() {
     process.exit(1);
   }
 
+  // HARNESS-TEST-MODE-PROD-GUARD (issue #240)
   if (value.TEST_MODE === true && value.NODE_ENV === 'production') {
     logger.error(
       'TEST_MODE is forbidden in production. Refusing to start server with TEST_MODE=true and NODE_ENV=production.'

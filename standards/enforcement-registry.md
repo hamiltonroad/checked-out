@@ -48,6 +48,7 @@ When you add a mechanically-enforced harness rule:
 | HARNESS-UNUSED-EXPORTS | #231 | `frontend/eslint.config.js` | `HARNESS-UNUSED-EXPORTS` | `eslint-plugin-unused-imports` catches unused imports as errors and unused vars as warnings on save in all `.ts/.tsx` files. |
 | HARNESS-UNUSED-EXPORTS | #231 | `frontend/package.json` | `lint:unused-exports` | `ts-unused-exports` runs as part of `npm run lint` (chained after `eslint .`) and fails the build on any unused exported symbol outside the entry-point exclude list. |
 | HARNESS-NO-PROP-TYPES | #231 | `frontend/eslint.config.js` | `HARNESS-NO-PROP-TYPES` | ESLint `no-restricted-imports` bans the `prop-types` package; PropTypes is retired in favor of TypeScript interfaces. |
+| HARNESS-TEST-MODE-PROD-GUARD | #240 | `backend/src/config/envValidator.js` | `HARNESS-TEST-MODE-PROD-GUARD` | Runtime startup guard: process exits non-zero if `TEST_MODE=true` and `NODE_ENV=production`. Marker embedded in a comment at the enforcement site so `harness-health.sh` can verify the guard still exists. |
 | HARNESS-RACE-TEST-REQUIRED | (predates registry) | `scripts/check-race-tests.sh` | `check-race-tests` | Requires `*.race.test.js` for any service performing aggregate-then-write. Wired into `backend/npm run lint`. |
 | HARNESS-PII-AUTH | (predates registry) | `scripts/check-pii-auth.sh` | `check-pii-auth` | Requires `authenticate` middleware on routes returning patron PII. |
 | HARNESS-TEST-RATIO | (predates registry) | `scripts/check-test-ratio.sh` | `check-test-ratio` | Pre-commit ratio check enforced via Husky. |
