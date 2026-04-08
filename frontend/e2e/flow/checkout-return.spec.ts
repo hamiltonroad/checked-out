@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures/consoleGuard';
 import { loginAs } from '../fixtures/auth';
 import { getCheckoutableCopy } from '../fixtures/api';
 import { SEED_PATRONS } from '../fixtures/testData';

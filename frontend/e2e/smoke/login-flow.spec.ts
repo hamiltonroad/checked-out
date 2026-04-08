@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures/consoleGuard';
 import { loginAs } from '../fixtures';
 import { BooksPage } from '../page-objects/BooksPage';
 

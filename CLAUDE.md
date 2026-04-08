@@ -66,6 +66,7 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - `TEST_MODE` MUST never be set in development, staging, or production environments. It is set only by `scripts/e2e-test.sh` and `scripts/smoke-test.sh` during local automated test runs. The backend exits at startup if `TEST_MODE=true` and `NODE_ENV=production`.
 - JSDoc `/** ... */` blocks MUST immediately precede the declaration they document — no orphaned blocks separated from their declaration by multiple blank lines. Enforced by `scripts/check-orphan-jsdoc.sh` (HARNESS-ORPHAN-JSDOC).
 - Every mechanically-enforced harness rule MUST be registered in `standards/enforcement-registry.md` with a marker string. `scripts/harness-health.sh` runs in pre-commit and fails if any registered marker is missing.
+- E2E specs MUST import `test` from `frontend/e2e/fixtures/consoleGuard.ts`, not from `@playwright/test` directly. Enforced by ESLint, `scripts/check-e2e-console-guard.sh`, and `HARNESS-E2E-CONSOLE-GUARD`.
 
 ## Conventions
 

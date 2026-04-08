@@ -20,8 +20,9 @@
     "harness:welcome123": "bash scripts/check-welcome123.sh",
     "harness:check-overrides": "bash scripts/check-eslint-overrides.sh",
     "harness:check-jsdoc": "bash scripts/check-orphan-jsdoc.sh",
+    "harness:e2e-console-guard": "bash scripts/check-e2e-console-guard.sh",
     "harness:health": "bash scripts/harness-health.sh",
-    "harness:all": "npm run harness:welcome123 && npm run harness:check-overrides && npm run harness:check-jsdoc && npm run harness:health",
+    "harness:all": "npm run harness:welcome123 && npm run harness:check-overrides && npm run harness:check-jsdoc && npm run harness:e2e-console-guard && npm run harness:health",
     "prepare": "husky"
   },
   "lint-staged": {

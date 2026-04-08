@@ -193,3 +193,42 @@ list. The code reviewer will.
       fixture's teardown.
 - [ ] `cd frontend && npm run lint` is clean.
 - [ ] `npm run test:smoke` passes locally against running servers.
+
+## Console / uncaught-error guard (HARNESS-E2E-CONSOLE-GUARD, issue #241)
+
+**Rule.** Every spec under `frontend/e2e/{smoke,flow,security}/**` MUST
+import `test` and `expect` from `frontend/e2e/fixtures/consoleGuard.ts`,
+not from `@playwright/test` directly. Type-only imports
+(`import type { Page } from '@playwright/test'`) remain allowed.
+
+**Rationale.** Previously only two smoke specs asserted on console
+errors, and `pageerror` / unhandled promise rejections weren't asserted
+anywhere. Real bugs slipped through silently. A fixture-level guard
+makes the check a property of the test infrastructure instead of
+copy-pasted boilerplate, and the three enforcement layers prevent
+future drift.
+
+**Three-layer enforcement.**
+
+| Layer   | Enforcement site                                       | Behavior                                                                 |
+| ------- | ------------------------------------------------------ | ------------------------------------------------------------------------ |
+| IDE     | `frontend/eslint.config.js` (`no-restricted-imports`)  | `@playwright/test` value imports error out in specs.                      |
+| Commit  | `scripts/check-e2e-console-guard.sh` (pre-commit)      | Bash backstop — also wired into `npm run harness:all`.                    |
+| Runtime | `frontend/e2e/fixtures/consoleGuard.ts` (`afterEach`)  | Asserts console errors, page errors, and unhandled rejections are empty. |
+
+**Adding an allowlist entry.** Same rules as the existing console
+allowlist: plain string, no regex, no substring, ≥10 characters, exact
+match or `startsWith`.
+
+1. Paste the EXACT runtime text into the appropriate file:
+   - `frontend/e2e/config/console-allowlist.ts` — console.error noise.
+   - `frontend/e2e/config/uncaughtErrorAllowlist.ts` — pageerror /
+     unhandled-rejection noise.
+2. Add a comment explaining which spec surfaced it and whether the
+   message has a dynamic tail stripped to the stable prefix.
+3. Guard tests in `frontend/e2e/config/allowlist.test.ts` enforce the
+   rules automatically.
+
+Registered in `standards/enforcement-registry.md` as
+`HARNESS-E2E-CONSOLE-GUARD` with three rows (fixture, ESLint rule,
+bash script).
