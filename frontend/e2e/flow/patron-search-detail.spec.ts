@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test } from '../fixtures/consoleGuard';
 import { loginAs } from '../fixtures/auth';
 import { SEED_PATRONS } from '../fixtures/testData';
 import { PatronsPage, PatronDetailPage } from '../page-objects';

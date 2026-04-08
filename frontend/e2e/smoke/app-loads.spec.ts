@@ -1,5 +1,5 @@
-import { test, expect, Page } from '@playwright/test';
-import { isAllowlistedConsoleError } from '../config/console-allowlist';
+import { test, expect } from '../fixtures/consoleGuard';
+import type { Page } from '@playwright/test';
 
 /**
  * Smoke test: verifies the application starts and renders without
@@ -7,9 +7,9 @@ import { isAllowlistedConsoleError } from '../config/console-allowlist';
  *
  * Assumes servers are already running via ./scripts/start-all.sh.
  *
- * Console-error filtering delegates to `frontend/e2e/config/console-allowlist.ts`,
- * which enforces exact-string (not substring, not regex) matching —
- * see issue #229 item #8.
+ * Console-error filtering is installed automatically by the
+ * `consoleGuard` fixture (issue #241) — see
+ * `frontend/e2e/fixtures/consoleGuard.ts`.
  */
 
 async function safeGoto(page: Page, path = '/') {
@@ -28,21 +28,6 @@ async function safeGoto(page: Page, path = '/') {
 }
 
 test.describe('App smoke test', () => {
-  let consoleErrors: string[];
-
-  test.beforeEach(async ({ page }) => {
-    consoleErrors = [];
-
-    page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        const text = msg.text();
-        if (!isAllowlistedConsoleError(text)) {
-          consoleErrors.push(text);
-        }
-      }
-    });
-  });
-
   test('app returns HTTP 200', async ({ page }) => {
     const response = await safeGoto(page);
 
@@ -59,20 +44,4 @@ test.describe('App smoke test', () => {
     expect((textContent ?? '').trim().length).toBeGreaterThan(0);
   });
 
-  test('no unexpected console errors', async ({ page }) => {
-    // Wait for the initial catalog fetch instead of 'networkidle'
-    // (flaky with React Query background refetches — issue #229 item #7).
-    const booksResponse = page.waitForResponse(
-      (resp) => resp.url().includes('/books') && resp.status() === 200
-    );
-    await safeGoto(page);
-    await booksResponse;
-
-    if (consoleErrors.length > 0) {
-      throw new Error(
-        `Found ${consoleErrors.length} unexpected console error(s):\n\n` +
-          consoleErrors.map((err, i) => `  ${i + 1}. ${err}`).join('\n')
-      );
-    }
-  });
 });

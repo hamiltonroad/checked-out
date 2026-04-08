@@ -5,4 +5,5 @@ npx lint-staged
 ./scripts/check-eslint-overrides.sh   # HARNESS-MAX-LINES-OVERRIDE-GUARD
 ./scripts/check-orphan-jsdoc.sh       # HARNESS-ORPHAN-JSDOC
 ./scripts/check-env-single-source.sh  # HARNESS-ENV-SINGLE-SOURCE
+./scripts/check-e2e-console-guard.sh  # HARNESS-E2E-CONSOLE-GUARD
 ./scripts/harness-health.sh           # registry drift check

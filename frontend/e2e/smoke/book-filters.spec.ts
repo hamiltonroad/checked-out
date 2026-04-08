@@ -1,4 +1,5 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '../fixtures/consoleGuard';
+import type { Page } from '@playwright/test';
 
 /**
  * Smoke tests for book filtering: author, rating, and genre filters.

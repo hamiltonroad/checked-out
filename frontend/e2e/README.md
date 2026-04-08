@@ -165,3 +165,54 @@ grep TEST_MODE logs/backend.log
 
 If you do not see that line, the running backend is NOT in TEST_MODE and
 your flow/security run will flake on 429s.
+
+## Console + uncaught-error guard (HARNESS-E2E-CONSOLE-GUARD, issue #241)
+
+Every spec under `frontend/e2e/{smoke,flow,security}/**` MUST import
+`test` and `expect` from `frontend/e2e/fixtures/consoleGuard.ts`, NOT
+from `@playwright/test` directly:
+
+```ts
+// CORRECT
+import { test, expect } from '../fixtures/consoleGuard';
+import type { Page } from '@playwright/test'; // type-only is fine
+
+// WRONG — will fail ESLint, the pre-commit bash check, and the registry health check
+import { test, expect } from '@playwright/test';
+```
+
+The `consoleGuard` fixture attaches three listeners per page:
+
+1. `page.on('console', ...)` — captures `console.error` messages,
+   filtered through `config/console-allowlist.ts`.
+2. `page.on('pageerror', ...)` — captures uncaught runtime errors,
+   filtered through `config/uncaughtErrorAllowlist.ts`.
+3. An `addInitScript` window.onerror + `unhandledrejection` hook that
+   drains any in-page errors React swallowed in dev mode, routed
+   through the same allowlists.
+
+After each test, the fixture asserts all three buckets are empty. A
+failure points at the right cause (console vs. uncaught vs. rejection).
+
+### Three-layer enforcement
+
+| Layer   | Where                                                    | What it does                                                                     |
+| ------- | -------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| ESLint  | `frontend/eslint.config.js` (`no-restricted-imports`)    | Bans `@playwright/test` value imports in `e2e/{smoke,flow,security}/**`.         |
+| Bash    | `scripts/check-e2e-console-guard.sh`                     | Pre-commit + `npm run harness:all` backstop. Type-only imports are exempt.       |
+| Runtime | `frontend/e2e/fixtures/consoleGuard.ts`                  | The fixture itself — assertions in the auto `afterEach`.                         |
+
+### Adding an allowlist entry
+
+Only do this when a message is genuinely benign (e.g. an expected 401
+from an unauthenticated bootstrap). Rules (same as the console
+allowlist): plain string, no regex, no substring, ≥10 characters,
+exact match or `startsWith` only.
+
+1. Paste the EXACT text as a new entry in the appropriate file:
+   - Console noise: `frontend/e2e/config/console-allowlist.ts`
+   - Uncaught errors / rejections: `frontend/e2e/config/uncaughtErrorAllowlist.ts`
+2. Add a one-line comment above the entry explaining the provenance
+   (which spec surfaced it, what the dynamic tail looks like).
+3. The guard tests in `config/allowlist.test.ts` run on every
+   `npm test` and will fail if the entry violates the rules.

@@ -1,11 +1,11 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from '@typescript-eslint/eslint-plugin'
-import tsparser from '@typescript-eslint/parser'
-import unusedImports from 'eslint-plugin-unused-imports'
-import { defineConfig, globalIgnores } from 'eslint/config'
+import js from '@eslint/js';
+import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from '@typescript-eslint/eslint-plugin';
+import tsparser from '@typescript-eslint/parser';
+import unusedImports from 'eslint-plugin-unused-imports';
+import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
   globalIgnores(['dist']),
@@ -48,17 +48,26 @@ export default defineConfig([
       '@typescript-eslint/explicit-module-boundary-types': 'warn',
       'react-hooks/exhaustive-deps': 'error',
       'max-lines': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
-      'no-restricted-imports': ['error', {
-        // [HARNESS-NO-PROP-TYPES issue #231] — PropTypes retired in favor of TypeScript interfaces.
-        paths: [{
-          name: 'prop-types',
-          message: 'PropTypes is retired — use TypeScript interfaces (HARNESS-NO-PROP-TYPES, issue #231).',
-        }],
-        patterns: [{
-          group: ['../services/*', '../../services/*', '../../../services/*', '*/services/*'],
-          message: 'Do not import services directly in components. Use hooks instead (see CLAUDE.md).',
-        }],
-      }],
+      'no-restricted-imports': [
+        'error',
+        {
+          // [HARNESS-NO-PROP-TYPES issue #231] — PropTypes retired in favor of TypeScript interfaces.
+          paths: [
+            {
+              name: 'prop-types',
+              message:
+                'PropTypes is retired — use TypeScript interfaces (HARNESS-NO-PROP-TYPES, issue #231).',
+            },
+          ],
+          patterns: [
+            {
+              group: ['../services/*', '../../services/*', '../../../services/*', '*/services/*'],
+              message:
+                'Do not import services directly in components. Use hooks instead (see CLAUDE.md).',
+            },
+          ],
+        },
+      ],
     },
   },
   // Test files configuration
@@ -131,7 +140,7 @@ export default defineConfig([
       'no-restricted-syntax': [
         'error',
         {
-          selector: "Literal[value=/^(admin|librarian|patron|staff|system_admin)$/]",
+          selector: 'Literal[value=/^(admin|librarian|patron|staff|system_admin)$/]',
           message:
             'Use role constants from src/utils/roles.ts (ROLES.ADMIN, etc.) instead of raw role string literals.',
         },
@@ -158,7 +167,11 @@ export default defineConfig([
   },
   // Enforce no-magic-numbers in services/hooks/pages (Issue #228 Rec #6). Scoped narrowly + warn-only.
   {
-    files: ['**/services/**/*.{ts,tsx,js,jsx}', '**/hooks/**/*.{ts,tsx,js,jsx}', '**/pages/**/*.{ts,tsx,js,jsx}'],
+    files: [
+      '**/services/**/*.{ts,tsx,js,jsx}',
+      '**/hooks/**/*.{ts,tsx,js,jsx}',
+      '**/pages/**/*.{ts,tsx,js,jsx}',
+    ],
     ignores: ['**/*.test.{ts,tsx,js,jsx}', '**/*.spec.{ts,tsx,js,jsx}'],
     rules: {
       'no-magic-numbers': [
@@ -241,14 +254,23 @@ export default defineConfig([
         },
         {
           // MUI class-name selectors in specs (also enforced in page-objects below).
-          selector: "Literal[value=/\\.Mui[A-Z]/]",
+          selector: 'Literal[value=/\\.Mui[A-Z]/]',
           message:
             'Do not select by MUI class names — use getByRole, labels, or data-testid (issue #229 item #11).',
         },
       ],
+      // [HARNESS-E2E-CONSOLE-GUARD issue #241] — specs must use the consoleGuard fixture.
       'no-restricted-imports': [
         'error',
         {
+          paths: [
+            {
+              name: '@playwright/test',
+              importNames: ['test', 'expect'],
+              message:
+                'Import { test, expect } from frontend/e2e/fixtures/consoleGuard.ts (HARNESS-E2E-CONSOLE-GUARD, issue #241). Type-only imports of Page/Locator from @playwright/test remain allowed.',
+            },
+          ],
           patterns: [
             {
               group: ['**/helpers/auth', '**/helpers/csrf'],
@@ -258,10 +280,7 @@ export default defineConfig([
           ],
         },
       ],
-      'max-lines': [
-        'error',
-        { max: 150, skipBlankLines: true, skipComments: true },
-      ],
+      'max-lines': ['error', { max: 150, skipBlankLines: true, skipComments: true }],
     },
   },
   // Page objects must not couple to MUI internal class names (issue #229 item #11).
@@ -271,11 +290,11 @@ export default defineConfig([
       'no-restricted-syntax': [
         'error',
         {
-          selector: "Literal[value=/\\.Mui[A-Z]/]",
+          selector: 'Literal[value=/\\.Mui[A-Z]/]',
           message:
             'Page objects must use getByRole, labels, or data-testid — not MUI class names (issue #229 item #11).',
         },
       ],
     },
   },
-])
+]);
