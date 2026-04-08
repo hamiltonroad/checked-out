@@ -18,17 +18,18 @@ cd "$ROOT"
 
 violations=()
 
-shopt -s nullglob
-for dir in frontend/e2e/smoke frontend/e2e/flow frontend/e2e/security; do
-  for f in "$dir"/*.spec.ts "$dir"/**/*.spec.ts; do
-    [ -f "$f" ] || continue
-    # Match value imports of test/expect from @playwright/test.
-    # `import type { ... } from '@playwright/test'` is exempt.
-    if grep -qE "^import[[:space:]]+\{[^}]*\b(test|expect)\b[^}]*\}[[:space:]]+from[[:space:]]+['\"]@playwright/test['\"]" "$f"; then
-      violations+=("$f")
-    fi
-  done
-done
+# Use `find` instead of a bash glob so nested spec directories
+# (e.g. frontend/e2e/smoke/subdir/foo.spec.ts) are always walked,
+# regardless of whether the invoking shell has `globstar` available
+# (bash 3.2 on macOS does not).
+while IFS= read -r f; do
+  [ -f "$f" ] || continue
+  # Match value imports of test/expect from @playwright/test.
+  # `import type { ... } from '@playwright/test'` is exempt.
+  if grep -qE "^import[[:space:]]+\{[^}]*\b(test|expect)\b[^}]*\}[[:space:]]+from[[:space:]]+['\"]@playwright/test['\"]" "$f"; then
+    violations+=("$f")
+  fi
+done < <(find frontend/e2e/smoke frontend/e2e/flow frontend/e2e/security -type f -name '*.spec.ts' 2>/dev/null)
 
 if [ ${#violations[@]} -gt 0 ]; then
   echo "[HARNESS-E2E-CONSOLE-GUARD issue #241] Forbidden direct @playwright/test import in spec(s):" >&2

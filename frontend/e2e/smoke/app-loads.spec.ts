@@ -43,5 +43,4 @@ test.describe('App smoke test', () => {
     const textContent = await body.textContent();
     expect((textContent ?? '').trim().length).toBeGreaterThan(0);
   });
-
 });

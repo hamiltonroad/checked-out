@@ -102,10 +102,22 @@ export const test = base.extend<{ consoleGuard: void }>({
             pageErrors.push(w);
           }
         }
-      } catch {
-        // Page closed before drain — listeners on the Playwright side
-        // (`page.on('console')`, `page.on('pageerror')`) still captured
-        // anything that fired during the test body.
+      } catch (err) {
+        // Only swallow the documented "page/target closed" case — in
+        // that branch the Playwright-side listeners (`page.on('console')`,
+        // `page.on('pageerror')`) still captured anything that fired
+        // during the test body. Any other drain failure (e.g. a bug in
+        // the evaluator itself) must surface loudly so buffered in-page
+        // errors are not lost silently.
+        const message = err instanceof Error ? err.message : String(err);
+        const isClosed =
+          message.includes('Target page, context or browser has been closed') ||
+          message.includes('Target closed') ||
+          message.includes('page has been closed') ||
+          message.includes('Execution context was destroyed');
+        if (!isClosed) {
+          throw err;
+        }
       }
 
       expect(consoleErrors, `Console errors:\n${consoleErrors.join('\n')}`).toEqual([]);
@@ -119,4 +131,11 @@ export const test = base.extend<{ consoleGuard: void }>({
   ],
 });
 
+/**
+ * Re-exported from `@playwright/test` solely so specs have a single
+ * import source alongside the guarded `test`. Importing `expect` from
+ * this file (instead of `@playwright/test` directly) keeps specs
+ * compliant with the `no-restricted-imports` ESLint rule and the
+ * `check-e2e-console-guard.sh` backstop (HARNESS-E2E-CONSOLE-GUARD).
+ */
 export { expect };

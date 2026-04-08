@@ -87,16 +87,28 @@ test.describe('isAllowlistedUncaughtError', () => {
   });
 
   test('exact match returns true (synthetic)', () => {
-    const sample = 'SYNTHETIC_TEST_EXACT_MATCH_ENTRY';
-    const matches = (msg: string): boolean => [sample].some((e) => msg === e || msg.startsWith(e));
-    expect(matches(sample)).toBe(true);
-    expect(matches('different message entirely')).toBe(false);
+    // Exercise the exported helper directly so a regression in
+    // isAllowlistedUncaughtError (e.g. switching to includes-matching)
+    // fails this test. We can only meaningfully call the exported
+    // function when the allowlist has at least one entry; when it is
+    // empty by design, fall back to asserting the empty-allowlist
+    // contract.
+    if (uncaughtErrorAllowlist.length === 0) {
+      expect(isAllowlistedUncaughtError('SYNTHETIC_TEST_EXACT_MATCH_ENTRY')).toBe(false);
+      return;
+    }
+    const sample = uncaughtErrorAllowlist[0];
+    expect(isAllowlistedUncaughtError(sample)).toBe(true);
+    expect(isAllowlistedUncaughtError('different message entirely')).toBe(false);
   });
 
   test('prefix match returns true (synthetic)', () => {
-    const sample = 'SYNTHETIC_PREFIX_HEAD';
-    const matches = (msg: string): boolean => [sample].some((e) => msg === e || msg.startsWith(e));
-    expect(matches('SYNTHETIC_PREFIX_HEAD: request /api/foo failed')).toBe(true);
-    expect(matches('totally different start')).toBe(false);
+    if (uncaughtErrorAllowlist.length === 0) {
+      expect(isAllowlistedUncaughtError('totally different start')).toBe(false);
+      return;
+    }
+    const sample = uncaughtErrorAllowlist[0];
+    expect(isAllowlistedUncaughtError(`${sample}: request /api/foo failed`)).toBe(true);
+    expect(isAllowlistedUncaughtError('totally different start')).toBe(false);
   });
 });
