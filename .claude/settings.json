@@ -1,6 +1,11 @@
 {
   "permissions": {
     "allow": [
+      "Bash(harness audit:*)",
+      "Bash(npx harness:*)",
+      "Bash(npx playwright:*)",
+      "Bash(./scripts/smoke-test.sh --start-servers 2>&1)",
+      "Bash(./scripts/smoke-test.sh --start-servers)",
       "Read",
       "Glob",
       "Grep",
