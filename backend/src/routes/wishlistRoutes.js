@@ -3,6 +3,8 @@ const wishlistController = require('../controllers/WishlistController');
 const wishlistValidator = require('../validators/wishlistValidator');
 const validateRequest = require('../middlewares/validateRequest');
 const { authenticate } = require('../middlewares/auth');
+const requireOwnerOrRole = require('../middlewares/requireOwnerOrRole');
+const { ROLES } = require('../config/roles');
 const { standardLimiter, strictLimiter } = require('../middlewares/rateLimiter');
 
 const router = express.Router();
@@ -30,6 +32,7 @@ router.get(
   '/patrons/:id/wishlist',
   standardLimiter,
   validateRequest(wishlistValidator.getPatronWishlist),
+  requireOwnerOrRole(ROLES.LIBRARIAN),
   wishlistController.getPatronWishlist
 );
 

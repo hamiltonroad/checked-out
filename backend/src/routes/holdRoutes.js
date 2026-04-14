@@ -3,6 +3,8 @@ const holdController = require('../controllers/HoldController');
 const holdValidator = require('../validators/holdValidator');
 const validateRequest = require('../middlewares/validateRequest');
 const { authenticate } = require('../middlewares/auth');
+const requireOwnerOrRole = require('../middlewares/requireOwnerOrRole');
+const { ROLES } = require('../config/roles');
 const { standardLimiter } = require('../middlewares/rateLimiter');
 
 const router = express.Router();
@@ -15,6 +17,7 @@ router.get(
   '/patrons/:id/holds',
   standardLimiter,
   validateRequest(holdValidator.getPatronHolds),
+  requireOwnerOrRole(ROLES.LIBRARIAN),
   holdController.getPatronHolds
 );
 

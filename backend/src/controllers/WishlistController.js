@@ -1,7 +1,5 @@
 const wishlistService = require('../services/WishlistService');
 const ApiResponse = require('../utils/ApiResponse');
-const ApiError = require('../utils/ApiError');
-const { hasMinimumRole, ROLES } = require('../config/roles');
 
 class WishlistController {
   /**
@@ -37,16 +35,11 @@ class WishlistController {
   }
 
   /**
-   * Get the wishlist for a specific patron (patron can only access their own)
+   * Get the wishlist for a specific patron (ownership enforced by requireOwnerOrRole middleware)
    */
   async getPatronWishlist(req, res, next) {
     try {
       const { id } = req.params;
-      const patronId = req.patron.id;
-
-      if (patronId !== parseInt(id, 10) && !hasMinimumRole(req.patron.role, ROLES.LIBRARIAN)) {
-        throw ApiError.forbidden('You can only view your own wishlist');
-      }
 
       const entries = await wishlistService.getPatronWishlist(parseInt(id, 10));
 
