@@ -36,7 +36,7 @@ function BooksPageSkeleton() {
       </Paper>
       <Grid container spacing={2}>
         {[...Array(6)].map((_, index) => (
-          <Grid item xs={12} sm={6} md={6} lg={4} xl={3} key={index}>
+          <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} key={index}>
             <Paper elevation={1} sx={{ overflow: 'hidden' }}>
               <Skeleton variant="rectangular" height={160} />
               <Box sx={{ p: 2 }}>

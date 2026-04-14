@@ -89,7 +89,7 @@ function WishlistPage() {
         <Fade in timeout={500}>
           <Grid container spacing={2}>
             {entries.map((entry) => (
-              <Grid item xs={12} sm={6} md={6} lg={4} xl={3} key={entry.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} key={entry.id}>
                 <BookCard
                   book={entry.book}
                   onClick={handleBookClick}
