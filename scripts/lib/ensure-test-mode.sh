@@ -70,7 +70,7 @@ ensure_test_mode_backend() {
   fi
 
   echo -e "${RED}Backend is not running.${NC}" >&2
-  echo "Run with --start-servers to start it automatically, or:" >&2
+  echo "Run without --no-start-servers to start it automatically, or:" >&2
   echo "  TEST_MODE=true ./scripts/start-all.sh" >&2
   return 1
 }

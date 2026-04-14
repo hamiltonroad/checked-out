@@ -1,6 +1,6 @@
 import { test, expect } from '../fixtures/consoleGuard';
 import { loginAs } from '../fixtures/auth';
-import { findAndDrainBook, releaseCheckouts } from '../fixtures/seed';
+import { findAndDrainBook, releaseCheckouts, leaveWaitlist } from '../fixtures/seed';
 import { BooksPage, WaitlistPage } from '../page-objects';
 
 /**
@@ -14,19 +14,33 @@ import { BooksPage, WaitlistPage } from '../page-objects';
  * waitlist for an unavailable format, visits the Waitlist & Holds page,
  * verifies position #1, leaves the waitlist, and asserts the empty
  * state. Cleanup runs in afterEach regardless of pass/fail.
+ *
+ * Teardown: releases draining checkouts AND removes any waitlist entry
+ * the patron may have joined, so subsequent runs start clean.
  */
 
 test.describe('Flow: waitlist join and leave', () => {
+  let bookId: number;
   let bookTitle: string;
+  let joinedFormat: string | null = null;
   let checkoutIds: number[] = [];
 
   test.beforeEach(async () => {
     const target = await findAndDrainBook();
+    bookId = target.book.id;
     bookTitle = target.book.title;
     checkoutIds = target.checkoutIds;
+    // Clean up any waitlist entries left by a prior failed run.
+    // Format values are lowercase in the database (physical, kindle).
+    await leaveWaitlist('patron', bookId, 'physical');
+    await leaveWaitlist('patron', bookId, 'kindle');
   });
 
   test.afterEach(async () => {
+    if (joinedFormat) {
+      await leaveWaitlist('patron', bookId, joinedFormat);
+      joinedFormat = null;
+    }
     await releaseCheckouts(checkoutIds);
     checkoutIds = [];
   });
@@ -48,9 +62,14 @@ test.describe('Flow: waitlist join and leave', () => {
     const dialog = page.getByRole('dialog');
     await dialog.waitFor({ state: 'visible' });
 
-    // Join the first available format waitlist.
+    // Join the first available format waitlist. Capture the format name
+    // from the button text (e.g. "Join Physical Waitlist" → "Physical")
+    // so afterEach can clean up if the test fails before leaving.
     const joinBtn = dialog.getByRole('button', { name: /^Join .+ Waitlist$/ }).first();
     await expect(joinBtn).toBeVisible();
+    const btnText = (await joinBtn.textContent()) ?? '';
+    const formatMatch = btnText.match(/^Join (.+) Waitlist$/);
+    joinedFormat = formatMatch ? formatMatch[1].toLowerCase() : null;
     await joinBtn.click();
     // Match the exact confirmation phrasing from WaitlistSection.tsx:
     // "You are #N in line for {format}" or "You're next! Check out now."

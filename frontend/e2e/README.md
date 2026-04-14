@@ -41,7 +41,7 @@ npx playwright test --project=security
 ./scripts/smoke-test.sh
 ```
 
-Both scripts accept `--start-servers` to launch backend + frontend before running.
+Both scripts start servers automatically by default. Pass `--no-start-servers` to skip.
 
 ## Fixture: `loginAs`
 
@@ -148,11 +148,12 @@ and `NODE_ENV=production`.
 **Gotcha: already-running backend:** the flag is read once at module
 load. If a backend is already running on port 3000, `start-backend.sh`
 will not restart it and your fresh `export TEST_MODE=true` will have no
-effect. Restart first:
+effect. The test scripts now auto-detect this and restart the backend
+automatically, but you can also restart manually:
 
 ```sh
 ./scripts/stop-all.sh
-./scripts/e2e-test.sh --start-servers
+./scripts/e2e-test.sh
 ```
 
 **How to verify it is active:** the backend logs a single warning line

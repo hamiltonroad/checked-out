@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "timestamp": "2026-04-07T17:32:31.168Z",
+  "timestamp": "2026-04-14T15:57:26.865Z",
   "projectRoot": "/Users/jmcrider/vscode/checked-out",
   "detectedStack": "Web — TypeScript",
   "overallScore": 71,
@@ -95,9 +95,9 @@
     {
       "ruleId": "instructions.claude-md-length",
       "status": "fail",
-      "message": "CLAUDE.md is 103 lines — too long",
+      "message": "CLAUDE.md is 105 lines — too long",
       "evidence": [
-        "103 lines"
+        "105 lines"
       ],
       "fix": "Split CLAUDE.md into a concise root file and subdirectory CLAUDE.md files for detailed guidance."
     },
@@ -129,7 +129,7 @@
     {
       "ruleId": "instructions.stale-references",
       "status": "partial",
-      "message": "6 of 32 referenced path(s) missing",
+      "message": "6 of 36 referenced path(s) missing",
       "evidence": [
         "Missing: sequelize.fn",
         "Missing: sequelize.col",
@@ -281,8 +281,8 @@
     {
       "ruleId": "context.harness-complexity",
       "status": "pass",
-      "message": "Harness complexity: 59 artifacts, 11379 lines (ratio N/A (no source files))",
-      "details": "Harness: 59 artifacts, 11379 lines\nSource: 0 files, 0 lines\nRatio: N/A (no source files)\nBreakdown:\n  instruction: 1 files, 103 lines\n  enforcement: 1 files, 99 lines\n  reference: 32 files, 5773 lines\n  workflow: 25 files, 5404 lines"
+      "message": "Harness complexity: 59 artifacts, 11429 lines (ratio N/A (no source files))",
+      "details": "Harness: 59 artifacts, 11429 lines\nSource: 0 files, 0 lines\nRatio: N/A (no source files)\nBreakdown:\n  instruction: 1 files, 105 lines\n  enforcement: 1 files, 104 lines\n  reference: 32 files, 5816 lines\n  workflow: 25 files, 5404 lines"
     },
     {
       "ruleId": "tools.mcp-configured",
@@ -329,10 +329,10 @@
     {
       "ruleId": "continuity.code-review-results",
       "status": "pass",
-      "message": "Code review results directory found with 68 entry/entries",
+      "message": "Code review results directory found with 71 entry/entries",
       "evidence": [
         "Directory: code-review-results/",
-        "Entries: 68"
+        "Entries: 71"
       ]
     },
     {
