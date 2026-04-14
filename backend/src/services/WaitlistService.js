@@ -26,7 +26,7 @@ class WaitlistService {
       }
 
       const staleEntry = await WaitlistEntry.findOne({
-        where: { patron_id: patronId, book_id: bookId, format },
+        where: { patron_id: patronId, book_id: bookId, format, status: { [Op.ne]: 'waiting' } },
         transaction,
       });
 

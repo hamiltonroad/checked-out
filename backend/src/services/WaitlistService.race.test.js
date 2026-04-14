@@ -13,17 +13,14 @@ const mockBook = { findByPk: vi.fn() };
 const mockPatron = { findByPk: vi.fn() };
 
 const mockTransaction = { id: 'tx-1' };
-const transactionMock = vi.fn();
 
 injectMock('../models', {
   WaitlistEntry: mockWaitlistEntry,
   Book: mockBook,
   Patron: mockPatron,
   Copy: {},
-  sequelize: { transaction: transactionMock },
-  Sequelize: {
-    Transaction: { ISOLATION_LEVELS: { SERIALIZABLE: 'SERIALIZABLE' } },
-  },
+  sequelize: {},
+  Sequelize: {},
 });
 
 // Mock withSerializableTransaction to execute the callback directly with a mock transaction
