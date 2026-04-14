@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const { WaitlistEntry, Patron, Book, Copy, sequelize } = require('../models');
 const ApiError = require('../utils/ApiError');
 const logger = require('../config/logger');
+const withSerializableTransaction = require('../utils/withSerializableTransaction');
 
 class WaitlistService {
   /** Add a patron to the waitlist for a specific book+format */
@@ -15,26 +16,36 @@ class WaitlistService {
       throw ApiError.conflict('Patron account is not active');
     }
 
-    const existing = await WaitlistEntry.findOne({
-      where: { patron_id: patronId, book_id: bookId, format },
-    });
-    if (existing) {
-      throw ApiError.conflict('Already on the waitlist for this book and format');
-    }
+    return withSerializableTransaction(async (transaction) => {
+      const activeEntry = await WaitlistEntry.findOne({
+        where: { patron_id: patronId, book_id: bookId, format, status: 'waiting' },
+        transaction,
+      });
+      if (activeEntry) {
+        throw ApiError.conflict('Already on the waitlist for this book and format');
+      }
 
-    const maxPosition = await WaitlistEntry.max('position', {
-      where: { book_id: bookId, format, status: 'waiting' },
-    });
+      const staleEntry = await WaitlistEntry.findOne({
+        where: { patron_id: patronId, book_id: bookId, format },
+        transaction,
+      });
 
-    const entry = await WaitlistEntry.create({
-      patron_id: patronId,
-      book_id: bookId,
-      format,
-      position: (maxPosition || 0) + 1,
-      status: 'waiting',
-    });
+      const maxPosition = await WaitlistEntry.max('position', {
+        where: { book_id: bookId, format, status: 'waiting' },
+        transaction,
+      });
+      const nextPosition = (maxPosition || 0) + 1;
 
-    return entry;
+      if (staleEntry) {
+        await staleEntry.update({ status: 'waiting', position: nextPosition }, { transaction });
+        return staleEntry;
+      }
+
+      return WaitlistEntry.create(
+        { patron_id: patronId, book_id: bookId, format, position: nextPosition, status: 'waiting' },
+        { transaction }
+      );
+    });
   }
 
   /** Remove a patron from the waitlist and reorder remaining positions */
