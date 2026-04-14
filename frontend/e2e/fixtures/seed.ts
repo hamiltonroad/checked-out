@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { apiRequestRaw, withApiSession, ApiSession } from './api';
+import type { PatronRole } from './testData';
 import type { BookListData, AvailableCopiesData } from './types';
 
 /**
@@ -74,6 +75,7 @@ export async function findAndDrainBook(): Promise<SeedTargetBook> {
         `books?page=${pageNum}&limit=12`
       );
       for (const book of list?.books ?? []) {
+
         const data = await session.request<AvailableCopiesResponse>(
           'GET',
           `copies/book/${book.id}/available`
@@ -255,6 +257,56 @@ export async function releaseCheckouts(checkoutIds: number[]): Promise<void> {
   await withApiSession('librarian', async (session) => {
     await rollback(session, checkoutIds);
   });
+}
+
+/**
+ * Return any active checkout on the given copy ID. Used by afterEach
+ * teardown to clean up state if a test checked out a copy through the
+ * UI but failed before returning it. Safe to call even if the copy has
+ * no active checkout — errors are swallowed.
+ */
+export async function returnCheckoutForCopy(copyId: number): Promise<void> {
+  try {
+    await withApiSession('librarian', async (session) => {
+      const checkouts = await session.request<CheckoutRow[]>(
+        'GET',
+        'checkouts/current'
+      );
+      const match = (checkouts ?? []).find((c) => c.copy_id === copyId);
+      if (match) {
+        await session.request('PUT', `checkouts/${match.id}/return`);
+      }
+    });
+  } catch {
+    // best-effort cleanup
+  }
+}
+
+interface CheckoutRow {
+  id: number;
+  copy_id: number;
+}
+
+/**
+ * Leave the waitlist for a given book and format as the given patron role.
+ * Safe to call even if the patron is not on the waitlist — errors are
+ * swallowed. Used by test teardown to ensure idempotent state.
+ */
+export async function leaveWaitlist(
+  role: PatronRole,
+  bookId: number,
+  format: string
+): Promise<void> {
+  try {
+    await withApiSession(role, async (session) => {
+      await session.request('DELETE', 'waitlist', {
+        book_id: bookId,
+        format,
+      });
+    });
+  } catch {
+    // patron may not be on the waitlist — that's fine
+  }
 }
 
 /**

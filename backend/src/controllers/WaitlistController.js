@@ -1,6 +1,5 @@
 const waitlistService = require('../services/WaitlistService');
 const ApiResponse = require('../utils/ApiResponse');
-const ApiError = require('../utils/ApiError');
 
 class WaitlistController {
   /** Join the waitlist for a book+format */
@@ -45,15 +44,10 @@ class WaitlistController {
     }
   }
 
-  /** Get waitlist entries for a specific patron (patron can only access their own) */
+  /** Get waitlist entries for a specific patron (ownership enforced by requireOwnerOrRole middleware) */
   async getPatronWaitlist(req, res, next) {
     try {
       const { id } = req.params;
-      const patronId = req.patron.id;
-
-      if (patronId !== parseInt(id, 10)) {
-        throw ApiError.forbidden('You can only view your own waitlist');
-      }
 
       const entries = await waitlistService.getPatronWaitlist(parseInt(id, 10));
 

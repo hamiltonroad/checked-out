@@ -155,7 +155,7 @@ function BooksPage() {
         <Fade in={!isLoading} timeout={500}>
           <Grid container spacing={2}>
             {filteredBooks.map((book) => (
-              <Grid item xs={12} sm={6} md={6} lg={4} xl={3} key={book.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} key={book.id}>
                 <BookCard
                   book={book}
                   onClick={handleRowClick}

@@ -1,6 +1,7 @@
 import { test, expect } from '../fixtures/consoleGuard';
 import { loginAs } from '../fixtures/auth';
 import { getCheckoutableCopy } from '../fixtures/api';
+import { returnCheckoutForCopy } from '../fixtures/seed';
 import { SEED_PATRONS } from '../fixtures/testData';
 import { BooksPage, CheckoutDialog, CheckoutsPage } from '../page-objects';
 
@@ -13,12 +14,29 @@ import { BooksPage, CheckoutDialog, CheckoutsPage } from '../page-objects';
  * copy through the UI, then verifies the checkout appears in Current
  * and moves to History after returning it via the CheckoutsPage page
  * object.
+ *
+ * Teardown: if the test fails after checkout but before return, the
+ * afterEach hook returns the copy via API so subsequent runs start clean.
  */
 
 test.describe('Flow: checkout and return round-trip', () => {
   test.setTimeout(90_000);
+  let targetCopyId: number | null = null;
+
+  test.beforeEach(async () => {
+    targetCopyId = null;
+  });
+
+  test.afterEach(async () => {
+    if (targetCopyId !== null) {
+      await returnCheckoutForCopy(targetCopyId);
+      targetCopyId = null;
+    }
+  });
+
   test('librarian can check out and return a copy', async ({ page }) => {
     const target = await getCheckoutableCopy();
+    targetCopyId = target.copyId;
     const bookTitle = target.bookTitle;
     await loginAs(page, 'librarian');
 
