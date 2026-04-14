@@ -67,6 +67,7 @@ React 18 + Vite + Material UI frontend, Express + Sequelize backend, MySQL datab
 - JSDoc `/** ... */` blocks MUST immediately precede the declaration they document — no orphaned blocks separated from their declaration by multiple blank lines. Enforced by `scripts/check-orphan-jsdoc.sh` (HARNESS-ORPHAN-JSDOC).
 - Every mechanically-enforced harness rule MUST be registered in `standards/enforcement-registry.md` with a marker string. `scripts/harness-health.sh` runs in pre-commit and fails if any registered marker is missing.
 - E2E specs MUST import `test` from `frontend/e2e/fixtures/consoleGuard.ts`, not from `@playwright/test` directly. Enforced by ESLint, `scripts/check-e2e-console-guard.sh`, and `HARNESS-E2E-CONSOLE-GUARD`.
+- E2E mutation tests MUST seed their own preconditions via fixture helpers AND tear down all mutations after the test completes. Database state after a test MUST match the state before it started. Tests that leak state (unreturned checkouts, orphaned waitlist entries) cause cascading failures.
 
 ## Conventions
 

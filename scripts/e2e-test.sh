@@ -3,8 +3,9 @@
 # E2E test gate for Checked Out
 # Ensures servers are running, then runs Playwright tests across all projects
 # (smoke, flow, security).
-# Usage: ./scripts/e2e-test.sh [--start-servers]
-#   --start-servers  Start servers automatically if not running
+# Usage: ./scripts/e2e-test.sh [--no-start-servers]
+#   Servers are started automatically by default if not running.
+#   --no-start-servers  Fail instead of starting servers automatically
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$SCRIPT_DIR/.."
@@ -31,16 +32,22 @@ echo -e "${BLUE}================================================${NC}"
 echo -e "${BLUE}Checked Out - E2E Test Gate${NC}"
 echo -e "${BLUE}================================================${NC}"
 
+# Default to starting servers unless --no-start-servers is passed.
+START_FLAG="--start-servers"
+if [ "$1" = "--no-start-servers" ]; then
+  START_FLAG=""
+fi
+
 # Ensure backend is running with TEST_MODE=true (restart if drifted).
-ensure_test_mode_backend "$1" || exit $?
+ensure_test_mode_backend "$START_FLAG" || exit $?
 
 # Verify frontend separately — helper only manages the backend TEST_MODE state.
 if ! lsof -Pi :5173 -sTCP:LISTEN -t >/dev/null 2>&1; then
-  if [ "$1" = "--start-servers" ]; then
+  if [ -n "$START_FLAG" ]; then
     "$SCRIPT_DIR/start-frontend.sh"
   else
     echo -e "${RED}Frontend NOT running on port 5173.${NC}"
-    echo "Run with --start-servers to start it automatically."
+    echo "Start servers first, or run without --no-start-servers."
     exit 1
   fi
 fi

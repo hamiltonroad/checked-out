@@ -36,6 +36,10 @@ export default defineConfig({
     {
       name: 'flow',
       testDir: './frontend/e2e/flow',
+      // Flow tests mutate shared database state (checkouts, waitlists)
+      // and must run serially to avoid cross-test interference.
+      fullyParallel: false,
+      workers: 1,
       use: { ...devices['Desktop Chrome'] },
     },
     {

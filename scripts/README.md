@@ -95,16 +95,16 @@ Run the Playwright **smoke** project — the cheap gate used by `/story-runner` 
 `/batch-runner`.
 
 ```bash
-./scripts/smoke-test.sh              # assumes servers are already running
-./scripts/smoke-test.sh --start-servers   # launch backend + frontend first
+./scripts/smoke-test.sh                    # starts servers automatically if needed
+./scripts/smoke-test.sh --no-start-servers # fail if servers aren't already running
 ```
 
 **What it does:**
 - Runs `npx playwright test --project=smoke` against `frontend/e2e/smoke/`
 - Exits **0** on pass, **non-zero** on any failure (the contract the story/batch
   runners rely on as a hard gate)
-- Optional `--start-servers` flag boots backend + frontend before the run and tears
-  them down after
+- Starts backend + frontend automatically by default if not already running
+- Pass `--no-start-servers` to fail instead of auto-starting
 
 **Use when:** Pre-flight and post-flight checks during agent workflows, and any time
 you want a sub-30-second confidence check that the app still loads.
@@ -116,14 +116,15 @@ you want a sub-30-second confidence check that the app still loads.
 Run the **full** E2E pyramid: smoke + flow + security.
 
 ```bash
-./scripts/e2e-test.sh
-./scripts/e2e-test.sh --start-servers
+./scripts/e2e-test.sh                    # starts servers automatically if needed
+./scripts/e2e-test.sh --no-start-servers # fail if servers aren't already running
 ```
 
 **What it does:**
 - Runs the smoke, flow, and security Playwright projects from `frontend/e2e/`
 - Exits non-zero if any layer fails
-- Optional `--start-servers` flag boots backend + frontend before the run
+- Starts backend + frontend automatically by default if not already running
+- Pass `--no-start-servers` to fail instead of auto-starting
 
 **Use when:** Locally before opening a PR that touches checkout, waitlist, auth, or
 any RBAC surface. This is the deep run; `smoke-test.sh` is the cheap gate.

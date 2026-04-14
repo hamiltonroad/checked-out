@@ -100,8 +100,20 @@ for one that isn't encumbered. That loop lives in
 
 ## 4. Seeding Rules
 
-Mutation tests (`security/`, `flow/`) must seed their own preconditions
-through a named fixture helper. Available today:
+**Tests own their data.** Every mutation test (`security/`, `flow/`)
+MUST set up its own preconditions via a fixture helper **and** tear them
+down after the test completes. The database state after a test finishes
+MUST match the state before it started. This ensures tests are
+idempotent — they pass on first run, on repeated runs, and regardless
+of execution order. Tests that leave behind dirty state (checked-out
+copies, waitlist entries, etc.) cause cascading failures in other tests.
+
+Use `test.afterEach` or the fixture's built-in teardown to reverse
+mutations. If a test creates a checkout, it must return it. If it joins
+a waitlist, it must leave it.
+
+Mutation tests must seed their own preconditions through a named fixture
+helper. Available today:
 
 - `seedAvailableCopy()` — returns `{ bookId, copyId, format }` for a
   copy the librarian can provably check out.
