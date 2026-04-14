@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "timestamp": "2026-04-14T15:57:26.865Z",
+  "timestamp": "2026-04-14T18:10:10.739Z",
   "projectRoot": "/Users/jmcrider/vscode/checked-out",
   "detectedStack": "Web — TypeScript",
   "overallScore": 71,
@@ -281,8 +281,8 @@
     {
       "ruleId": "context.harness-complexity",
       "status": "pass",
-      "message": "Harness complexity: 59 artifacts, 11429 lines (ratio N/A (no source files))",
-      "details": "Harness: 59 artifacts, 11429 lines\nSource: 0 files, 0 lines\nRatio: N/A (no source files)\nBreakdown:\n  instruction: 1 files, 105 lines\n  enforcement: 1 files, 104 lines\n  reference: 32 files, 5816 lines\n  workflow: 25 files, 5404 lines"
+      "message": "Harness complexity: 59 artifacts, 11424 lines (ratio N/A (no source files))",
+      "details": "Harness: 59 artifacts, 11424 lines\nSource: 0 files, 0 lines\nRatio: N/A (no source files)\nBreakdown:\n  instruction: 1 files, 105 lines\n  enforcement: 1 files, 99 lines\n  reference: 32 files, 5816 lines\n  workflow: 25 files, 5404 lines"
     },
     {
       "ruleId": "tools.mcp-configured",
