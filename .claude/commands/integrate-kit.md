@@ -255,6 +255,52 @@ FIX: Run `git init` and set up remote
 ACTION: Let Claude handle `git init`? (y/n) (Remote setup is manual)
 ```
 
+### Step 6.5: Assess ADRs and OpenAPI Spec
+
+The kit treats ADRs as universal and OpenAPI as the source of truth for HTTP APIs.
+
+**ADR check:**
+
+Look at CLAUDE.md's Context Guidance section for a reference to an ADR directory or ADR index (e.g., `docs/adr/README.md`). Also check common locations (`docs/adr/`, `docs/architecture/`, `adr/`) for a README index.
+
+If no ADR reference exists and no ADR directory is found:
+
+```
+GAP: No ADR system found
+IMPACT: Architectural decisions are undocumented — future agents and humans will re-litigate the same choices, and the refine-kit agent cannot enrich issues with referenced ADRs
+FIX: Create `docs/adr/` with a `README.md` index. Add a reference to CLAUDE.md's Context Guidance.
+ACTION: Let Claude handle this? (y/n)
+```
+
+If the user says yes, create `docs/adr/README.md` with a minimal index skeleton and update CLAUDE.md's Context Guidance to reference it.
+
+**OpenAPI check:**
+
+First determine whether the project exposes an HTTP API. Look for:
+- HTTP framework dependencies in `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml` (express, fastify, koa, fastapi, flask, gin, actix, axum, etc.)
+- Route/controller directories (`routes/`, `controllers/`, `handlers/`, `api/`)
+- Existing OpenAPI/Swagger files (`openapi.yaml`, `openapi.json`, `swagger.yaml`)
+
+If the project **has an HTTP API** but no OpenAPI spec is referenced in CLAUDE.md and no spec file is found:
+
+```
+GAP: Project exposes an HTTP API but has no OpenAPI specification
+IMPACT: The API has no source of truth — agents cannot verify endpoint contracts, schemas drift silently, and refine-kit cannot enrich issues with OpenAPI changes
+FIX: Create an OpenAPI spec (root `openapi.yaml` is simplest; split into `paths/` and `components/` when it grows). Add a reference to CLAUDE.md's Context Guidance. The kit requires the spec to be updated before or alongside any API code change.
+ACTION: Let Claude scaffold a minimal openapi.yaml? (y/n)
+```
+
+If the project has **no HTTP API** (CLI tool, library, batch job), skip this check and note: "No HTTP API detected — OpenAPI not applicable."
+
+If the project has an OpenAPI spec but CLAUDE.md does not reference it:
+
+```
+GAP: OpenAPI spec exists but is not referenced in CLAUDE.md Context Guidance
+IMPACT: Agents will not discover the spec and may bypass it when making API changes
+FIX: Add a Context Guidance entry pointing to the spec file
+ACTION: Let Claude handle this? (y/n)
+```
+
 ### Step 7: Assess Kit File References in CLAUDE.md
 
 **If CLAUDE.md exists and kit files have been synced to the project** (check for files with `-kit` in `.claude/agents/`, `.claude/commands/`, `knowledge/`, `standards/`):
@@ -308,6 +354,8 @@ INTEGRATION SUMMARY
 | standards/code-review.md | Missing | Create skeleton |
 | code-review-results/ | Missing | Create directory |
 | .claude/temp/ | Missing | Create directory |
+| ADR system | Missing | Create docs/adr/ with README index |
+| OpenAPI spec | Missing (HTTP API detected) | Scaffold openapi.yaml |
 | GitHub CLI | Authenticated | — |
 | Existing commands | None | Kit commands available |
 
@@ -329,6 +377,8 @@ POST-INTEGRATION CHECK
 - [x] standards/code-review.md exists
 - [x] code-review-results/ directory exists
 - [x] .claude/temp/ directory exists
+- [x] ADR directory exists and is referenced in CLAUDE.md
+- [x] OpenAPI spec exists and is referenced in CLAUDE.md (or N/A for non-HTTP projects)
 - [x] Git repo initialized
 - [x] GitHub CLI authenticated
 

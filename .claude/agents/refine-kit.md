@@ -14,7 +14,7 @@
 
 - GitHub CLI authenticated (`gh auth status`)
 - Issues exist and are open
-- Repository has `backend/api/` OpenAPI specs (if API changes are relevant)
+- Project has `CLAUDE.md` with architecture and conventions documented
 
 ---
 
@@ -36,56 +36,66 @@ Parse all issues and hold in memory for cross-issue analysis.
 
 Read:
 
-1. `CLAUDE.md` -- project structure, conventions, architecture
-2. `harness.md` -- agent and command index
-3. `docs/adr/README.md` -- ADR index
+1. `CLAUDE.md` — project structure, conventions, architecture
+2. **ADR index** — discover the location from CLAUDE.md's Context Guidance section (e.g., `docs/adr/README.md`). The kit assumes every project maintains ADRs; if none are found, flag it to the user and continue with a warning.
+3. **OpenAPI spec** — discover the location from CLAUDE.md (e.g., root `openapi.yaml` or `backend/api/openapi.yaml`). The kit assumes projects exposing HTTP APIs maintain an OpenAPI spec as the source of truth. If the project has no HTTP API (CLI tool, library, etc.), skip this step gracefully.
+
+Do not assume paths — discover them from CLAUDE.md's Context Guidance section.
 
 ### Step 3: Audit Codebase Per Issue
 
-For each issue, use Explore subagent or direct file reads to understand:
+For each issue, use the Explore subagent or direct file reads to understand:
 
 - Which areas of the codebase are affected
 - Which existing patterns and components are relevant
-- Which ADRs apply to the planned work
+- Which architectural decisions apply to the planned work
 
 ### Step 4: Identify Referenced ADRs
 
-Search `docs/adr/` for existing ADRs that apply to each issue's work. Match by:
+Search the project's ADR directory (discovered in Step 2) for existing ADRs that apply to each issue's work. Match by:
 
 - Domain area (e.g., authentication, checkout flow, ratings)
 - Technical pattern (e.g., validation approach, state management)
 - Infrastructure concern (e.g., API versioning, error handling)
 
+**If the project has no ADR system:** Flag it — "No ADR system found. The kit assumes ADRs are maintained. Recommend creating an ADR index (e.g., `docs/adr/README.md`) before proceeding." Continue with a warning rather than blocking.
+
 ### Step 5: Identify Suggested ADRs
 
 For each issue, determine if any architectural decisions need to be made before implementation. Examples:
 
-- New database table design
+- New database/data model design
 - New API versioning approach
 - New authentication pattern
 - Cross-cutting concern not yet documented
 
-**If suggested ADRs exist:** Present them to the human. Block until each is resolved (accepted, rejected, or deferred with rationale).
+**If suggested ADRs exist:** Present them to the human. Block until each is resolved (accepted, rejected, or deferred with rationale). Resolved ADRs should be written to the ADR directory before implementation begins.
 
 **When multiple issues are passed:** Batch all ADR questions across all issues and present them together, grouped by topic, rather than asking one at a time.
 
 ### Step 6: Identify OpenAPI Changes
 
+The kit treats the OpenAPI spec as the **source of truth** for HTTP APIs — it must be updated before or alongside any API code change.
+
 For issues involving API work, identify:
 
-- Endpoints to extend (reference `backend/api/paths/*.yaml`)
+- Endpoints to extend (reference existing path files in the spec)
 - Endpoints to create (propose new path files)
-- Schema changes (reference `backend/api/components/schemas.yaml`)
-- Response changes (reference `backend/api/components/responses.yaml`)
+- Schema/component changes
+- Response changes
 
-**If no API changes:** State "No OpenAPI changes required."
+**If the project has an OpenAPI spec but no API changes are needed for this issue:** State "No OpenAPI changes required."
+
+**If the project has no OpenAPI spec but does expose an HTTP API:** Flag it — "Project exposes an HTTP API but has no OpenAPI spec. The kit assumes HTTP APIs are specified in OpenAPI. Recommend adding one." Continue with a warning.
+
+**If the project has no HTTP API** (CLI tool, library, batch job): State "No HTTP API — OpenAPI not applicable."
 
 ### Step 7: Identify Likely Affected Files
 
 Label all files as **"likely"** (not authoritative). Inform identification using:
 
-- Harness files (`harness.md` for agent/command files)
-- OpenAPI specs (for API-related files)
+- CLAUDE.md and any harness/index files
+- API specs (for API-related files)
 - Codebase analysis (imports, exports, dependencies)
 - Issue body references
 
@@ -103,11 +113,11 @@ When multiple issues are provided:
 - Identify semantic dependencies (e.g., issue A adds a model that issue B needs)
 - Flag conflicts that require sequential processing
 
-**If single issue:** State "Single issue -- no cross-issue dependencies."
+**If single issue:** State "Single issue — no cross-issue dependencies."
 
 ### Step 9: Generate UI Component Spec
 
-**When frontend work is involved**, produce a spec following this format:
+**When user-facing work is involved**, produce a spec following this format:
 
 ```markdown
 # UI Spec: [Feature Name]
@@ -117,14 +127,14 @@ When multiple issues are provided:
 - ADR-NNN: [relevant decisions]
 
 ## Existing components to reuse
-- [Component names scanned from frontend/src/components/]
+- [Component/module names discovered in codebase]
 
-## Screen N: [Screen Name]
+## Screen/Interface N: [Name]
 **Entry point:** [how user gets here]
 **Layout:** [layout description, reference existing screens as precedent]
 
-**Fields:**
-- [field descriptions with type, autocomplete, etc.]
+**Fields/Inputs:**
+- [field descriptions with type, validation, etc.]
 
 **States:**
 | State | Behavior |
@@ -138,11 +148,11 @@ When multiple issues are provided:
 - [explicit exclusions]
 ```
 
-**When no frontend work is involved:** State "No UI changes."
+**When no user-facing work is involved:** State "No UI/interface changes."
 
 ### Step 10: Scan for Reusable Components
 
-Scan `frontend/src/components/` for existing components that could be reused. List component names and their purpose.
+Scan the project's component/module directories (as defined in CLAUDE.md) for existing components that could be reused. List component names and their purpose.
 
 ### Step 11: Append Refinement Comment to Issue
 
@@ -159,7 +169,7 @@ gh issue comment <N> --body "$(cat <<'EOF'
 - [list with resolution status, or "None needed"]
 
 ### OpenAPI Changes
-- [changes or "No OpenAPI changes required"]
+- [changes, or "No OpenAPI changes required", or "No HTTP API — OpenAPI not applicable"]
 
 ### Likely Affected Files
 
@@ -173,7 +183,7 @@ gh issue comment <N> --body "$(cat <<'EOF'
 - [files]
 
 ### Cross-Issue Dependencies
-- [dependencies or "Single issue -- no cross-issue dependencies"]
+- [dependencies or "Single issue — no cross-issue dependencies"]
 
 ### UI Component Spec
 [full spec or "No UI changes"]
@@ -188,7 +198,7 @@ gh issue comment <N> --body "$(cat <<'EOF'
 
 ## Refinement Checklist
 - [x] ADRs resolved
-- [x] OpenAPI changes defined
+- [x] OpenAPI changes defined (or N/A)
 - [x] Likely affected files identified
 - [x] Dependencies mapped
 - [x] UI spec written (or marked N/A)
@@ -202,8 +212,8 @@ EOF
 SUCCESS: Refinement complete
 
 Issues refined:
-- #<N1>: <title> -- comment appended
-- #<N2>: <title> -- comment appended
+- #<N1>: <title> — comment appended
+- #<N2>: <title> — comment appended
 
 ADR decisions required: <count resolved>
 Cross-issue conflicts: <count or "none">
@@ -228,8 +238,10 @@ Next steps:
 
 ## Notes
 
-- Files are labeled as "likely" affected -- the plan-agent will confirm during tactical planning
+- Files are labeled as "likely" affected — the plan-agent will confirm during tactical planning
 - ADR questions are batched across all issues when multiple are provided
 - The refinement comment becomes the primary input for plan-agent (via the GH-ISSUE file which includes comments)
-- This agent does NOT create branches or write code -- it enriches the issue for downstream agents
+- This agent does NOT create branches or write code — it enriches the issue for downstream agents
+- Discover project-specific paths (ADR dir, OpenAPI spec, component dirs) from `CLAUDE.md` — do not assume layout
+- The kit treats ADRs as universal and OpenAPI as source-of-truth for HTTP APIs (degrade gracefully for non-HTTP projects)
 - Error protocol (three-strikes) is defined in `CLAUDE.md`

@@ -59,6 +59,8 @@ This is a [DESCRIPTION] built with [LANGUAGE/FRAMEWORK]. [KEY TOOLS/SERVICES].
 
 - Architecture rules: [PATH OR TBD]
 - Shared types/interfaces: [PATH OR TBD]
+- Architecture Decision Records (ADRs): [PATH — e.g., docs/adr/README.md]
+- OpenAPI specification: [PATH — e.g., openapi.yaml or backend/api/openapi.yaml, or "N/A — no HTTP API"]
 - Code craftsmanship: standards/quick-ref/craftsmanship-kit.md
 - Code review criteria: standards/code-review.md (project-specific) + .claude/agents/code-review-kit.md (universal)
 - How to write good CLAUDE.md: knowledge/claude-md-kit.md

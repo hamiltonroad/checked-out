@@ -46,109 +46,73 @@ CREATE DATABASE checked_out_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_c
 EXIT;
 ```
 
-## Step 3: Configure the Backend
+## Step 3: Install Dependencies
 
-### Create Environment File
-
+From the project root:
 ```bash
-cd backend
-cp .env.example .env
+npm install
 ```
 
-### Edit Database Credentials
+This uses npm workspaces to install both backend and frontend dependencies.
 
-Open `backend/.env` in your text editor and update these values with your MySQL credentials:
+## Step 4: Configure Environment
+
+### Backend
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Open `backend/.env` in your text editor and update with your MySQL credentials:
 
 ```env
-# Database Configuration
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=your_mysql_password_here
 DB_NAME=checked_out
-
-# Server Configuration
 PORT=3000
 NODE_ENV=development
-
-# JWT Configuration (default values are fine for development)
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-JWT_EXPIRES_IN=24h
 ```
 
-### Install Dependencies
+### Frontend
 
 ```bash
-npm install
+cp frontend/.env.example frontend/.env
 ```
+
+The default frontend configuration should work as-is. Verify `frontend/.env` contains:
+```env
+VITE_API_BASE_URL=http://localhost:3000/api
+```
+
+## Step 5: Set Up the Database Schema and Seed Data
 
 ### Run Database Migrations
 
 This creates the database tables:
 ```bash
+cd backend
 npm run db:migrate
 ```
 
-You should see output showing migrations being run:
-```
-Sequelize CLI [Node: 18.x.x, CLI: 6.6.x, ORM: 6.37.x]
-
-Loaded configuration file "src/config/database.js".
-== 20251103000000-create-books: migrating =======
-== 20251103000000-create-books: migrated (0.123s)
-...
-```
+You should see output showing each migration being applied.
 
 ### Seed the Database with Sample Data
 
-This populates the database with sample books, authors, copies, and checkouts:
+This populates the database with sample data:
 ```bash
 npm run db:seed
 ```
 
-You should see output like:
-```
-Sequelize CLI [Node: 18.x.x, CLI: 6.6.x, ORM: 6.37.x]
-
-Loaded configuration file "src/config/database.js".
-== 20251103225926-books: migrating =======
-== 20251103225926-books: migrated (0.045s)
-== 20251103230000-authors: migrating =======
-== 20251103230000-authors: migrated (0.032s)
-== 20251103230100-book-authors: migrating =======
-== 20251103230100-book-authors: migrated (0.028s)
-== 20251104134847-demo-copies-and-checkouts: migrating =======
-== 20251104134847-demo-copies-and-checkouts: migrated (0.051s)
-```
-
 The seeded data includes:
-- Multiple books across various genres (fiction, non-fiction, science fiction, mystery)
+- 30+ books across various genres (fiction, non-fiction, science fiction, mystery)
 - Author information and book-author relationships
-- Physical book copies with different conditions
+- Physical and Kindle copies with different conditions
+- Patron accounts with login credentials
 - Sample checkout records showing books in circulation
+- Sample ratings and reviews
 
-## Step 4: Configure the Frontend
-
-Open a **new terminal** window/tab and navigate to the frontend directory:
-
-```bash
-cd frontend
-cp .env.example .env
-```
-
-The default frontend configuration should work as-is, but verify `frontend/.env` contains:
-```env
-VITE_API_BASE_URL=http://localhost:3000/api
-```
-
-### Install Dependencies
-
-```bash
-npm install
-```
-
-## Step 5: Start the Application
-
-You have two options to start the application:
+## Step 6: Start the Application
 
 ### Option A: Automated Startup (Recommended)
 
@@ -197,7 +161,7 @@ VITE v5.x.x  ready in XXX ms
   ➜  press h + enter to show help
 ```
 
-## Step 6: Access the Application
+## Step 7: Access the Application
 
 Open your web browser and navigate to:
 
@@ -205,16 +169,15 @@ Open your web browser and navigate to:
 
 **Backend API Health Check:** http://localhost:3000/health
 
-You should see the library management interface with the seeded data already loaded!
-
 ## What You Should See
 
 With the seeded data, you should be able to:
-- Browse multiple books in the catalog
-- View book details including authors, genres, and descriptions
-- See which books are available vs. checked out
-- View different physical copies of books with varying conditions
-- Explore sample checkout records
+- Browse the book catalog with search and availability filters
+- Log in as a patron, librarian, or admin using seeded credentials
+- View book details including ratings and reviews
+- (As a librarian) Check out and return books, view overdue checkouts
+- (As a patron) Join waitlists, manage wishlists, and submit ratings
+- (As an admin) Search and view patron details with full history
 
 ## Verification
 
@@ -231,22 +194,6 @@ Expected response:
   "timestamp": "2025-11-05T..."
 }
 ```
-
-### Check Database Contains Data
-
-```bash
-cd backend
-node -e "
-const db = require('./src/models');
-db.sequelize.query('SELECT COUNT(*) as count FROM books')
-  .then(([results]) => {
-    console.log('Books in database:', results[0].count);
-  })
-  .finally(() => process.exit(0));
-"
-```
-
-You should see a count greater than 0.
 
 ## Troubleshooting
 
@@ -323,16 +270,9 @@ npm run db:seed
 
 **Error:** `Cannot find module` errors
 
-**Solution:**
+**Solution:** From the project root:
 ```bash
-# Backend
-cd backend
-rm -rf node_modules package-lock.json
-npm install
-
-# Frontend
-cd frontend
-rm -rf node_modules package-lock.json
+rm -rf node_modules backend/node_modules frontend/node_modules
 npm install
 ```
 
@@ -384,6 +324,9 @@ cd frontend && npm run format
 ### Running Tests
 
 ```bash
+# Smoke tests (requires servers running)
+npm run test:smoke
+
 # Backend tests
 cd backend
 npm test
@@ -397,7 +340,7 @@ npm test
 
 Now that your application is running:
 
-1. **Explore the Interface** - Browse books, view details, check availability
+1. **Explore the Interface** - Browse books, log in, try checking out a book
 2. **Read the Documentation** - Check [README.md](README.md) for architecture details
 3. **Review Standards** - See [standards/quick-ref/](standards/quick-ref/) for coding guidelines
 4. **Start Developing** - Create new features or fix issues
@@ -422,4 +365,4 @@ If you encounter issues:
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 (GPL-3.0). See [LICENSE](LICENSE) for details.
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0). See [LICENSE.txt](LICENSE.txt) for details.
