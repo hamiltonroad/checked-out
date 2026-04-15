@@ -22,11 +22,18 @@ CREATE DATABASE checked_out_test;
 EXIT;
 ```
 
-## 2. Backend Setup
+## 2. Install Dependencies
+
+From the project root:
+```bash
+npm install
+```
+
+## 3. Configure Environment
 
 ```bash
-cd backend
-cp .env.example .env
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 ```
 
 Edit `backend/.env` with your MySQL credentials:
@@ -37,38 +44,53 @@ DB_PASSWORD=your_password
 DB_NAME=checked_out
 ```
 
-Install and start:
+## 4. Migrate and Seed
+
 ```bash
-npm install
+cd backend
+npm run db:migrate
+npm run db:seed
+```
+
+## 5. Start the Application
+
+**Option A: Automated (recommended)**
+```bash
+./scripts/start-all.sh
+```
+
+**Option B: Manual**
+
+Terminal 1:
+```bash
+cd backend
 npm run dev
 ```
 
-✅ Backend running at http://localhost:3000
-
-## 3. Frontend Setup
-
-In a new terminal:
-
+Terminal 2:
 ```bash
 cd frontend
-cp .env.example .env
-npm install
 npm run dev
 ```
-
-✅ Frontend running at http://localhost:5173
 
 ## Verify Setup
 
 1. Backend health check: http://localhost:3000/health
 2. Frontend app: http://localhost:5173
 
+You should see the book catalog. Log in with seeded patron credentials to access checkout, waitlist, wishlist, and rating features.
+
+## Stop Services
+
+```bash
+./scripts/stop-all.sh
+```
+
 ## Next Steps
 
 - Review [coding standards](standards/quick-ref/)
 - Check [full README](README.md) for detailed documentation
-- Create your first user story/issue
-- Start building features!
+- See [RUNNING.md](RUNNING.md) for troubleshooting
 
 ## Troubleshooting
 

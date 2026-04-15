@@ -1,6 +1,6 @@
 # Checked Out
 
-A working 3-tier library management application built as a teaching tool for full-stack web development. This application was developed in approximately 8 hours to create a functional foundation demonstrating modern web technologies, best practices, and architectural patterns.
+A working 3-tier library management application built as a teaching tool for full-stack web development. This application was developed iteratively to create a functional foundation demonstrating modern web technologies, best practices, and architectural patterns.
 
 Check out my book about building AI harnesses like the one used in this application:
 https://www.amazon.com/Harness-Engineering-Vibe-Coders-Crider/dp/B0GTMV3D3W/#
@@ -13,75 +13,106 @@ https://www.amazon.com/Harness-Engineering-Vibe-Coders-Crider/dp/B0GTMV3D3W/#
 - Learn from working code that follows industry standards
 - Build upon a solid foundation with clear opportunities for extension
 
-**Status**: The application currently implements core book browsing functionality with a complete backend infrastructure. Many features are intentionally left unimplemented to provide learning opportunities for students and developers.
+**Status**: The application implements a comprehensive library management system with book browsing, patron management, checkout/return workflows, waitlists, holds, wishlists, ratings and reviews, and role-based access control.
 
 ## Current Features
 
-### What Works Now
-- **Browse Books**: View all books in a responsive interface (table on desktop, cards on mobile)
-- **Search**: Real-time search across book titles and author names with debouncing
-- **Filter**: Filter books by availability status (All Books, Available, Checked Out)
-- **Book Details**: View detailed information about each book including authors, ISBN, publisher, publication year, and genre
-- **Availability Tracking**: Automatic calculation of book availability based on physical and Kindle copies and checkout records
-- **Responsive Design**: Mobile-optimized with bottom navigation and card layouts
-- **Theme Toggle**: Switch between light and dark modes
-- **Keyboard Navigation**: Search shortcuts (Cmd/Ctrl+K) and accessible navigation
+### Books
+- Browse all books in a responsive interface (table on desktop, cards on mobile)
+- Real-time search across book titles and author names with debouncing
+- Filter books by availability status (All Books, Available, Checked Out)
+- View detailed information about each book including authors, ISBN, publisher, publication year, and genre
+- Automatic availability calculation based on physical/Kindle copies and checkout records
+- Ratings and reviews with star ratings, review text, and rating statistics
+
+### Authentication & Authorization
+- Login with card number and password (JWT cookie-based sessions)
+- Access/refresh token management with automatic rotation
+- Role-based access control with three roles: patron, librarian, admin
+- Protected routes enforcing role requirements on both frontend and backend
+
+### Patron Management
+- List and search patrons by name or card number (admin)
+- View patron details with full checkout, hold, and waitlist history
+- Patron status tracking (active, inactive, suspended)
+
+### Checkout & Return Workflow
+- Librarians can check out copies to patrons
+- View current checkouts with due dates
+- Return books with single-click workflow
+- Overdue checkout tracking and display
+- Full checkout history
+
+### Waitlist & Holds
+- Patrons can join a waitlist for unavailable books by format (physical/digital)
+- View waitlist position in queue
+- Automatic hold creation when a copy becomes available for the next patron in queue
+- Leave waitlist functionality
+
+### Wishlist
+- Add/remove books from a personal wishlist
+- View wishlist from patron profile
+
+### Ratings & Reviews
+- Submit 1-5 star ratings with optional review text
+- View book ratings, reviews, and rating distribution
+- Top-rated books endpoint
+- Edit and delete own ratings
+
+### UI/UX
+- Responsive design with mobile bottom navigation and card layouts
+- Light and dark theme toggle
+- Keyboard navigation with search shortcuts (Cmd/Ctrl+K)
+- Loading skeletons, empty states, and confirmation dialogs
 
 ### Database & Backend
-- Complete relational database schema with 5 models:
-  - **Books**: Core metadata (title, ISBN, publisher, publication year, genre)
-  - **Authors**: Many-to-many relationships with books
-  - **Copies**: Physical and Kindle format tracking
-  - **Patrons**: Library cardholder information
-  - **Checkouts**: Transaction history with checkout and return dates
-- Two working API endpoints: `GET /api/v1/books` and `GET /api/v1/books/:id`
-- Business logic for calculating book availability from copy and checkout records
-- Seed data with 30+ books, authors, and sample checkout records
+- 10 Sequelize models: Books, Authors, Copies, Patrons, Checkouts, Ratings, Wishlists, WaitlistEntries, Holds, and the BookAuthor join table
+- RESTful API with 11+ route files covering books, authors, copies, patrons, checkouts, waitlist, holds, wishlists, ratings, and auth
+- Service-layer business logic with controller-layer HTTP handling
+- Joi validation on all routes
+- JWT authentication with HTTP-only cookies
+- Rate limiting, structured logging (Winston), and comprehensive error handling
+- Database migrations and seeders with 30+ books and sample data
+
+### Testing
+- Playwright E2E tests organized in three layers: smoke, flow, and security
+- Smoke tests: app loading, login, book browsing, filtering, book details
+- Flow tests: checkout/return workflow, waitlist operations, patron search
+- Security tests: RBAC enforcement, protected route redirects, request validation
+- Backend unit and integration tests
 
 ### What's Not Implemented Yet
 
-The following features are **intentionally disabled or incomplete** to provide learning opportunities:
+The following features are **intentionally left incomplete** to provide learning opportunities:
 
-- **Patron Management**: Database models exist but no UI or API endpoints
+- **Book Management CRUD**: No create, update, or delete functionality for books
+- **Patron Registration**: Login exists but no self-signup workflow
 - **Reports Dashboard**: Placeholder in navigation only
-- **Book Management**: No create, update, or delete functionality
-- **Checkout/Return Process**: Models exist but no workflow implementation
-- **Authentication**: Passport.js and JWT configured but not implemented
-- **Authorization**: No role-based access control
-- **Advanced Filtering**: Backend supports genre filtering but frontend doesn't use it
-- **Pagination**: All books loaded at once (limited to 100)
-- **Image Upload**: Books show placeholder icons only
-- **Overdue Tracking**: No overdue status calculation or notifications
+- **Book Cover Images**: Books show placeholder icons only
+- **Notifications**: No email or push notifications for overdue books or hold availability
+- **Data Export**: No CSV or report export functionality
+- **Advanced Admin Features**: No admin UI for creating/editing patrons or books
 
 ## Learning Opportunities
 
 This codebase provides excellent opportunities to:
 
 1. **Add New Features**:
-   - Implement patron management pages and API endpoints
-   - Build the book checkout/return workflow
-   - Add authentication and user accounts
+   - Build book management (add, edit, delete) with admin UI
+   - Implement patron self-registration
    - Create a reports dashboard with analytics
-   - Implement book management (add, edit, delete)
+   - Add book cover image uploads
+   - Build an overdue notification system
 
-2. **Fix and Improve Tests**:
-   - Add missing unit tests for services and controllers
-   - Write integration tests for API endpoints
-   - Add frontend component tests
-   - Increase test coverage
-
-3. **Enhance Existing Features**:
-   - Add server-side pagination for better performance
-   - Implement book cover image uploads
-   - Add overdue book tracking and notifications
-   - Create advanced search with multiple filters
+2. **Enhance Existing Features**:
+   - Add server-side pagination for book listings
+   - Implement advanced search with multiple filters
    - Add data export functionality
+   - Build email notifications for holds and overdue books
 
-4. **Code Quality**:
-   - Refactor duplicated code
-   - Improve error handling
+3. **Code Quality**:
    - Add API documentation with Swagger/OpenAPI
-   - Optimize database queries
+   - Improve test coverage
    - Add performance monitoring
 
 ## Tech Stack
@@ -93,24 +124,27 @@ This codebase provides excellent opportunities to:
 - **React Router v7** - Client-side routing
 - **TanStack Query v5** - Server state management and caching
 - **Axios** - HTTP client
+- **TypeScript** - Type-safe component development
 
 ### Backend
 - **Node.js 18+ LTS** - JavaScript runtime
 - **Express 4+** - Web application framework
 - **Sequelize 6+** - ORM for MySQL
-- **Passport.js** - Authentication middleware
-- **JWT** - Token-based authentication
+- **JWT** - Token-based authentication with HTTP-only cookies
 - **Joi** - Request validation
 - **Winston** - Structured logging
 
 ### Database
 - **MySQL 8+** - Relational database
 
+### Testing
+- **Playwright** - End-to-end testing
+- **Jest/Vitest** - Unit and integration testing
+
 ### Development Tools
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
 - **Husky** - Git hooks
-- **Jest/Vitest** - Testing frameworks
 
 ## Architecture
 
@@ -131,8 +165,11 @@ checked-out/
 │   │   ├── hooks/        # Custom React hooks
 │   │   ├── context/      # React Context providers
 │   │   ├── services/     # API integration
+│   │   ├── types/        # Shared TypeScript interfaces
+│   │   ├── constants/    # Shared domain constants
 │   │   ├── utils/        # Utility functions
 │   │   └── theme/        # MUI theme configuration
+│   ├── e2e/              # Playwright E2E tests
 │   └── package.json
 │
 ├── backend/              # Node.js/Express API
@@ -153,10 +190,11 @@ checked-out/
 │   ├── README.md         # Database setup instructions
 │   └── init.sql          # Database initialization script
 │
-└── standards/            # Project coding standards
-    ├── quick-ref/        # Quick reference guides
-    └── full/             # Detailed standards documentation
-
+├── standards/            # Project coding standards
+│   ├── quick-ref/        # Quick reference guides
+│   └── full/             # Detailed standards documentation
+│
+└── scripts/              # Utility scripts
 ```
 
 ## Getting Started
@@ -274,6 +312,9 @@ Quick references:
 ### Testing
 
 ```bash
+# Smoke tests (requires servers running)
+npm run test:smoke
+
 # Frontend tests
 cd frontend
 npm test
@@ -297,48 +338,6 @@ npm run lint
 npm run format
 ```
 
-## API Documentation
-
-Base URL (development): `http://localhost:3000/api`
-
-### Available Endpoints
-
-**Health Check**
-```
-GET /health
-```
-Returns server health status.
-
-**Books**
-```
-GET /api/v1/books
-```
-Get all books with authors and availability status.
-
-Query Parameters:
-- `genre` (optional): Filter by genre
-- `limit` (optional, default: 100): Maximum number of results
-- `offset` (optional, default: 0): Number of records to skip
-
-Response: Array of book objects with authors array and calculated `status` field (either "available" or "checked_out").
-
-```
-GET /api/v1/books/:id
-```
-Get a single book by ID with full details.
-
-Response: Book object with authors array and availability status.
-
-### Planned Endpoints (Not Implemented)
-- `POST /api/v1/books` - Create a new book
-- `PUT /api/v1/books/:id` - Update a book
-- `DELETE /api/v1/books/:id` - Delete a book
-- `GET /api/v1/patrons` - List patrons
-- `POST /api/v1/checkouts` - Check out a book
-- `PUT /api/v1/checkouts/:id/return` - Return a book
-- `POST /api/v1/auth/login` - Authenticate user
-- `POST /api/v1/auth/register` - Register new user
-
 ## Contributing
 
 1. Follow the coding standards in [standards/](standards/)
@@ -351,4 +350,4 @@ Response: Book object with authors array and availability status.
 
 This project is licensed under the GNU General Public License v3.0 (GPL-3.0).
 
-See [LICENSE](LICENSE) for more details.
+See [LICENSE.txt](LICENSE.txt) for more details.

@@ -83,10 +83,18 @@ Point to where things are without bloating the file.
 
 ```
 - Architecture rules: .harness/architecture.json
+- Architecture Decision Records: docs/adr/README.md
+- OpenAPI specification: openapi.yaml
 - API design conventions: docs/api-conventions.md
 - Shared types and interfaces: src/shared/
 - Environment configuration: src/config/env.ts
 ```
+
+**Two references the kit treats as standard:**
+
+1. **ADRs (universal)** — Every project should maintain Architecture Decision Records documenting significant design choices with context and consequences. Typical layout: numbered files in a directory with a README index (e.g., `docs/adr/001-layered-architecture.md`, `docs/adr/README.md`). Agents consult ADRs when making or understanding architectural decisions. **Every project should have an ADR directory referenced from CLAUDE.md.**
+
+2. **OpenAPI (HTTP APIs only)** — Projects exposing HTTP APIs should maintain an OpenAPI spec as the **source of truth** for the API surface. The spec must be updated before or alongside any API code change. Agents consult it before touching API code. **If your project exposes an HTTP API, reference the OpenAPI spec from CLAUDE.md.** Projects without HTTP APIs (CLI tools, libraries, batch jobs) can omit this.
 
 ## The 60-Line Rule
 
