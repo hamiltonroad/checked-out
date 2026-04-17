@@ -2,7 +2,7 @@
 
 **Purpose:** Run complete issue workflow via agents with minimal context usage.
 
-**Usage:** `/story-runner <issue-number>`
+**Usage:** `/story-runner-kit <issue-number>`
 
 ---
 
@@ -28,9 +28,9 @@ Extract issue number from command argument: `$ARGUMENTS`
 **If no issue number provided:**
 
 ```
-Usage: /story-runner <issue-number>
+Usage: /story-runner-kit <issue-number>
 
-Example: /story-runner 42
+Example: /story-runner-kit 42
 ```
 
 ### Step 2: Spawn prep-agent
@@ -44,7 +44,7 @@ Agent tool invocation:
 - prompt: |
     You are prep-agent. Your task is to prepare for implementing GitHub issue #<number>.
 
-    Follow the instructions in the prep-agent definition exactly.
+    Read `.claude/agents/prep-kit.md` and follow every instruction exactly.
 
     Return either:
     - SUCCESS: with summary of what was created
@@ -71,7 +71,7 @@ Agent tool invocation:
     - .claude/temp/GH-ISSUE-<number>-REMOVE.md
     - .claude/temp/CONTEXT-HINT-<number>-REMOVE.md
 
-    Follow the instructions in the plan-agent definition exactly.
+    Read `.claude/agents/plan-kit.md` and follow every instruction exactly.
 
     Return either:
     - SUCCESS: with summary of plan created
@@ -97,7 +97,7 @@ Agent tool invocation:
     - .claude/temp/GH-ISSUE-<number>-REMOVE.md
     - .claude/temp/PLAN-<number>-REMOVE.md
 
-    Follow the instructions in the implement-agent definition exactly.
+    Read `.claude/agents/implement-kit.md` and follow every instruction exactly.
 
     Return either:
     - SUCCESS: with PR URL and summary
@@ -115,11 +115,11 @@ Agent tool invocation:
 
 #### Step 5.1: Run code-review-pr
 
-Use the Skill tool to invoke the `code-review-pr` skill with the issue number:
+Use the Skill tool to invoke the `code-review-pr-kit` skill with the issue number:
 
 ```
 Skill tool invocation:
-- skill: "code-review-pr"
+- skill: "code-review-pr-kit"
 - args: "<number>"
 ```
 
@@ -210,7 +210,7 @@ If an agent doesn't respond or returns unexpected results, display the phase, is
 
 ## Related Commands
 
-- `/prep-issue <n>` - Just prep phase
-- `/plan-issue <n>` - Just planning phase
-- `/implement-issue <n>` - Just implementation phase
-- `/code-review-pr <n>` - Review PR against standards
+- `/prep-issue-kit <n>` - Just prep phase
+- `/plan-issue-kit <n>` - Just planning phase
+- `/implement-issue-kit <n>` - Just implementation phase
+- `/code-review-pr-kit <n>` - Review PR against standards

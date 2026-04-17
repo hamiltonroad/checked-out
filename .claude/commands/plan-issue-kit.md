@@ -2,11 +2,11 @@
 
 **Purpose:** Deep planning - analyze issue, load full context, create comprehensive implementation plan.
 
-**Usage:** `/plan-issue <issue-number>`
+**Usage:** `/plan-issue-kit <issue-number>`
 
-**Prerequisites:** Must run `/prep-issue <issue-number>` first
+**Prerequisites:** Must run `/prep-issue-kit <issue-number>` first
 
-**Next Steps:** After reviewing plan, run `/implement-issue <issue-number>`
+**Next Steps:** After reviewing plan, run `/implement-issue-kit <issue-number>`
 
 ---
 
@@ -22,7 +22,7 @@
 
 **This command does NOT:**
 
-- Execute the plan (that's `/implement-issue`)
+- Execute the plan (that's `/implement-issue-kit`)
 - Write any code
 - Make any changes to codebase (read-only analysis)
 

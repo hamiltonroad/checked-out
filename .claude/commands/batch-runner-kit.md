@@ -2,9 +2,9 @@
 
 **Purpose:** Run 1-5 independent GitHub issues in parallel, each in its own worktree, producing PRs with code review for each.
 
-**Usage:** `/batch-runner <issue-1> [issue-2] [issue-3] [issue-4] [issue-5]`
+**Usage:** `/batch-runner-kit <issue-1> [issue-2] [issue-3] [issue-4] [issue-5]`
 
-**Example:** `/batch-runner 5 6 7 8`
+**Example:** `/batch-runner-kit 5 6 7 8`
 
 ---
 
@@ -24,7 +24,7 @@ User kicks it off, walks away, comes back to PRs ready for approval.
 **Requirements:**
 
 - Issues MUST be independent (different files/components, different areas of codebase)
-- If issues touch the same files, use `/story-runner` sequentially instead
+- If issues touch the same files, use `/story-runner-kit` sequentially instead
 - Git must be clean (no uncommitted changes)
 - 1-5 issue numbers required
 
@@ -47,9 +47,9 @@ Extract issue numbers from `$ARGUMENTS`.
 ```
 BATCH RUNNER: Invalid input
 
-Usage: /batch-runner <issue-1> <issue-2> [issue-3] [issue-4] [issue-5]
+Usage: /batch-runner-kit <issue-1> <issue-2> [issue-3] [issue-4] [issue-5]
 
-Example: /batch-runner 5 6 7 8
+Example: /batch-runner-kit 5 6 7 8
 
 Requirements:
 - Provide 1-5 issue numbers (space-separated)
@@ -238,7 +238,7 @@ Workers are fully independent. One worker's failure does NOT affect others.
 
 ### All Workers Fail
 
-Show all failure details, report paths, and recovery options (run individually with `/story-runner`).
+Show all failure details, report paths, and recovery options (run individually with `/story-runner-kit`).
 
 ---
 
@@ -246,7 +246,7 @@ Show all failure details, report paths, and recovery options (run individually w
 
 - Each worker runs in an isolated git worktree (no interference)
 - Workers run truly in parallel (1-5 simultaneous)
-- Issues MUST be independent — if issues touch the same files, use `/story-runner` sequentially
+- Issues MUST be independent — if issues touch the same files, use `/story-runner-kit` sequentially
 - PRs are created but NOT merged — user approves and merges manually
 - Worktrees persist after batch completes; clean up after merging PRs
 
@@ -254,6 +254,6 @@ Show all failure details, report paths, and recovery options (run individually w
 
 ## Related Commands
 
-- `/story-runner <N>` - Run single issue (sequential, 3 phases)
-- `/code-review-pr <N>` - Review a PR against standards
-- `/start-worktree <N>` - Create worktree for manual work
+- `/story-runner-kit <N>` - Run single issue (sequential, 3 phases)
+- `/code-review-pr-kit <N>` - Review a PR against standards
+- `/start-worktree-kit <N>` - Create worktree for manual work

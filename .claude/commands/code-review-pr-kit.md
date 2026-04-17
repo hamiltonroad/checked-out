@@ -2,7 +2,7 @@
 
 **Purpose:** Run a code review on the current PR or diff.
 
-**Usage:** `/code-review-pr [issue-number]`
+**Usage:** `/code-review-pr-kit [issue-number]`
 
 ---
 

@@ -200,7 +200,7 @@ If it does not exist:
 
 ```
 GAP: standards/code-review.md does not exist
-IMPACT: Code reviews have no standard to evaluate against — /code-review-pr will lack project-specific criteria
+IMPACT: Code reviews have no standard to evaluate against — /code-review-pr-kit will lack project-specific criteria
 FIX: Create a skeleton code-review.md for the team to customize
 ACTION: Let Claude handle this? (y/n)
 ```
@@ -213,7 +213,7 @@ If it does not exist:
 
 ```
 GAP: code-review-results/ directory does not exist
-IMPACT: /code-review-pr and /harvest-reviews have no output directory
+IMPACT: /code-review-pr-kit and /harvest-reviews-kit have no output directory
 FIX: Create code-review-results/ directory
 ACTION: Let Claude handle this? (y/n)
 ```
@@ -330,7 +330,7 @@ List any files in `.claude/commands/` and `.claude/agents/`.
 
 If they exist, report them — they may be custom commands the team already uses. Do not suggest removing them.
 
-If they do not exist, note that harness-kit commands (like `/story-runner`, `/code-review-pr`, `/harvest-reviews-kit`) are available from the kit and can be referenced or copied.
+If they do not exist, note that harness-kit commands (like `/story-runner-kit`, `/code-review-pr-kit`, `/harvest-reviews-kit`) are available from the kit and can be referenced or copied.
 
 ```
 EXISTING COMMANDS: None found

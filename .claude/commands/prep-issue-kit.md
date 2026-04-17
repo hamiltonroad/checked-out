@@ -2,9 +2,9 @@
 
 **Purpose:** Fast setup for issue implementation - create branch, fetch issue, generate context hints.
 
-**Usage:** `/prep-issue <issue-number>`
+**Usage:** `/prep-issue-kit <issue-number>`
 
-**Next Steps:** After this completes, run `/plan-issue <issue-number>`
+**Next Steps:** After this completes, run `/plan-issue-kit <issue-number>`
 
 ---
 
@@ -18,8 +18,8 @@
 
 **This command does NOT:**
 
-- Create implementation plan (that's `/plan-issue`)
-- Write any code (that's `/implement-issue`)
+- Create implementation plan (that's `/plan-issue-kit`)
+- Write any code (that's `/implement-issue-kit`)
 
 ---
 
@@ -94,9 +94,9 @@ Files created:
 - .claude/temp/CONTEXT-HINT-<number>-REMOVE.md
 
 Next steps:
-1. Run /plan-issue <number> to create implementation plan
+1. Run /plan-issue-kit <number> to create implementation plan
 2. Review plan
-3. Run /implement-issue <number> to execute plan
+3. Run /implement-issue-kit <number> to execute plan
 ```
 
 ---
@@ -113,4 +113,4 @@ Next steps:
 
 - This command is FAST (~30-45 seconds)
 - Does not load heavy context
-- Always run `/plan-issue` next (don't skip to /implement-issue)
+- Always run `/plan-issue-kit` next (don't skip to /implement-issue-kit)

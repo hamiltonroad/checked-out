@@ -2,9 +2,9 @@
 
 **Purpose:** Execute plan — implement changes, code review, validate, commit, create PR.
 
-**Usage:** `/implement-issue <issue-number>`
+**Usage:** `/implement-issue-kit <issue-number>`
 
-**Prerequisites:** Must run `/prep-issue <number>` and `/plan-issue <number>` first
+**Prerequisites:** Must run `/prep-issue-kit <number>` and `/plan-issue-kit <number>` first
 
 **End Result:** Implementation complete, code reviewed, committed, PR created, ready for human review
 
@@ -45,11 +45,11 @@ Extract issue number from `$ARGUMENTS`.
 **If no issue number provided:**
 
 ```
-Usage: /implement-issue <issue-number>
+Usage: /implement-issue-kit <issue-number>
 
 Prerequisites:
-1. Run /prep-issue <number> first
-2. Run /plan-issue <number> first
+1. Run /prep-issue-kit <number> first
+2. Run /plan-issue-kit <number> first
 ```
 
 ### Step 2: Invoke Agent
@@ -65,7 +65,7 @@ Agent tool invocation:
     - .claude/temp/GH-ISSUE-[NUMBER]-REMOVE.md
     - .claude/temp/PLAN-[NUMBER]-REMOVE.md
 
-    Follow the instructions in the implement-agent definition exactly.
+    Read `.claude/agents/implement-kit.md` and follow every instruction exactly.
 
     Return either:
     - SUCCESS: with PR URL, code review summary, and unresolved findings

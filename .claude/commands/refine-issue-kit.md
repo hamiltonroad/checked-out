@@ -2,11 +2,11 @@
 
 **Purpose:** Enrich one or more GitHub issues with implementation context: ADRs, OpenAPI changes, likely affected files, dependency maps, and UI specs.
 
-**Usage:** `/refine-issue <issue-1> [issue-2] [issue-3]`
+**Usage:** `/refine-issue-kit <issue-1> [issue-2] [issue-3]`
 
-**Example:** `/refine-issue 180 181 182`
+**Example:** `/refine-issue-kit 180 181 182`
 
-**Next Steps:** After refinement, run `/story-runner <number>` or `/batch-runner <n1> <n2>` to implement.
+**Next Steps:** After refinement, run `/story-runner-kit <number>` or `/batch-runner-kit <n1> <n2>` to implement.
 
 ---
 
@@ -21,8 +21,8 @@
 
 **This command does NOT:**
 
-- Create branches or write code (that's `/prep-issue` and `/implement-issue`)
-- Create implementation plans (that's `/plan-issue`)
+- Create branches or write code (that's `/prep-issue-kit` and `/implement-issue-kit`)
+- Create implementation plans (that's `/plan-issue-kit`)
 - Modify any files in the repository
 
 ---
@@ -41,9 +41,9 @@ Extract issue numbers from `$ARGUMENTS`.
 **If validation fails:**
 
 ```
-Usage: /refine-issue <issue-1> [issue-2] [issue-3]
+Usage: /refine-issue-kit <issue-1> [issue-2] [issue-3]
 
-Example: /refine-issue 180 181 182
+Example: /refine-issue-kit 180 181 182
 
 Provide one or more GitHub issue numbers to refine.
 ```
@@ -99,7 +99,7 @@ Each issue now has a refinement comment with:
 
 Next steps:
 1. Review refinement comments on GitHub
-2. Run /story-runner <N> or /batch-runner <N1> <N2> to implement
+2. Run /story-runner-kit <N> or /batch-runner-kit <N1> <N2> to implement
 ```
 
 **On ABORT:** Display blocker and suggested actions.
@@ -120,4 +120,4 @@ Next steps:
 - Refinement is a one-time enrichment step -- run it once before implementation
 - When multiple issues are passed, ADR questions are batched (not asked one at a time)
 - The refinement comment becomes input for plan-agent via the GH-ISSUE file
-- Issues should be refined BEFORE running `/story-runner` or `/batch-runner`
+- Issues should be refined BEFORE running `/story-runner-kit` or `/batch-runner-kit`

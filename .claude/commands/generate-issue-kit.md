@@ -2,9 +2,9 @@
 
 **Purpose:** Create a well-structured GitHub issue from a one-line value statement by drafting scope/approach options for human selection.
 
-**Usage:** `/generate-issue <one-line value statement>`
+**Usage:** `/generate-issue-kit <one-line value statement>`
 
-**Example:** `/generate-issue patrons should be able to rate books they've read`
+**Example:** `/generate-issue-kit patrons should be able to rate books they've read`
 
 ---
 
@@ -17,9 +17,9 @@
 
 **This command does NOT:**
 
-- Refine the issue with ADRs, affected files, or UI specs (that's `/refine-issue`)
-- Create an implementation plan (that's `/plan-issue`)
-- Write any code (that's `/implement-issue`)
+- Refine the issue with ADRs, affected files, or UI specs (that's `/refine-issue-kit`)
+- Create an implementation plan (that's `/plan-issue-kit`)
+- Write any code (that's `/implement-issue-kit`)
 
 ---
 
@@ -32,9 +32,9 @@ Extract value statement from `$ARGUMENTS`.
 **If empty or missing:**
 
 ```
-Usage: /generate-issue <one-line value statement>
+Usage: /generate-issue-kit <one-line value statement>
 
-Example: /generate-issue patrons should be able to rate books they've read
+Example: /generate-issue-kit patrons should be able to rate books they've read
 
 The value statement should describe what the user needs, not how to build it.
 ```
@@ -107,8 +107,8 @@ URL: <issue URL>
 Title: <title>
 
 Next steps:
-1. Run /refine-issue <number> to enrich with ADRs, affected files, and UI specs
-2. Then run /story-runner <number> or add to a /batch-runner batch
+1. Run /refine-issue-kit <number> to enrich with ADRs, affected files, and UI specs
+2. Then run /story-runner-kit <number> or add to a /batch-runner-kit batch
 ```
 
 ---
@@ -124,6 +124,6 @@ Next steps:
 ## NOTES
 
 - Options should be meaningfully different in scope or technical approach
-- Do NOT include implementation details in the issue body -- that's for `/refine-issue` and `/plan-issue`
+- Do NOT include implementation details in the issue body -- that's for `/refine-issue-kit` and `/plan-issue-kit`
 - The issue body follows the format in `standards/issue-authoring-guide-kit.md`
-- After creation, the issue is a draft -- `/refine-issue` adds implementation context
+- After creation, the issue is a draft -- `/refine-issue-kit` adds implementation context

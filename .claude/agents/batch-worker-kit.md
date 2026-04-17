@@ -21,7 +21,7 @@ This agent runs the complete lifecycle for ONE GitHub issue:
 | 1. Prep         | INLINE   | Fetch issue, rename branch, save files              |
 | 2. Plan         | SUB-TASK | Deep analysis, create implementation plan           |
 | 3. Implement    | SUB-TASK | Execute plan, test, commit (NO code review/push/PR) |
-| 3.5 Code Review | INLINE   | Run /code-review-pr, fix medium+, commit fixes      |
+| 3.5 Code Review | INLINE   | Run /code-review-pr-kit, fix medium+, commit fixes   |
 | 4. Merge Main   | INLINE   | Pull latest main, re-test                           |
 | 5. Push + PR    | INLINE   | Push branch, create pull request                    |
 | 6. Report       | INLINE   | Write per-issue report                              |
@@ -86,7 +86,7 @@ Agent tool invocation:
     - .claude/temp/GH-ISSUE-<N>-REMOVE.md
     - .claude/temp/CONTEXT-HINT-<N>-REMOVE.md
 
-    Follow the instructions in the plan-agent definition exactly.
+    Read `.claude/agents/plan-kit.md` and follow every instruction exactly.
 
     Return either:
     - SUCCESS: with summary of plan created
@@ -118,7 +118,7 @@ Agent tool invocation:
     - .claude/temp/GH-ISSUE-<N>-REMOVE.md
     - .claude/temp/PLAN-<N>-REMOVE.md
 
-    Follow the instructions in the implement-agent definition exactly, with these IMPORTANT OVERRIDES:
+    Read `.claude/agents/implement-kit.md` and follow every instruction exactly, with these IMPORTANT OVERRIDES:
 
     1. DO execute all steps through Step 6 (testing)
     2. SKIP Steps 7, 7.5, and 8 entirely — do NOT run code review. The batch-worker handles code review separately.
@@ -150,13 +150,13 @@ Agent tool invocation:
 
 **This phase runs code review directly at the batch-worker level, not nested inside implement-agent.**
 
-### Step 3.5.1: Run /code-review-pr
+### Step 3.5.1: Run /code-review-pr-kit
 
-Use the Skill tool to invoke the `code-review-pr` skill with the issue number:
+Use the Skill tool to invoke the `code-review-pr-kit` skill with the issue number:
 
 ```
 Skill tool invocation:
-- skill: "code-review-pr"
+- skill: "code-review-pr-kit"
 - args: "<N>"
 ```
 

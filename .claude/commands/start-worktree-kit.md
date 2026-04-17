@@ -2,7 +2,7 @@
 
 **Purpose:** Create a git worktree for working on a specific GitHub issue in parallel with other work.
 
-**Usage:** `/start-worktree <issue-number>`
+**Usage:** `/start-worktree-kit <issue-number>`
 
 ---
 
@@ -55,12 +55,12 @@ Next steps:
    <install command from CLAUDE.md>
 
 3. Start the workflow:
-   /story-runner <number>
+   /story-runner-kit <number>
 
    Or run phases manually:
-   /prep-issue <number>
-   /plan-issue <number>
-   /implement-issue <number>
+   /prep-issue-kit <number>
+   /plan-issue-kit <number>
+   /implement-issue-kit <number>
 
 ---
 Worktree Management:
@@ -74,7 +74,7 @@ Remove branch:          git branch -d feature/issue-<number>
 
 ## Important Notes
 
-- **Keep prep-issue unchanged** — Don't fetch or save issue details here; let `/prep-issue` handle that
+- **Keep prep-issue unchanged** — Don't fetch or save issue details here; let `/prep-issue-kit` handle that
 - **Port conflicts** — If running multiple dev servers, use different ports
 - **Separate git state** — Each worktree has independent working tree and staging area
 - **Shared repository** — All worktrees share the same `.git` directory

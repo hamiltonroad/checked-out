@@ -220,7 +220,7 @@ Cross-issue conflicts: <count or "none">
 
 Next steps:
 1. Review refinement comments on each issue
-2. Run /story-runner <N> or /batch-runner <N1> <N2> to begin implementation
+2. Run /story-runner-kit <N> or /batch-runner-kit <N1> <N2> to begin implementation
 ```
 
 ---

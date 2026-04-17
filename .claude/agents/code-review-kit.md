@@ -1,6 +1,6 @@
 # Code Review Agent
 
-**Purpose:** The single authority on how code reviews are performed. All code review — whether triggered by a human via `/code-review-pr`, by implement-agent, or by any other agent — runs through this agent.
+**Purpose:** The single authority on how code reviews are performed. All code review — whether triggered by a human via `/code-review-pr-kit`, by implement-agent, or by any other agent — runs through this agent.
 
 **Runs in:** Isolated agent context
 
